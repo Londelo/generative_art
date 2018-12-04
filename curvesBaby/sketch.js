@@ -2,6 +2,12 @@
 	let allCurves = [],
 	circles = []
 
+// function preload() {
+//   soundFormats('mp3');
+//   var mySound = loadSound('fantasy-loop.mp3');
+// }
+
+
 function setup () {
 	// //find appropriate canvas width
 	// canvas_size = windowWidth < windowHeight ? windowWidth : windowHeight
@@ -62,7 +68,7 @@ function setup () {
 
 function draw () {
 
-	background("#FCC8CD")
+	background("black")
 
 	allCurves.forEach((curve) => {
 
@@ -71,6 +77,8 @@ function draw () {
 
 		if(mouseIsPressed) {
 			curve.findDot()
+			// mySound.setVolume(1);
+			// mySound.play()
 		}
 
 		if(curve.dotsFound.x1) {
@@ -82,8 +90,11 @@ function draw () {
 
 	circles.forEach((points) => {
 		points.forEach((point) => {
-			fill("black")
+			push()
+			stroke(random(10, 300), random(10, 300), random(10, 300))
+			fill(random(10, 300), random(10, 300), random(10, 300))
 			ellipse(point.x, point.y, 1, 1)
+			pop()
 		})
 	})
 
@@ -101,7 +112,8 @@ function kurve () {
 	this.make = () => {
 
 		noFill()
-		stroke("#556487");
+		// "#556487"
+		stroke("white");
 		curve(
 			this.points.x1,
 			this.points.y1,

@@ -1,9 +1,6 @@
 let Planets = []
 let Trails = []
 
-let orbit = {
-}
-
 function setup () {
 
 	// //find appropriate canvas width
@@ -17,61 +14,59 @@ function setup () {
 	// $(".p5Canvas").css("margin-left", margin_left)
 	// $(".p5Canvas").css("margin-top", 40)
 
-	const NumPlanets = 30
-	for (var i = 0; i < NumPlanets; i++) {
+	let NumPlanets = [
+		{id:"work", rank:23},
+		{id:"Programing", rank:5},
+		{id:"Climbing", rank:1},
+		{id:"SlackLining", rank:1},
+		{id:"Hiking", rank:.5},
+		{id:"Sam", rank:12},
+		{id:"Games", rank:2},
+		{id:"podcast.book", rank:5},
+		{id:"misc", rank:8}
+	]
 
-		const NewPlanet = new Planet
+	for (var i = 0; i < NumPlanets.length; i++) {
+
+		const NewPlanet = new Planet, PlanetDesc = NumPlanets[i]
 
 		NewPlanet.Props = {
-			size: random(5, 25),
+			size: PlanetDesc.rank * 5,
 			speed: random(.01, .02),
 			color: 50,
 			angle: random(0, 360),
 			orbit: {
-				xradius: random(100, 500),
-				yradius: random(-50, 20),
-				zradius: random(-100, 10),
+				xradius: random(500, 600),
+				yradius: random(-100, 500),
+				zradius: random(-500, -300),
 				x: 0,
 				y: 0,
-				z: -20
+				z: -400
 			}
 		}
 
 		Planets.push(NewPlanet)
 	}
-
-	orbit = {
-		xradius: random(50, 300),
-		yradius: random(-80, -20),
-		zradius: random(-100, 10),
-		x: 0,
-		y: 0,
-		z: -20
-	}
-
 }
 
 function draw () {
 
 	background("grey")
 
-	// pointLight(250, 250, 250, 0, 0, -20);
-	// ambientMaterial(250);
-
 	for (var i = 0; i < Planets.length; i++) {
 		const BigObjectInTheSky = Planets[i]
+
 		BigObjectInTheSky.Draw()
 		BigObjectInTheSky.Move()
-		BigObjectInTheSky.MakeTrail()
-		// BigObjectInTheSky.Trail.push(BigObjectInTheSky.Position)
-		// console.log(BigObjectInTheSky.Trail.length, BigObjectInTheSky.Trail, BigObjectInTheSky.Position);
 	}
+
 	//the sun
 	push()
-	fill("orange")
-	translate(orbit.x, orbit.y, orbit.z)
-	sphere(30, 100, 100)
+	fill("red")
+	translate(0, 0, -400)
+	sphere(300, 100, 100)
 	pop()
+
 }
 
 function Planet () {
@@ -81,7 +76,7 @@ function Planet () {
 	this.Trail = []
 
 	this.Draw = () => {
-		// noStroke()
+		noStroke()
 		push()
 		fill(this.Props.color)
 		translate(this.Position.x, this.Position.y, this.Position.z)
@@ -116,51 +111,6 @@ function Planet () {
 		// 	sphere(10, 100, 100)
 		// 	pop()
 		// })
-	}
-}
-
-const SetUpOurSolarSystem = (index) => {
-
-	switch (index) {
-
-		case 1:
-
-			break;
-
-		case 2:
-
-			break;
-
-		case 3:
-
-			break;
-
-		case 4:
-
-			break;
-
-		case 5:
-
-			break;
-
-		case 6:
-
-			break;
-
-		case 7:
-
-			break;
-
-		case 8:
-
-			break;
-
-		case 9:
-
-			break;
-
-		default:
-
 	}
 }
 

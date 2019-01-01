@@ -1,6 +1,8 @@
 let Planets = []
 let Trails = []
 
+//dysfunctional-operation.surge.sh
+
 function setup () {
 
 	// //find appropriate canvas width
@@ -62,7 +64,7 @@ function draw () {
 
 	//the sun
 	push()
-	fill("red")
+	fill("orange")
 	translate(0, 0, -400)
 	sphere(300, 100, 100)
 	pop()

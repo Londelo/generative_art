@@ -1,4 +1,5 @@
-let TheGround
+let TheGround,
+		AllThings = []
 
 function setup () {
 	// //find appropriate canvas width
@@ -14,12 +15,25 @@ function setup () {
 	TheGround = new ground
 
 	TheGround.size = {
-		w: 1000,
+		w: 10000,
 		h: 100
 	}
 	TheGround.position = {
 		x: 0,
 		y: windowHeight - TheGround.size.h
+	}
+
+	for (let i = 0; i < 100; i++) {
+		let NewThing = new square
+
+		NewThing.size = {
+			w: 50,
+			h: random(50, 200)
+		}
+		NewThing.startingX = random(0, TheGround.size.w)
+		NewThing.position.y = windowHeight - (TheGround.size.h + NewThing.size.h)
+
+		AllThings.push(NewThing)
 	}
 }
 
@@ -28,26 +42,44 @@ function draw () {
 
 	background("grey")
 
-	console.log(keyCode);
 	TheGround.draw()
 
 	if(keyCode === 100) {
-		console.log("hit");
 		TheGround.position.x += TheGround.speed
 	}
 	if(keyCode === 97) {
 		TheGround.position.x -= TheGround.speed
 	}
 
+	for (var i = 0; i < AllThings.length; i++) {
+		let Thing = AllThings[i]
+		Thing.draw()
+	}
+
 }
 
 function ground () {
 
-	this.postion = {}
+	this.position = {}
 	this.size = {}
 	this.speed = 5
 
 	this.draw = () => {
+
+		fill("black")
+		rect(this.position.x, this.position.y, this.size.w, this.size.h)
+	}
+}
+
+function square () {
+
+	this.startingX = 0
+	this.position = {}
+	this.size = {}
+
+	this.draw = () => {
+
+		this.position.x = this.startingX + TheGround.position.x
 
 		fill("black")
 		rect(this.position.x, this.position.y, this.size.w, this.size.h)

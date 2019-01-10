@@ -12,7 +12,7 @@ function setup () {
 	// let margin_left = (windowWidth - canvas_size) / 2
 	// $(".p5Canvas").css("margin-left", margin_left)
 	// $(".p5Canvas").css("margin-top", 40)
-	TheGround = new ground
+	TheGround = new Ground
 
 	TheGround.size = {
 		w: 10000,
@@ -23,16 +23,9 @@ function setup () {
 		y: windowHeight - TheGround.size.h
 	}
 
-	for (let i = 0; i < 100; i++) {
-		let NewThing = new square
+	for (let i = 0; i < 200; i++) {
 
-		NewThing.size = {
-			w: 50,
-			h: random(50, 200)
-		}
-		NewThing.startingX = random(0, TheGround.size.w)
-		NewThing.position.y = windowHeight - (TheGround.size.h + NewThing.size.h)
-
+		let NewThing = RandomCreation(0)
 		AllThings.push(NewThing)
 	}
 }
@@ -58,7 +51,7 @@ function draw () {
 
 }
 
-function ground () {
+function Ground () {
 
 	this.position = {}
 	this.size = {}
@@ -71,18 +64,60 @@ function ground () {
 	}
 }
 
-function square () {
+const RandomCreation = (Num) => {
+
+	switch (Num) {
+		case 0:
+			let NewThing = new SimpleTree
+
+			NewThing.TrunkSize = {
+				w: random(20, 100),
+				h: random(20, 120)
+			}
+			let RandomWidth = random(20, NewThing.TrunkSize.w)
+			NewThing.BranchSize = {
+				left: RandomWidth,
+				top: random( NewThing.TrunkSize.h / 2, NewThing.TrunkSize.h * 2 ),
+				right: RandomWidth
+			}
+			NewThing.startingX = random(0, TheGround.size.w)
+			NewThing.position.y = windowHeight - (TheGround.size.h + NewThing.TrunkSize.h)
+
+			return NewThing
+			break;
+		default:
+
+	}
+}
+
+function SimpleTree () {
 
 	this.startingX = 0
 	this.position = {}
-	this.size = {}
+	this.TrunkSize = {}
+	this.BranchSize = {}
+
 
 	this.draw = () => {
 
+		let HalfWidth = this.TrunkSize.w/2
+
 		this.position.x = this.startingX + TheGround.position.x
 
+		push()
 		fill("black")
-		rect(this.position.x, this.position.y, this.size.w, this.size.h)
+		rect(this.position.x, this.position.y, this.TrunkSize.w, this.TrunkSize.h)
+		pop()
+
+		push()
+		fill("black")
+		// triangle(30, 75, 58, 20, 86, 75)
+		triangle(
+			this.position.x - this.BranchSize.left, this.position.y,
+			this.position.x + HalfWidth, this.position.y - this.BranchSize.top,
+			this.position.x + this.TrunkSize.w + this.BranchSize.right, this.position.y
+		)
+		pop()
 	}
 }
 

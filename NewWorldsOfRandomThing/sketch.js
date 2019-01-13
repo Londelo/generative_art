@@ -23,13 +23,12 @@ function setup () {
 		y: windowHeight - TheGround.size.h
 	}
 
-	for (let i = 0; i < 200; i++) {
+	for (let i = 0; i < 100; i++) {
 
 		let NewThing = RandomCreation(0)
 		AllThings.push(NewThing)
 	}
 }
-
 
 function draw () {
 
@@ -68,20 +67,10 @@ const RandomCreation = (Num) => {
 
 	switch (Num) {
 		case 0:
+
 			let NewThing = new SimpleTree
 
-			NewThing.TrunkSize = {
-				w: random(20, 100),
-				h: random(20, 120)
-			}
-			let RandomWidth = random(20, NewThing.TrunkSize.w)
-			NewThing.BranchSize = {
-				left: RandomWidth,
-				top: random( NewThing.TrunkSize.h / 2, NewThing.TrunkSize.h * 2 ),
-				right: RandomWidth
-			}
-			NewThing.startingX = random(0, TheGround.size.w)
-			NewThing.position.y = windowHeight - (TheGround.size.h + NewThing.TrunkSize.h)
+			NewThing.make()
 
 			return NewThing
 			break;
@@ -97,10 +86,10 @@ function SimpleTree () {
 	this.TrunkSize = {}
 	this.BranchSize = {}
 
-
 	this.draw = () => {
 
-		let HalfWidth = this.TrunkSize.w/2
+		let TempPosition = {x: this.position.x, y: this.position.y, w: this.BranchSize.w},
+				TempSizes = {BW: this.BranchSize.w, BH: this.BranchSize.h}
 
 		this.position.x = this.startingX + TheGround.position.x
 
@@ -111,13 +100,51 @@ function SimpleTree () {
 
 		push()
 		fill("black")
-		// triangle(30, 75, 58, 20, 86, 75)
 		triangle(
-			this.position.x - this.BranchSize.left, this.position.y,
-			this.position.x + HalfWidth, this.position.y - this.BranchSize.top,
-			this.position.x + this.TrunkSize.w + this.BranchSize.right, this.position.y
+			this.position.x - this.BranchSize.w, this.position.y,
+			this.position.x + (this.TrunkSize.w/2), this.position.y - this.BranchSize.h,
+			this.position.x + this.TrunkSize.w + this.BranchSize.w, this.position.y
 		)
 		pop()
+
+		TempPosition.y -= TempSizes.BH / 2
+		TempSizes.BW -= TempSizes.BW / 2
+		push()
+		fill("black")
+		triangle(
+			TempPosition.x - TempSizes.BW, TempPosition.y,
+			TempPosition.x + (this.TrunkSize.w/2), TempPosition.y - TempSizes.BH,
+			TempPosition.x + this.TrunkSize.w + TempSizes.BW, TempPosition.y
+		)
+		pop()
+
+		TempPosition.y -= TempSizes.BH / 2
+		TempSizes.BW -= TempSizes.BW / 2
+		push()
+		fill("black")
+		triangle(
+			TempPosition.x - TempSizes.BW, TempPosition.y,
+			TempPosition.x + (this.TrunkSize.w/2), TempPosition.y - TempSizes.BH,
+			TempPosition.x + this.TrunkSize.w + TempSizes.BW, TempPosition.y
+		)
+		pop()
+	}
+
+	this.make = () => {
+
+		this.TrunkSize = {
+			w: random(20, 75),
+			h: random(20, 50)
+		}
+
+		this.BranchSize = {
+			w: random(20, 100),
+			h: random( this.TrunkSize.h , this.TrunkSize.h * 4),
+		}
+
+		this.startingX = random(0, TheGround.size.w)
+
+		this.position.y = windowHeight - (TheGround.size.h + this.TrunkSize.h)
 	}
 }
 

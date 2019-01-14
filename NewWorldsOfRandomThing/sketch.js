@@ -1,5 +1,7 @@
 let TheGround,
-		AllThings = []
+		TheMoon,
+		AllThings = [],
+		LastPlacedThing = {x: 0, width:0}
 
 function setup () {
 	// //find appropriate canvas width
@@ -13,19 +15,14 @@ function setup () {
 	// $(".p5Canvas").css("margin-left", margin_left)
 	// $(".p5Canvas").css("margin-top", 40)
 	TheGround = new Ground
+	TheGround.make()
 
-	TheGround.size = {
-		w: 10000,
-		h: 100
-	}
-	TheGround.position = {
-		x: 0,
-		y: windowHeight - TheGround.size.h
-	}
+	TheMoon = new Moon
+	TheMoon.make()
 
 	for (let i = 0; i < 100; i++) {
-
-		let NewThing = RandomCreation(0)
+		let RandomNum = Number(random(0,1).toFixed(0))
+		let NewThing = RandomCreation(RandomNum)
 		AllThings.push(NewThing)
 	}
 }
@@ -34,19 +31,20 @@ function draw () {
 
 	background("grey")
 
+	TheMoon.draw()
 	TheGround.draw()
-
-	if(keyCode === 100) {
-		TheGround.position.x += TheGround.speed
-	}
-	if(keyCode === 97) {
-		TheGround.position.x -= TheGround.speed
-	}
 
 	for (var i = 0; i < AllThings.length; i++) {
 		let Thing = AllThings[i]
-		Thing.draw()
+
+		Thing.position.x = Thing.startingX + TheGround.position.x
+
+		if(Thing.position.x < windowWidth + 200 && Thing.position.x > -200) {
+			Thing.draw()
+		}
 	}
+
+	MoveMoonAndGround()
 
 }
 
@@ -54,28 +52,24 @@ function Ground () {
 
 	this.position = {}
 	this.size = {}
-	this.speed = 5
+	this.speed = 1
 
 	this.draw = () => {
 
 		fill("black")
 		rect(this.position.x, this.position.y, this.size.w, this.size.h)
 	}
-}
 
-const RandomCreation = (Num) => {
+	this.make = () => {
 
-	switch (Num) {
-		case 0:
-
-			let NewThing = new SimpleTree
-
-			NewThing.make()
-
-			return NewThing
-			break;
-		default:
-
+		this.size = {
+			w: 10000,
+			h: 100
+		}
+		this.position = {
+			x: 0,
+			y: windowHeight - TheGround.size.h
+		}
 	}
 }
 
@@ -90,8 +84,6 @@ function SimpleTree () {
 
 		let TempPosition = {x: this.position.x, y: this.position.y, w: this.BranchSize.w},
 				TempSizes = {BW: this.BranchSize.w, BH: this.BranchSize.h}
-
-		this.position.x = this.startingX + TheGround.position.x
 
 		push()
 		fill("black")
@@ -138,13 +130,229 @@ function SimpleTree () {
 		}
 
 		this.BranchSize = {
-			w: random(20, 100),
-			h: random( this.TrunkSize.h , this.TrunkSize.h * 4),
+			w: this.TrunkSize.w + random(10, 30),
+			h: random( this.TrunkSize.h * 2 , this.TrunkSize.h * 5),
 		}
 
-		this.startingX = random(0, TheGround.size.w)
+		let SpaceBetween = random(LastPlacedThing.width + 10,  200)
+
+		this.startingX = LastPlacedThing.x += SpaceBetween
+
+		LastPlacedThing.width = this.TrunkSize.w
 
 		this.position.y = windowHeight - (TheGround.size.h + this.TrunkSize.h)
+	}
+}
+
+function SimpleHouse () {
+
+	this.startingX = 0
+	this.position = {}
+	this.BaseSize = {}
+	this.RoofSize = {}
+	this.Door = {}
+	this.windows = {}
+
+	this.draw = () => {
+
+		//Base
+		push()
+		fill("black")
+		rect(this.position.x, this.position.y, this.BaseSize.w, this.BaseSize.h)
+		pop()
+
+		//Roof
+		push()
+		fill("black")
+		triangle(
+			this.position.x - this.RoofSize.w, this.position.y,
+			this.position.x + (this.BaseSize.w/2), this.position.y - this.RoofSize.h,
+			this.position.x + this.BaseSize.w + this.RoofSize.w, this.position.y
+		)
+		pop()
+
+		drawDoor()
+		drawWindows()
+
+	}
+
+	const drawDoor = () => {
+
+		let DoorPosition = {
+			x: (this.position.x + (this.BaseSize.w / 2)) - (this.Door.w / 2),
+			y:	(this.position.y + this.BaseSize.h) - this.Door.h
+		}
+		//Door
+		push()
+		fill("grey")
+		rect(
+			DoorPosition.x,
+			DoorPosition.y,
+			this.Door.w,
+			this.Door.h
+		)
+		pop()
+
+		//Knob
+		push()
+		fill("black")
+		ellipse(
+			DoorPosition.x + (this.Door.w * .2),
+			DoorPosition.y + (this.Door.h / 2),
+			this.Door.NobRadius,
+			this.Door.NobRadius
+		)
+		pop()
+	}
+
+	const drawWindows = () => {
+
+		let WindowPositions = {
+			x1: this.position.x + (this.BaseSize.w * .1),
+			y1:	this.position.y + (this.BaseSize.h * .05),
+			x2: this.position.x + (this.BaseSize.w * .6),
+			y2:	this.position.y + (this.BaseSize.h * .05)
+		}
+		//window 1
+		push()
+		fill("grey")
+		rect(
+			WindowPositions.x1,
+			WindowPositions.y1,
+			this.windows.size,
+			this.windows.size
+		)
+		pop()
+
+			//window 2
+			push()
+			fill("grey")
+			rect(
+				WindowPositions.x2,
+				WindowPositions.y2,
+				this.windows.size,
+				this.windows.size
+			)
+			pop()
+	}
+
+	this.make = () => {
+
+		this.BaseSize = {
+			w: random(80, 150),
+			h: random(100, 120)
+		}
+
+		this.RoofSize = {
+			w: this.BaseSize.w * .25,
+			h:  this.BaseSize.h * .7
+		}
+
+		this.Door = {
+			w: this.BaseSize.w * .25,
+			h: this.BaseSize.h * .45,
+			NobRadius: 3
+		}
+
+		this.windows = {
+			size: this.BaseSize.w * .3
+		}
+
+		let SpaceBetween = random(LastPlacedThing.width + 10,  300)
+
+		this.startingX = LastPlacedThing.x += SpaceBetween
+		// this.startingX = random(150, 200)
+
+		LastPlacedThing.width = this.BaseSize.w
+
+		this.position.y = windowHeight - (TheGround.size.h + this.BaseSize.h)
+	}
+}
+
+function Moon () {
+
+	this.radius = 100
+	this.position = {}
+
+	this.draw = () => {
+
+		noStroke()
+		//moon
+		push()
+		fill("black")
+		ellipse(
+			this.position.x,
+			this.position.y,
+			this.radius,
+			this.radius
+		)
+		pop()
+
+		//shadow
+		push()
+		fill("grey")
+		ellipse(
+			this.position.x + 15,
+			this.position.y + 5,
+			this.radius,
+			this.radius
+		)
+		pop()
+
+	}
+
+	this.make = () => {
+
+		this.position = {
+			x: 100,
+			y: windowHeight
+		}
+	}
+}
+
+const RandomCreation = (Num) => {
+
+	let NewThing
+
+	switch (Num) {
+
+		case 0:
+
+		 	NewThing = new SimpleTree
+
+			NewThing.make()
+
+			return NewThing
+		break;
+
+		case 1:
+
+		 	NewThing = new SimpleHouse
+
+			NewThing.make()
+
+			return NewThing
+		break;
+
+
+	}
+}
+
+const MoveMoonAndGround = () => {
+
+	TheGround.position.x -= TheGround.speed
+	TheMoon.position.x += (TheGround.speed * .12)
+
+	if(TheMoon.position.x > windowWidth/2) {
+		TheMoon.position.y += (TheGround.speed * .12)
+	}
+	else {
+		TheMoon.position.y -= (TheGround.speed * .12)
+	}
+
+	if(TheGround.position.x < (TheGround.size.w - windowWidth) * -1) {
+		TheGround.position.x = 0
+		TheMoon.make()
 	}
 }
 

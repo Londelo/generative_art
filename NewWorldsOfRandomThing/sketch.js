@@ -21,7 +21,7 @@ function setup () {
 	TheMoon.make()
 
 	for (let i = 0; i < 100; i++) {
-		let RandomNum = Number(random(0,1).toFixed(0))
+		let RandomNum = Number(random(0,2).toFixed(0))
 		let NewThing = RandomCreation(RandomNum)
 		AllThings.push(NewThing)
 	}
@@ -64,7 +64,7 @@ function Ground () {
 
 		this.size = {
 			w: 10000,
-			h: 100
+			h: 50
 		}
 		this.position = {
 			x: 0,
@@ -210,7 +210,7 @@ function SimpleHouse () {
 		let WindowPositions = {
 			x1: this.position.x + (this.BaseSize.w * .1),
 			y1:	this.position.y + (this.BaseSize.h * .05),
-			x2: this.position.x + (this.BaseSize.w * .6),
+			x2: this.position.x + (this.BaseSize.w * .65),
 			y2:	this.position.y + (this.BaseSize.h * .05)
 		}
 		//window 1
@@ -238,10 +238,8 @@ function SimpleHouse () {
 
 	this.make = () => {
 
-		this.BaseSize = {
-			w: random(80, 150),
-			h: random(100, 120)
-		}
+		this.BaseSize.w = random(80, 150)
+		this.BaseSize.h = random(this.BaseSize.w / 2, this.BaseSize.w + 20)
 
 		this.RoofSize = {
 			w: this.BaseSize.w * .25,
@@ -255,7 +253,7 @@ function SimpleHouse () {
 		}
 
 		this.windows = {
-			size: this.BaseSize.w * .3
+			size: this.BaseSize.w * .25
 		}
 
 		let SpaceBetween = random(LastPlacedThing.width + 10,  300)
@@ -266,6 +264,88 @@ function SimpleHouse () {
 		LastPlacedThing.width = this.BaseSize.w
 
 		this.position.y = windowHeight - (TheGround.size.h + this.BaseSize.h)
+	}
+}
+
+function FireFlies () {
+
+	this.startingX = 0
+	this.position = { x: 0, y: 0}
+	this.allPositions = []
+	this.amount = random(3, 10)
+
+	const move = (bug) => {
+
+		let x, y
+		x = this.position.x + Math.cos(bug.xangle) * bug.xradius
+		y = this.position.y + Math.sin(bug.yangle) * bug.yradius
+
+		bug.xangle += bug.xspeed
+		bug.yangle += bug.yspeed
+
+		bug.x = x
+		bug.y = y
+	}
+
+	const changeOpacity = (bug) => {
+
+		if(bug.color.a <= 0.1) {
+			bug.lighting = true
+		}
+		else if (bug.color.a >= 1) {
+			bug.lighting = false
+		}
+
+		if(!bug.lighting) {
+			bug.color.a -= .005
+		}
+		else if (bug.lighting) {
+			bug.color.a += .005
+		}
+	}
+
+	this.draw = () => {
+
+		for (var i = 0; i < this.allPositions.length; i++) {
+
+			let bug = this.allPositions[i]
+
+			move(bug)
+			changeOpacity(bug)
+
+			fill(`rgba(${bug.color.r}, ${bug.color.g}, ${bug.color.b}, ${bug.color.a})`)
+			ellipse(bug.x, bug.y, bug.size, bug.size)
+		}
+
+	}
+
+	this.make = () => {
+
+		let SpaceBetween = random(LastPlacedThing.width + 10,  300)
+
+		this.startingX = LastPlacedThing.x += SpaceBetween
+		// this.startingX = random(200, 300)
+
+		this.position.y = (windowHeight - TheGround.size.h) - 50
+
+		for (let i = 0; i <= this.amount; i++) {
+
+			let bug = {
+				x: 0,
+				y: 0,
+				size: random(1.5, 5),
+				xspeed: random(.01, .02),
+				yspeed: random(.01, .02),
+				lighting: true,
+				color: {r: 242, g: 163, b: 44, a: random(0,1)},
+				xangle: random(0, 360),
+				yangle: random(0, 360),
+				xradius: random(20, 200),
+				yradius: random(20, 100),
+			}
+
+			this.allPositions.push(bug)
+		}
 	}
 }
 
@@ -328,6 +408,15 @@ const RandomCreation = (Num) => {
 		case 1:
 
 		 	NewThing = new SimpleHouse
+
+			NewThing.make()
+
+			return NewThing
+		break;
+
+		case 2:
+
+		 	NewThing = new FireFlies
 
 			NewThing.make()
 

@@ -88,7 +88,7 @@ function Planet () {
 
 	this.Move = () => {
 
-		let x, y
+		let x, y, z
 		x = this.Props.orbit.x + Math.cos(this.Props.angle) * this.Props.orbit.xradius
 		y = this.Props.orbit.y + Math.sin(this.Props.angle) * this.Props.orbit.yradius
 		z = this.Props.orbit.z + Math.sin(this.Props.angle) * this.Props.orbit.zradius

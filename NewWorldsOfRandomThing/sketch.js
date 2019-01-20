@@ -43,9 +43,6 @@ function draw () {
 			Thing.draw()
 		}
 	}
-
-	MoveMoonAndGround()
-
 }
 
 function Ground () {
@@ -54,7 +51,18 @@ function Ground () {
 	this.size = {}
 	this.speed = 1
 
+	const move = () => {
+
+		this.position.x -= this.speed
+
+		if(this.position.x < (this.size.w - windowWidth) * -1) {
+			this.position.x = 0
+		}
+	}
+
 	this.draw = () => {
+
+		move()
 
 		fill("black")
 		rect(this.position.x, this.position.y, this.size.w, this.size.h)
@@ -353,8 +361,31 @@ function Moon () {
 
 	this.radius = 100
 	this.position = {}
+	this.shadow = {}
+	this.angle = 600
+	this.xradius = 0
+	this.yradius = 0
+	this.speed = .001
+
+	const move = () => {
+
+		let x, y
+		x = (windowWidth/2) + Math.cos(this.angle) * this.xradius
+		y = (windowHeight) + Math.sin(this.angle) * this.yradius
+
+		this.angle += this.speed
+
+		this.position.x = x
+		this.position.y = y
+
+		if(this.position.y > windowHeight + (this.yradius/2)) {
+			this.angle = 600
+		}
+	}
 
 	this.draw = () => {
+
+		move()
 
 		noStroke()
 		//moon
@@ -372,8 +403,8 @@ function Moon () {
 		push()
 		fill("grey")
 		ellipse(
-			this.position.x + 15,
-			this.position.y + 5,
+			this.position.x + this.shadow.x,
+			this.position.y + this.shadow.y,
 			this.radius,
 			this.radius
 		)
@@ -385,8 +416,17 @@ function Moon () {
 
 		this.position = {
 			x: 100,
-			y: windowHeight
+			y: 100
 		}
+
+		this.shadow = {
+			x: random(10, 100),
+			y: random(3, 15)
+		}
+										// 	This is 30% the width - 50% of width
+		this.xradius = random(windowWidth - (windowWidth * .7), windowWidth - (windowWidth * .4))
+		// 								// 	This is 40% the width - 60% of width
+		this.yradius = random(windowHeight - (windowHeight * .6), windowHeight - (windowHeight * .4))
 	}
 }
 
@@ -424,24 +464,6 @@ const RandomCreation = (Num) => {
 		break;
 
 
-	}
-}
-
-const MoveMoonAndGround = () => {
-
-	TheGround.position.x -= TheGround.speed
-	TheMoon.position.x += (TheGround.speed * .12)
-
-	if(TheMoon.position.x > windowWidth/2) {
-		TheMoon.position.y += (TheGround.speed * .12)
-	}
-	else {
-		TheMoon.position.y -= (TheGround.speed * .12)
-	}
-
-	if(TheGround.position.x < (TheGround.size.w - windowWidth) * -1) {
-		TheGround.position.x = 0
-		TheMoon.make()
 	}
 }
 

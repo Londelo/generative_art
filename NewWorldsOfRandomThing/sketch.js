@@ -1,6 +1,7 @@
 let TheGround,
 		TheMoon,
 		AllThings = [],
+		AllClouds = []
 		LastPlacedThing = {x: 0, width:0}
 
 function setup () {
@@ -20,29 +21,29 @@ function setup () {
 	TheMoon = new Moon
 	TheMoon.make()
 
-	for (let i = 0; i < 100; i++) {
-		let RandomNum = Number(random(0,2).toFixed(0))
-		let NewThing = RandomCreation(RandomNum)
-		AllThings.push(NewThing)
-	}
+	MakeClouds()
+
+	MakeLandThings()
 }
 
 function draw () {
 
-	background("grey")
+	background("#7D7D7D")
+
+	// push()
+	// fill("red")
+	// ellipse(300, windowHeight - (windowHeight * .85), 30, 30)
+	// pop()
+	//
+	// push()
+	// fill("red")
+	// ellipse(300, windowHeight - (windowHeight * .28), 30, 30)
+	// pop()
 
 	TheMoon.draw()
+	DrawAllThings()
 	TheGround.draw()
 
-	for (var i = 0; i < AllThings.length; i++) {
-		let Thing = AllThings[i]
-
-		Thing.position.x = Thing.startingX + TheGround.position.x
-
-		if(Thing.position.x < windowWidth + 200 && Thing.position.x > -200) {
-			Thing.draw()
-		}
-	}
 }
 
 function Ground () {
@@ -64,7 +65,7 @@ function Ground () {
 
 		move()
 
-		fill("black")
+		fill("#2B2B2B")
 		rect(this.position.x, this.position.y, this.size.w, this.size.h)
 	}
 
@@ -85,8 +86,14 @@ function SimpleTree () {
 
 	this.startingX = 0
 	this.position = {}
-	this.TrunkSize = {}
-	this.BranchSize = {}
+	this.TrunkSize = {
+		w: random(15, 25),
+		h: random(20, 30)
+	}
+	this.BranchSize = {
+		w: this.TrunkSize.w + random(5, 15),
+		h: random( this.TrunkSize.h, this.TrunkSize.h * 3),
+	}
 
 	this.draw = () => {
 
@@ -94,23 +101,23 @@ function SimpleTree () {
 				TempSizes = {BW: this.BranchSize.w, BH: this.BranchSize.h}
 
 		push()
-		fill("black")
+		fill("#2B2B2B")
 		rect(this.position.x, this.position.y, this.TrunkSize.w, this.TrunkSize.h)
 		pop()
 
 		push()
-		fill("black")
+		fill("#2B2B2B")
 		triangle(
-			this.position.x - this.BranchSize.w, this.position.y,
+			this.position.x - this.BranchSize.w, this.position.y + 1,
 			this.position.x + (this.TrunkSize.w/2), this.position.y - this.BranchSize.h,
-			this.position.x + this.TrunkSize.w + this.BranchSize.w, this.position.y
+			this.position.x + this.TrunkSize.w + this.BranchSize.w, this.position.y + 1
 		)
 		pop()
 
 		TempPosition.y -= TempSizes.BH / 2
 		TempSizes.BW -= TempSizes.BW / 2
 		push()
-		fill("black")
+		fill("#2B2B2B")
 		triangle(
 			TempPosition.x - TempSizes.BW, TempPosition.y,
 			TempPosition.x + (this.TrunkSize.w/2), TempPosition.y - TempSizes.BH,
@@ -121,7 +128,7 @@ function SimpleTree () {
 		TempPosition.y -= TempSizes.BH / 2
 		TempSizes.BW -= TempSizes.BW / 2
 		push()
-		fill("black")
+		fill("#2B2B2B")
 		triangle(
 			TempPosition.x - TempSizes.BW, TempPosition.y,
 			TempPosition.x + (this.TrunkSize.w/2), TempPosition.y - TempSizes.BH,
@@ -131,16 +138,6 @@ function SimpleTree () {
 	}
 
 	this.make = () => {
-
-		this.TrunkSize = {
-			w: random(20, 75),
-			h: random(20, 50)
-		}
-
-		this.BranchSize = {
-			w: this.TrunkSize.w + random(10, 30),
-			h: random( this.TrunkSize.h * 2 , this.TrunkSize.h * 5),
-		}
 
 		let SpaceBetween = random(LastPlacedThing.width + 10,  200)
 
@@ -165,17 +162,17 @@ function SimpleHouse () {
 
 		//Base
 		push()
-		fill("black")
+		fill("#2B2B2B")
 		rect(this.position.x, this.position.y, this.BaseSize.w, this.BaseSize.h)
 		pop()
 
 		//Roof
 		push()
-		fill("black")
+		fill("#2B2B2B")
 		triangle(
-			this.position.x - this.RoofSize.w, this.position.y,
+			this.position.x - this.RoofSize.w, this.position.y + 1,
 			this.position.x + (this.BaseSize.w/2), this.position.y - this.RoofSize.h,
-			this.position.x + this.BaseSize.w + this.RoofSize.w, this.position.y
+			this.position.x + this.BaseSize.w + this.RoofSize.w, this.position.y + 1
 		)
 		pop()
 
@@ -331,10 +328,10 @@ function FireFlies () {
 
 		let SpaceBetween = random(LastPlacedThing.width + 10,  300)
 
-		this.startingX = LastPlacedThing.x += SpaceBetween
+		this.startingX = LastPlacedThing.x +=  SpaceBetween
 		// this.startingX = random(200, 300)
 
-		this.position.y = (windowHeight - TheGround.size.h) - 50
+		this.position.y = (windowHeight - TheGround.size.h) - 20
 
 		for (let i = 0; i <= this.amount; i++) {
 
@@ -349,7 +346,7 @@ function FireFlies () {
 				xangle: random(0, 360),
 				yangle: random(0, 360),
 				xradius: random(20, 200),
-				yradius: random(20, 100),
+				yradius: random(20, 50),
 			}
 
 			this.allPositions.push(bug)
@@ -378,8 +375,10 @@ function Moon () {
 		this.position.x = x
 		this.position.y = y
 
+		// if it goes below the ground
 		if(this.position.y > windowHeight + (this.yradius/2)) {
 			this.angle = 600
+			this.make()
 		}
 	}
 
@@ -390,7 +389,7 @@ function Moon () {
 		noStroke()
 		//moon
 		push()
-		fill("black")
+		fill("#2B2B2B")
 		ellipse(
 			this.position.x,
 			this.position.y,
@@ -401,7 +400,7 @@ function Moon () {
 
 		//shadow
 		push()
-		fill("grey")
+		fill("#7D7D7D")
 		ellipse(
 			this.position.x + this.shadow.x,
 			this.position.y + this.shadow.y,
@@ -414,11 +413,6 @@ function Moon () {
 
 	this.make = () => {
 
-		this.position = {
-			x: 100,
-			y: 100
-		}
-
 		this.shadow = {
 			x: random(10, 100),
 			y: random(3, 15)
@@ -427,6 +421,76 @@ function Moon () {
 		this.xradius = random(windowWidth - (windowWidth * .7), windowWidth - (windowWidth * .4))
 		// 								// 	This is 40% the width - 60% of width
 		this.yradius = random(windowHeight - (windowHeight * .6), windowHeight - (windowHeight * .4))
+	}
+}
+
+function Cloud () {
+
+	this.type = "Cloud"
+	this.position = { x: random(0, TheGround.size.w), y: random(
+		windowHeight - (windowHeight * .85),
+		windowHeight - (windowHeight * .30)
+	)}
+	this.numOfPoofs = random(10,20)
+	this.allPoofs = []
+	this.speed = random(0.2, 0.8)
+
+	this.move = () => {
+		this.position.x -= this.speed
+	}
+
+	this.draw = () => {
+
+		for (let i = 0; i < this.allPoofs.length; i++) {
+
+			let poof = this.allPoofs[i]
+
+			fill(`#363636`)
+
+			if(i === 0) {
+				ellipse(this.position.x, this.position.y, poof.size, poof.size)
+			}
+			else {
+				ellipse(this.position.x + poof.xOffSet , this.position.y + poof.yOffSet, poof.size, poof.size)
+			}
+		}
+	}
+
+	this.make = () => {
+
+		for (let i = 0; i < this.numOfPoofs; i++) {
+
+			let poof = {
+						xOffSet: random(-80, 80),
+						yOffSet: random(20, 50),
+						size: random(80, 120)
+					}
+
+			this.allPoofs.push(poof)
+		}
+
+	}
+}
+
+const MakeClouds = () => {
+
+	let NumOfClouds = random(50, 100)
+
+	for (let i = 0; i < NumOfClouds; i++) {
+		let NewCloud = new Cloud
+		NewCloud.make()
+		AllThings.push(NewCloud)
+	}
+}
+
+const MakeLandThings = () => {
+
+	let NumOfThings = 1000
+
+	for (let i = 0; i < NumOfThings; i++) {
+		let RandomNum = Number(random(0,2).toFixed(0))
+		let NewThing = RandomCreation(RandomNum)
+		AllThings.push(NewThing)
 	}
 }
 
@@ -463,7 +527,32 @@ const RandomCreation = (Num) => {
 			return NewThing
 		break;
 
+	}
+}
 
+const DrawAllThings = () => {
+
+	for (var i = 0; i < AllThings.length; i++) {
+		let Thing = AllThings[i]
+
+		if( Thing.type ) {
+			if( Thing.type === "Cloud") {
+
+				Thing.move()
+
+				if(Thing.position.x < windowWidth + 200 && Thing.position.x > -200) {
+					Thing.draw()
+				}
+			}
+		}
+		else {
+
+			Thing.position.x = Thing.startingX + TheGround.position.x
+
+			if(Thing.position.x < windowWidth + 200 && Thing.position.x > -200) {
+				Thing.draw()
+			}
+		}
 	}
 }
 

@@ -1,8 +1,11 @@
 let TheGround,
 		TheMoon,
 		AllThings = [],
-		AllClouds = []
-		LastPlacedThing = {x: 0, width:0}
+		AllClouds = [],
+		LastPlacedThing = {x: 0, width:0},
+		Physics = {
+			gravity: 1
+		}
 
 function setup () {
 	// //find appropriate canvas width
@@ -21,9 +24,8 @@ function setup () {
 	TheMoon = new Moon
 	TheMoon.make()
 
-	MakeClouds()
-
 	MakeLandThings()
+	MakeClouds()
 }
 
 function draw () {
@@ -311,7 +313,7 @@ function FireFlies () {
 
 	this.draw = () => {
 
-		for (var i = 0; i < this.allPositions.length; i++) {
+		for (let i = 0; i < this.allPositions.length; i++) {
 
 			let bug = this.allPositions[i]
 
@@ -435,6 +437,12 @@ function Cloud () {
 	this.allPoofs = []
 	this.speed = random(0.2, 0.8)
 
+	this.weather = 1
+	this.weatherVolume = random(10000, 30000)
+	this.rainDrops = []
+	this.snowFlakes = []
+	this.volumeVisible = 0
+
 	this.move = () => {
 		this.position.x -= this.speed
 	}
@@ -458,17 +466,72 @@ function Cloud () {
 
 	this.make = () => {
 
-		for (let i = 0; i < this.numOfPoofs; i++) {
+		let size = random(.5, 3)
+		for (let i = 0; i <= this.weatherVolume; i++) {
 
-			let poof = {
-						xOffSet: random(-80, 80),
-						yOffSet: random(20, 50),
-						size: random(80, 120)
+			//Make poofs for clouds
+			if(i <= this.numOfPoofs) {
+
+				let poof = {
+							xOffSet: random(-80, 80),
+							yOffSet: random(20, 50),
+							size: random(80, 120)
+						}
+
+				this.allPoofs.push(poof)
+			}
+
+			//Make weather
+			if(this.weather === 1) {
+				//make rain
+				let drop = {
+					xOffSet: random(-80, 80),
+					yOffSet: random(20, 30),
+					size: size
+				}
+
+				this.rainDrops.push(drop)
+			}
+			else {
+				//make snow
+					let flake = {
+						x: 0,
+						y: 0,
+						size: size
 					}
 
-			this.allPoofs.push(poof)
-		}
+					this.snowFlakes.push(flake)
+			}
 
+		}
+	}
+
+	this.activateWeather = () => {
+
+		fill('black')
+
+		if(this.weather === 1) {
+
+			if(this.volumeVisible <= this.rainDrops.length - 11) {
+				this.volumeVisible += 1
+			}
+			//make it rain
+			for (let i = 0; i < this.volumeVisible; i++) {
+				let drop = this.rainDrops[i]
+
+				if(this.position.y + drop.yOffSet < windowHeight) {
+
+					drop.xOffSet -= this.speed /2
+					drop.yOffSet += Physics.gravity
+
+					ellipse(this.position.x - drop.xOffSet, this.position.y + drop.yOffSet, drop.size, drop.size)
+				}
+			}
+		}
+		else {
+			//make it snow
+
+		}
 	}
 }
 
@@ -532,7 +595,7 @@ const RandomCreation = (Num) => {
 
 const DrawAllThings = () => {
 
-	for (var i = 0; i < AllThings.length; i++) {
+	for (let i = 0; i < AllThings.length; i++) {
 		let Thing = AllThings[i]
 
 		if( Thing.type ) {
@@ -541,6 +604,7 @@ const DrawAllThings = () => {
 				Thing.move()
 
 				if(Thing.position.x < windowWidth + 200 && Thing.position.x > -200) {
+					Thing.activateWeather()
 					Thing.draw()
 				}
 			}

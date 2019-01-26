@@ -437,7 +437,8 @@ function Cloud () {
 	this.allPoofs = []
 	this.speed = random(0.2, 0.8)
 
-	this.weather = 1
+	this.weather = 0
+	// Number(random(0,1).toFixed())
 	this.weatherVolume = random(10000, 30000)
 	this.rainDrops = []
 	this.snowFlakes = []
@@ -492,15 +493,18 @@ function Cloud () {
 
 				this.rainDrops.push(drop)
 			}
-			else {
+			else if (this.weather === 0) {
 				//make snow
-					let flake = {
-						x: 0,
-						y: 0,
-						size: size
+				let	RandomNum = Number(random(0,1).toFixed()),
+						flake = {
+						xOffSet: random(-80, 80),
+						yOffSet: random(20, 30),
+						size: size,
+						counter: 0,
+						floating: RandomNum === 1 ? true : false
 					}
 
-					this.snowFlakes.push(flake)
+				this.snowFlakes.push(flake)
 			}
 
 		}
@@ -508,29 +512,61 @@ function Cloud () {
 
 	this.activateWeather = () => {
 
-		fill('black')
-
 		if(this.weather === 1) {
+
+			fill('black')
 
 			if(this.volumeVisible <= this.rainDrops.length - 11) {
 				this.volumeVisible += 1
 			}
+
 			//make it rain
 			for (let i = 0; i < this.volumeVisible; i++) {
 				let drop = this.rainDrops[i]
 
 				if(this.position.y + drop.yOffSet < windowHeight) {
 
-					drop.xOffSet -= this.speed /2
+					drop.xOffSet -= this.speed / 2
 					drop.yOffSet += Physics.gravity
 
 					ellipse(this.position.x - drop.xOffSet, this.position.y + drop.yOffSet, drop.size, drop.size)
 				}
 			}
 		}
-		else {
-			//make it snow
+		else if (this.weather === 0) {
 
+			fill('white')
+
+
+			if(this.volumeVisible <= this.snowFlakes.length - 11) {
+				this.volumeVisible += 1
+			}
+
+			//make it snow
+				for (let i = 0; i < this.volumeVisible; i++) {
+					let flake = this.snowFlakes[i]
+
+					if(this.position.y + flake.yOffSet < windowHeight) {
+
+						if(flake.counter === 30) {
+							flake.counter = 0
+							flake.floating = !flake.floating
+						}
+						else if(flake.floating === true) {
+							flake.counter += 1
+							flake.xOffSet += this.speed - (this.speed * .3)
+						}
+						else if(flake.floating === false) {
+							flake.counter += 1
+							flake.xOffSet -= this.speed - (this.speed * .3)
+						}
+
+						flake.xOffSet -= this.speed - (this.speed * .8)
+						flake.yOffSet += Physics.gravity
+
+						ellipse(this.position.x - flake.xOffSet, this.position.y + flake.yOffSet, flake.size, flake.size)
+					}
+				}
 		}
 	}
 }

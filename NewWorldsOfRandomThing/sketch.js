@@ -28,7 +28,7 @@ function setup () {
 	TheGround.basicSetUp(windowHeight)
 
 	TheMidGround = new Ground
-	TheMidGround.basicSetUp(windowHeight - 53)
+	TheMidGround.basicSetUp(windowHeight - 50, "mid")
 
 	TheBackGround = new Ground
 	TheBackGround.basicSetUp(windowHeight - 300)
@@ -71,6 +71,7 @@ function Ground () {
 	this.position = {}
 	this.size = {}
 	this.speed = 1
+	this.color = "#2B2B2B"
 
 	const move = () => {
 
@@ -82,14 +83,22 @@ function Ground () {
 	}
 
 	this.draw = () => {
-
 		move()
 
-		fill("#2B2B2B")
+		fill(this.color)
 		rect(this.position.x, this.position.y, this.size.w, this.size.h)
 	}
 
-	this.basicSetUp = (y) => {
+	this.basicSetUp = (y, z) => {
+
+			if(z === "mid") {
+
+				this.color = "#303030"
+
+			}
+			else if(z === "back"){
+
+			}
 
 		this.size = {
 			w: 10000,
@@ -110,13 +119,14 @@ function SimpleTree () {
 	this.position = {}
 	this.TrunkSize = {w: 0, h: 0}
 	this.BranchSize = {w: 0, h: 0}
+	this.color = "#2B2B2B"
 
 	this.draw = () => {
 
 		let TempPosition = {x: this.position.x, y: this.position.y, w: this.BranchSize.w},
 				TempSizes = {BW: this.BranchSize.w, BH: this.BranchSize.h}
 
-		fill("#2B2B2B")
+		fill(this.color)
 
 		//Trunk
 		rect(this.position.x, this.position.y, this.TrunkSize.w, this.TrunkSize.h)
@@ -151,6 +161,7 @@ function SimpleTree () {
 
 		if(z === "mid") {
 
+			this.color = "#303030"
 			this.TrunkSize = {
 				w: random(5, 15),
 				h: random(10, 20)
@@ -189,18 +200,19 @@ function SimpleHouse () {
 	this.RoofSize = {}
 	this.Door = {}
 	this.windows = {}
+	this.color = "#2B2B2B"
 
 	this.draw = () => {
 
+		fill(this.color)
+
 		//Base
 		push()
-		fill("#2B2B2B")
 		rect(this.position.x, this.position.y, this.BaseSize.w, this.BaseSize.h)
 		pop()
 
 		//Roof
 		push()
-		fill("#2B2B2B")
 		triangle(
 			this.position.x - this.RoofSize.w, this.position.y + 1,
 			this.position.x + (this.BaseSize.w/2), this.position.y - this.RoofSize.h,
@@ -277,8 +289,9 @@ function SimpleHouse () {
 
 		if(z === "mid") {
 
+			this.color = "#303030"
 			this.BaseSize.w = random(50, 100)
-			this.BaseSize.h = random(this.BaseSize.w / 2, this.BaseSize.w + 20)
+			this.BaseSize.h = random(this.BaseSize.w / 2, this.BaseSize.w)
 		}
 		else {
 

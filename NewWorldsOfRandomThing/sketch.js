@@ -57,11 +57,11 @@ function draw () {
 
 	TheMoon.draw()
 
-	DrawMidGround()
 	TheMidGround.draw()
+	DrawMidGround()
 
-	DrawForGround()
 	TheGround.draw()
+	DrawForGround()
 
 }
 
@@ -327,7 +327,7 @@ function SimpleHouse () {
 
 function FireFlies () {
 
-	this.type = "landThing"
+	this.type = "Fly"
 	this.startingX = 0
 	this.position = { x: 0, y: 0}
 	this.allPositions = []
@@ -378,7 +378,7 @@ function FireFlies () {
 
 	}
 
-	this.basicSetUp = (Ground) => {
+	this.basicSetUp = (Ground, z) => {
 
 		let SpaceBetween = random(LastPlacedThing.width + 10,  300)
 
@@ -392,7 +392,6 @@ function FireFlies () {
 			let bug = {
 				x: 0,
 				y: 0,
-				size: random(1.5, 5),
 				xspeed: random(.01, .02),
 				yspeed: random(.01, .02),
 				lighting: true,
@@ -401,6 +400,13 @@ function FireFlies () {
 				yangle: random(0, 360),
 				xradius: random(20, 200),
 				yradius: random(20, 50),
+			}
+
+			if(z === "mid") {
+				bug.size = random(1, 2)
+			}
+			else {
+				bug.size = random(1.5, 4)
 			}
 
 			this.allPositions.push(bug)
@@ -669,16 +675,23 @@ const MakeClouds = (least, most) => {
 const MakeLandThings = (least, most) => {
 
 	let NumOfThings = random(least, most),
-			SomeThings = []
+			SomeThings = [],
+			ThingsInFront = []
 
 	for (let i = 0; i < NumOfThings; i++) {
+
 		let RandomNum = Number(random(0,2).toFixed(0))
 		let NewThing = RandomLandCreation(RandomNum)
 		NewThing.NumOfAll = NumOfThings
-		SomeThings.push(NewThing)
-	}
 
-	return SomeThings
+		if(NewThing.type === "Fy") {
+			ThingsInFront.push(NewThing)
+		}
+		else {
+			SomeThings.push(NewThing)
+		}
+	}
+	return SomeThings.concat(ThingsInFront)
 }
 
 
@@ -702,7 +715,7 @@ const MakeMidGround = () => {
 		LastPlacedThing.x = 0
 
 		let Clouds = MakeClouds(10, 30),
-				LandThings = MakeLandThings(800, 1000)
+				LandThings = MakeLandThings(1000, 2000)
 
 		MidGround = Clouds.concat(LandThings)
 
@@ -735,8 +748,7 @@ const DrawForGround = () => {
 				Thing.draw()
 			}
 		}
-		else if (Thing.type === "landThing"){
-
+		else {
 			Thing.position.x = Thing.startingX + TheGround.position.x
 
 			if(Thing.position.x < windowWidth + 200 && Thing.position.x > -200) {
@@ -761,7 +773,7 @@ const DrawMidGround = () => {
 				Thing.draw()
 			}
 		}
-		else if (Thing.type === "landThing"){
+		else {
 
 			Thing.position.x = Thing.startingX + TheMidGround.position.x
 

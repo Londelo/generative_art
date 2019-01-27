@@ -31,13 +31,14 @@ function setup () {
 	TheMidGround.basicSetUp(windowHeight - 50, "mid")
 
 	TheBackGround = new Ground
-	TheBackGround.basicSetUp(windowHeight - 300)
+	TheBackGround.basicSetUp(windowHeight - 70, "back")
 
 	TheMoon = new Moon
 	TheMoon.basicSetUp()
-
+	//
 	MakeForGround()
 	MakeMidGround()
+	MakeBackGround()
 
 }
 
@@ -47,7 +48,7 @@ function draw () {
 
 	// push()
 	// fill("red")
-	// ellipse(300, windowHeight * .05, 30, 30)
+	// ellipse(300, TheBackGround.position.y, 30, 30)
 	// pop()
 	//
 	// push()
@@ -56,6 +57,9 @@ function draw () {
 	// pop()
 
 	TheMoon.draw()
+
+	TheBackGround.draw()
+	DrawBackGround()
 
 	TheMidGround.draw()
 	DrawMidGround()
@@ -92,12 +96,10 @@ function Ground () {
 	this.basicSetUp = (y, z) => {
 
 			if(z === "mid") {
-
 				this.color = "#303030"
-
 			}
 			else if(z === "back"){
-
+				this.color = "#383838"
 			}
 
 		this.size = {
@@ -114,9 +116,8 @@ function Ground () {
 function SimpleTree () {
 
 	this.type = "landThing"
-	this.NumOfAll = 0
 	this.startingX = 0
-	this.position = {}
+	this.position = {x:0,y:0,z:"for"}
 	this.TrunkSize = {w: 0, h: 0}
 	this.BranchSize = {w: 0, h: 0}
 	this.color = "#2B2B2B"
@@ -180,11 +181,11 @@ function SimpleTree () {
 			h: random( this.TrunkSize.h, this.TrunkSize.h * 3),
 		}
 
-		let SpaceBetween = random(LastPlacedThing.width + 10,  200 - (this.NumOfAll * .1))
-
-		this.startingX = LastPlacedThing.x += SpaceBetween
-
-		LastPlacedThing.width = this.TrunkSize.w
+		this.startingX = PickStartingPosition(
+											this.TrunkSize.w,
+											LastPlacedThing.width + 10,
+											200
+										)
 
 		this.position.y = Ground.position.y - this.TrunkSize.h
 	}
@@ -193,9 +194,9 @@ function SimpleTree () {
 function SimpleHouse () {
 
 	this.type = "landThing"
-	this.NumOfAll = 0
+
 	this.startingX = 0
-	this.position = {}
+	this.position = {x:0,y:0,z:"for"}
 	this.BaseSize = {}
 	this.RoofSize = {}
 	this.Door = {}
@@ -314,14 +315,49 @@ function SimpleHouse () {
 			size: this.BaseSize.w * .25
 		}
 
-		let SpaceBetween = random(LastPlacedThing.width + 10,  300 - (this.NumOfAll * .1))
-
-		this.startingX = LastPlacedThing.x += SpaceBetween
-		// this.startingX = random(150, 200)
-
-		LastPlacedThing.width = this.BaseSize.w
+		this.startingX = PickStartingPosition(
+											this.BaseSize.w,
+											LastPlacedThing.width + 10,
+											300
+										)
 
 		this.position.y = Ground.position.y - this.BaseSize.h
+	}
+}
+
+function SimpleMountain () {
+
+		this.type = "landThing"
+		this.NumOfAll = 0
+		this.startingX = 0
+		this.position = {x:0,y:0,z:"for"}
+		this.size = {
+			w: random(100, 200),
+			h: random(50, 80)
+		}
+		this.color = "#383838"
+
+	this.draw = () => {
+
+		fill(this.color)
+
+		triangle(
+			this.position.x - (this.size.w / 2), this.position.y + 1,
+			this.position.x, this.position.y - this.size.h,
+			this.position.x + (this.size.w / 2), this.position.y + 1
+		)
+	}
+
+	this.basicSetUp = (Ground) => {
+
+		let SpaceBetween = random(LastPlacedThing.width * .6,  LastPlacedThing.width + 100)
+
+		this.startingX = PickStartingPosition(
+											this.size.w / 2,
+											LastPlacedThing.width * .6,
+											LastPlacedThing.width + 100
+										)
+		this.position.y = Ground.position.y
 	}
 }
 
@@ -329,9 +365,9 @@ function FireFlies () {
 
 	this.type = "Fly"
 	this.startingX = 0
-	this.position = { x: 0, y: 0}
+	this.position = {x:0,y:0,z:"for"}
 	this.allPositions = []
-	this.amount = random(3, 10)
+	this.amount = random(3, 8)
 
 	const move = (bug) => {
 
@@ -380,9 +416,11 @@ function FireFlies () {
 
 	this.basicSetUp = (Ground, z) => {
 
-		let SpaceBetween = random(LastPlacedThing.width + 10,  300)
-
-		this.startingX = LastPlacedThing.x +=  SpaceBetween
+		this.startingX = PickStartingPosition(
+											100,
+											LastPlacedThing.width + 10,
+											300
+										)
 		// this.startingX = random(200, 300)
 
 		this.position.y = (windowHeight - Ground.size.h) - 20
@@ -489,7 +527,9 @@ function Cloud () {
 	this.type = "Cloud"
 	this.position = {
 		x: 0,
-		y: random(windowHeight * .05, windowHeight * .30)}
+		y: random(windowHeight * .05, windowHeight * .30),
+		z: "for"
+	}
 	this.numOfPoofs = random(10,20)
 	this.allPoofs = []
 	this.speed = random(0.2, 0.8)
@@ -658,78 +698,86 @@ const RandomLandCreation = (Num) => {
 	}
 }
 
+const PickStartingPosition = (width, least, most) => {
 
-const MakeClouds = (least, most) => {
+	let SpaceBetween = random(least,  most)
+
+	LastPlacedThing.width = width
+	LastPlacedThing.x += SpaceBetween
+
+	return LastPlacedThing.x
+	// return random(150, 200)
+}
+
+
+const MakeClouds = (least, most, ground, z) => {
+
+	LastPlacedThing.x = 0
 
 	let NumOfClouds = random(least, most),
 			SomeClouds = []
 
 	for (let i = 0; i < NumOfClouds; i++) {
 		let NewCloud = new Cloud
+		NewCloud.basicSetUp(ground, z)
 		SomeClouds.push(NewCloud)
 	}
 
 	return SomeClouds
 }
 
-const MakeLandThings = (least, most) => {
+const MakeLandThings = (ground, z) => {
 
-	let NumOfThings = random(least, most),
-			SomeThings = [],
-			ThingsInFront = []
+	LastPlacedThing.x = 0
 
-	for (let i = 0; i < NumOfThings; i++) {
+	let SomeThings = []
 
+	while (LastPlacedThing.x < ground.size.w - 200) {
 		let RandomNum = Number(random(0,2).toFixed(0))
 		let NewThing = RandomLandCreation(RandomNum)
-		NewThing.NumOfAll = NumOfThings
-
-		if(NewThing.type === "Fy") {
-			ThingsInFront.push(NewThing)
-		}
-		else {
-			SomeThings.push(NewThing)
-		}
+		NewThing.basicSetUp(ground, z)
+		SomeThings.push(NewThing)
 	}
-	return SomeThings.concat(ThingsInFront)
+
+	return SomeThings
+}
+
+const MakeMountains = (ground, z) => {
+
+	LastPlacedThing.x = 0
+
+	let SomeMoutains = []
+
+	while (LastPlacedThing.x < ground.size.w - 200) {
+		let NewMountain = new SimpleMountain
+		NewMountain.basicSetUp(ground, z)
+		SomeMoutains.push(NewMountain)
+	}
+	return SomeMoutains
 }
 
 
 const MakeForGround = () => {
 
-	let Clouds = MakeClouds(10, 30),
-			LandThings = MakeLandThings(800, 1000)
+	let Clouds = MakeClouds(20, 50, TheGround, "for"),
+			LandThings = MakeLandThings(TheGround, "for")
 
 	ForGround = Clouds.concat(LandThings)
-
-	for (var i = 0; i < ForGround.length; i++) {
-
-		let Thing = ForGround[i]
-
-		Thing.basicSetUp(TheGround)
-	}
 }
 
 const MakeMidGround = () => {
 
-		LastPlacedThing.x = 0
-
-		let Clouds = MakeClouds(10, 30),
-				LandThings = MakeLandThings(1000, 2000)
+		let Clouds = MakeClouds(20, 50, TheMidGround, "mid"),
+				LandThings = MakeLandThings(TheMidGround, "mid")
 
 		MidGround = Clouds.concat(LandThings)
-
-		for (var i = 0; i < MidGround.length; i++) {
-
-			let Thing = MidGround[i]
-
-			Thing.basicSetUp(TheMidGround, "mid")
-		}
 }
 
 const MakeBackGround = () => {
 
-	LastPlacedThing.x = 0
+	let Mountains = MakeMountains(TheBackGround, "back")
+
+	BackGround = Mountains
 }
 
 
@@ -790,22 +838,10 @@ const DrawBackGround = () => {
 
 		let Thing = BackGround[i]
 
-		if(Thing.type === "Cloud") {
+		Thing.position.x = Thing.startingX + TheBackGround.position.x
 
-			Thing.move()
-
-			if(Thing.position.x < windowWidth + 200 && Thing.position.x > -200) {
-				Thing.activateWeather()
-				Thing.draw()
-			}
-		}
-		else if (Thing.type === "landThing"){
-
-			Thing.position.x = Thing.startingX + TheBackGround.position.x
-
-			if(Thing.position.x < windowWidth + 200 && Thing.position.x > -200) {
-				Thing.draw()
-			}
+		if(Thing.position.x < windowWidth + 200 && Thing.position.x > -200) {
+			Thing.draw()
 		}
 	}
 }

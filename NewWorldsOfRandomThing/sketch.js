@@ -47,15 +47,15 @@ function draw () {
 	background("#7D7D7D")
 
 	AddAndRemoveClouds()
-
+	//
 	// push()
 	// fill("red")
-	// ellipse(300, TheBackGround.position.y, 30, 30)
+	// ellipse(300, 30, 32, 32)
 	// pop()
 	//
 	// push()
 	// fill("red")
-	// ellipse(300, windowHeight * .3, 30, 30)
+	// ellipse(300, windowHeight * .50, 30, 30)
 	// pop()
 
 	TheMoon.draw()
@@ -63,7 +63,7 @@ function draw () {
 	TheBackGround.draw()
 	DrawBackGround()
 
-	Enviorment.CloudsInView = 0
+	Enviorment.CloudsInView = []
 	TheMidGround.draw()
 	DrawMidGround() //This Collects info on clouds in view
 
@@ -71,13 +71,17 @@ function draw () {
 	DrawForGround() //This Collects info on clouds in view
 
 	Enviorment.HandleWeather()
+	Enviorment.GenerateClouds()
 }
 
 
 function Ground () {
 
 	this.position = {}
-	this.size = {}
+	this.size = {
+		w: 10000,
+		h: 50
+	}
 	this.speed = 1
 	this.color = "#2B2B2B"
 
@@ -106,10 +110,6 @@ function Ground () {
 				this.color = "#383838"
 			}
 
-		this.size = {
-			w: 10000,
-			h: 50
-		}
 		this.position = {
 			x: 0,
 			y: y - this.size.h
@@ -531,19 +531,29 @@ function Cloud () {
 	this.type = "Cloud"
 	this.position = {
 		x: 0,
-		y: random(windowHeight * .05, windowHeight * .30),
+		y: random( -30, windowHeight * .30),
 		z: "for"
 	}
 	this.numOfPoofs = random(10,20)
 	this.allPoofs = []
-	this.color = `#363636`
-	this.speed = random(0.2, 0.8)
+	this.color = `#2B2B2B`
+	this.speed = random(0.2, 0.5)
 
 	this.rainDrops = []
 	this.snowFlakes = []
 	this.wSize = random(1,3)
 
-	this.move = () => {
+	this.move = (index) => {
+
+		if (this.position.x < -200) {
+
+			if(this.position.z === "for") {
+				ForGround.splice(index, 1)
+			}
+			else {
+				MidGround.splice(index, 1)
+			}
+		}
 		this.position.x -= this.speed
 	}
 
@@ -565,16 +575,21 @@ function Cloud () {
 		}
 	}
 
-	this.basicSetUp = (Ground) => {
+	this.basicSetUp = (Ground, z) => {
 
-		this.position.x = random(0, Ground.size.w)
+		this.position.x =  windowWidth
+		this.position.z = z === "for" ? "for" : "mid"
+
+		// random(windowWidth + 100, windowWidth + 400)
+		this.speed = z === "for" ? this.speed : this.speed - 0.1
+		this.color = z === "for" ? this.color : "#303030"
 
 		for (let i = 0; i <= this.numOfPoofs; i++) {
 
 			let poof = {
-						xOffSet: random(-80, 80),
-						yOffSet: random(20, 50),
-						size: random(80, 120)
+						xOffSet: z === "for" ? random(-65, 65) : random(-55, 55),
+						yOffSet: z === "for" ? random(30, 50) : random(20, 40),
+						size: z === "for" ? random(50, 100) : random(30, 80)
 					}
 
 			this.allPoofs.push(poof)
@@ -587,7 +602,7 @@ function Cloud () {
 
 			//make rain
 			let drop = {
-				xOffSet: random(-80, 80),
+				xOffSet: random(-50, 50),
 				yOffSet: random(20, 30),
 				size: this.wSize
 			}
@@ -601,7 +616,7 @@ function Cloud () {
 			//make snow
 			let	RandomNum = Number(random(0,1).toFixed()),
 					flake = {
-						xOffSet: random(-80, 80),
+						xOffSet: random(-50, 50),
 						yOffSet: random(20, 30),
 						size: this.wSize,
 						counter: 0,
@@ -691,18 +706,46 @@ function Cloud () {
 function Env () {
 
 	this.Gravity = 1
-	this.CloudsInView = 0
+	this.CloudsInView = []
+	this.CloudTimer = 100
+	this.CloudWeight = 0
 	this.weather = 2 // 0=rain, 1=snow, 2=off
 
 	this.HandleWeather = () => {
 
-		console.log(this.CloudsInView);
+		console.log(this.CloudsInView.length, this.weather);
 
-		if(this.CloudsInView >= 10 && this.weather === 2) {
+		if(this.CloudsInView.length >= 6 && this.weather === 2) {
 			this.weather = Number(random(0,1).toFixed())
+			this.CloudWeight = 0
 		}
-		else if (this.CloudsInView < 10){
+		else if (this.CloudsInView.length < 6){
 			this.weather = 2
+		}
+	}
+
+	this.GenerateClouds = () => {
+
+		this.CloudTimer -= 1
+
+		console.log(this.CloudTimer, this.CloudWeight.toFixed());
+
+		if(this.CloudTimer === 0) {
+
+			this.CloudTimer = Number(random(500,1200 - this.CloudWeight).toFixed())
+			this.CloudWeight += random(20, 50)
+
+			let RanNum = Number(random(0,1).toFixed()),
+					NewCloud = new Cloud
+
+			if(RanNum === 1) {
+				NewCloud.basicSetUp(TheGround, "for")
+				ForGround.unshift(NewCloud)
+			}
+			else {
+				NewCloud.basicSetUp(TheMidGround, "mid")
+				MidGround.push(NewCloud)
+			}
 		}
 	}
 }
@@ -757,6 +800,7 @@ const MakeClouds = (least, most, ground, z) => {
 	for (let i = 0; i < NumOfClouds; i++) {
 		let NewCloud = new Cloud
 		NewCloud.basicSetUp(ground, z)
+		NewCloud.position.x = random(100, windowWidth - 100)
 		SomeClouds.push(NewCloud)
 	}
 
@@ -796,7 +840,7 @@ const MakeMountains = (ground, z) => {
 
 const MakeForGround = () => {
 
-	let Clouds = MakeClouds(20, 50, TheGround, "for"),
+	let Clouds = MakeClouds(1, 3, TheGround, "for"),
 			LandThings = MakeLandThings(TheGround, "for")
 
 	ForGround = LandThings.concat(Clouds)
@@ -804,11 +848,10 @@ const MakeForGround = () => {
 
 const MakeMidGround = () => {
 
-		let Clouds = MakeClouds(20, 50, TheMidGround, "mid"),
+		let Clouds = MakeClouds(1, 2, TheMidGround, "mid"),
 				LandThings = MakeLandThings(TheMidGround, "mid")
 
-		MidGround = LandThings
-		console.log("fix here");
+		MidGround = LandThings.concat(Clouds)
 }
 
 const MakeBackGround = () => {
@@ -827,11 +870,11 @@ const DrawForGround = () => {
 
 		if(Thing.type === "Cloud") {
 
-			Thing.move()
+			Thing.move(i)
 
 			if(Thing.position.x < windowWidth + 200 && Thing.position.x > -200) {
 
-				Enviorment.CloudsInView += 1
+				Enviorment.CloudsInView.push(Thing)
 				Thing.activateWeather()
 				Thing.draw()
 			}
@@ -854,11 +897,11 @@ const DrawMidGround = () => {
 
 		if(Thing.type === "Cloud") {
 
-			Thing.move()
+			Thing.move(i)
 
 			if(Thing.position.x < windowWidth + 200 && Thing.position.x > -200) {
 
-				Enviorment.CloudsInView += 1
+				Enviorment.CloudsInView.push(Thing)
 				Thing.activateWeather()
 				Thing.draw()
 			}

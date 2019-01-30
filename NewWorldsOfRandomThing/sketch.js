@@ -585,10 +585,7 @@ function Cloud () {
 
 		if(Enviorment.weather === 1) {
 
-			fill('black')
-
 			//make rain
-
 			let drop = {
 				xOffSet: random(-80, 80),
 				yOffSet: random(20, 30),
@@ -597,72 +594,23 @@ function Cloud () {
 
 			this.rainDrops.push(drop)
 
-			//make it rain
-			for (let i = 0; i < this.rainDrops.length; i++) {
-
-				let drop = this.rainDrops[i]
-
-				//If in view
-				if(this.position.y + drop.yOffSet < windowHeight) {
-
-					drop.xOffSet -= this.speed / 2
-					drop.yOffSet += Enviorment.Gravity
-
-					ellipse(this.position.x - drop.xOffSet, this.position.y + drop.yOffSet, drop.size, drop.size)
-				}
-				else {
-					this.rainDrops.splice(i, 1)
-				}
-			}
+			MakeItRain()
 		}
 		else if (Enviorment.weather === 0) {
 
-			fill('white')
-
 			//make snow
-			for (let c = 0; c < 1; c++) {
-
-				let	RandomNum = Number(random(0,1).toFixed()),
-						flake = {
+			let	RandomNum = Number(random(0,1).toFixed()),
+					flake = {
 						xOffSet: random(-80, 80),
 						yOffSet: random(20, 30),
 						size: this.wSize,
 						counter: 0,
 						floating: RandomNum === 1 ? true : false
-						}
-
-				this.snowFlakes.push(flake)
-			}
-
-			//make it snow
-				for (let i = 0; i < this.snowFlakes.length; i++) {
-					let flake = this.snowFlakes[i]
-
-					//If in view
-					if(this.position.y + flake.yOffSet < windowHeight) {
-
-						if(flake.counter === 20) {
-							flake.counter = 0
-							flake.floating = !flake.floating
-						}
-						else if(flake.floating === true) {
-							flake.counter += 1
-							flake.xOffSet += this.speed - (this.speed * .6)
-						}
-						else if(flake.floating === false) {
-							flake.counter += 1
-							flake.xOffSet -= this.speed - (this.speed * .6)
-						}
-
-						flake.xOffSet -= this.speed - (this.speed * .8)
-						flake.yOffSet += Enviorment.Gravity
-
-						ellipse(this.position.x - flake.xOffSet, this.position.y + flake.yOffSet, flake.size, flake.size)
 					}
-					else {
-						this.snowFlakes.splice(i, 1)
-					}
-				}
+
+			this.snowFlakes.push(flake)
+
+			MakeItSnow()
 		}
 		else {
 			//slowly take out from the drops
@@ -670,13 +618,71 @@ function Cloud () {
 			for (let c = 0; c < takeOutNum; c++) {
 
 				if(this.rainDrops.length > 0) {
-					let ranNum = Number(random(0,this.rainDrops.length).toFixed())
+					let ranNum = Number(random( 0, this.rainDrops.length/2 ).toFixed())
 					this.rainDrops.splice(ranNum, 1)
+					MakeItRain()
 				}
 				if(this.snowFlakes.length > 0) {
-					let ranNum = Number(random(0,this.snowFlakes.length).toFixed())
+					let ranNum = Number(random( 0, this.snowFlakes.length/2 ).toFixed())
 					this.snowFlakes.splice(ranNum, 1)
+					MakeItSnow()
 				}
+			}
+		}
+	}
+
+	const MakeItSnow = () => {
+
+		fill('white')
+		//make it snow
+			for (let i = 0; i < this.snowFlakes.length; i++) {
+				let flake = this.snowFlakes[i]
+
+				//If in view
+				if(this.position.y + flake.yOffSet < windowHeight) {
+
+					if(flake.counter === 20) {
+						flake.counter = 0
+						flake.floating = !flake.floating
+					}
+					else if(flake.floating === true) {
+						flake.counter += 1
+						flake.xOffSet += this.speed - (this.speed * .6)
+					}
+					else if(flake.floating === false) {
+						flake.counter += 1
+						flake.xOffSet -= this.speed - (this.speed * .6)
+					}
+
+					flake.xOffSet -= this.speed - (this.speed * .8)
+					flake.yOffSet += Enviorment.Gravity
+
+					ellipse(this.position.x - flake.xOffSet, this.position.y + flake.yOffSet, flake.size, flake.size)
+				}
+				else {
+					this.snowFlakes.splice(i, 1)
+				}
+			}
+	}
+
+	const MakeItRain = () => {
+
+		fill('black')
+		//make it rain
+		for (let i = 0; i < this.rainDrops.length; i++) {
+
+			let drop = this.rainDrops[i]
+
+			//If in view
+			if(this.position.y + drop.yOffSet < windowHeight) {
+
+				drop.xOffSet -= this.speed / 2
+				drop.yOffSet += Enviorment.Gravity
+
+				ellipse(this.position.x - drop.xOffSet, this.position.y + drop.yOffSet, drop.size, drop.size)
+			}
+			else {
+				this.rainDrops.splice(i, 1)
 			}
 		}
 	}
@@ -691,6 +697,7 @@ function Env () {
 	this.HandleWeather = () => {
 
 		console.log(this.CloudsInView);
+
 		if(this.CloudsInView >= 10 && this.weather === 2) {
 			this.weather = Number(random(0,1).toFixed())
 		}
@@ -925,7 +932,6 @@ const AddAndRemoveClouds = () => {
 		let ranNum = Number(random(0,Clouds.length - 1).toFixed()), copiedCloud = Clouds[ranNum], newCloud = new Cloud
 		newCloud.basicSetUp(TheGround)
 		newCloud.position.x = copiedCloud.position.x + 50
-		newCloud.color = "red"
 		Clouds.push(newCloud)
 
 		ForGround = NotClouds.concat(Clouds)

@@ -577,7 +577,7 @@ function Cloud () {
 
 	this.basicSetUp = (Ground, z) => {
 
-		this.position.x =  windowWidth
+		this.position.x =  windowWidth + 100
 		this.position.z = z === "for" ? "for" : "mid"
 
 		// random(windowWidth + 100, windowWidth + 400)
@@ -610,6 +610,10 @@ function Cloud () {
 			this.rainDrops.push(drop)
 
 			MakeItRain()
+
+			if(this.snowFlakes.length > 0) {
+				MakeItSnow()
+			}
 		}
 		else if (Enviorment.weather === 0) {
 
@@ -626,22 +630,18 @@ function Cloud () {
 			this.snowFlakes.push(flake)
 
 			MakeItSnow()
+
+			if(this.rainDrops.length > 0) {
+				MakeItRain()
+			}
 		}
 		else {
-			//slowly take out from the drops
-			let takeOutNum = 2
-			for (let c = 0; c < takeOutNum; c++) {
 
-				if(this.rainDrops.length > 0) {
-					let ranNum = Number(random( 0, this.rainDrops.length/2 ).toFixed())
-					this.rainDrops.splice(ranNum, 1)
-					MakeItRain()
-				}
-				if(this.snowFlakes.length > 0) {
-					let ranNum = Number(random( 0, this.snowFlakes.length/2 ).toFixed())
-					this.snowFlakes.splice(ranNum, 1)
-					MakeItSnow()
-				}
+			if(this.rainDrops.length > 0) {
+				MakeItRain()
+			}
+			if(this.snowFlakes.length > 0) {
+				MakeItSnow()
 			}
 		}
 	}
@@ -708,18 +708,19 @@ function Env () {
 	this.Gravity = 1
 	this.CloudsInView = []
 	this.CloudTimer = 100
+	this.WeightTimer = Number(random(1000, 2000).toFixed())
 	this.CloudWeight = 0
-	this.weather = 2 // 0=rain, 1=snow, 2=off
+	this.weather = 2 // 0=snow, 1=rain, 2=off
 
 	this.HandleWeather = () => {
 
-		console.log(this.CloudsInView.length, this.weather);
+		// console.log(this.CloudsInView.length, this.weather);
 
-		if(this.CloudsInView.length >= 6 && this.weather === 2) {
+		if(this.CloudsInView.length >= 8 && this.weather === 2) {
 			this.weather = Number(random(0,1).toFixed())
 			this.CloudWeight = 0
 		}
-		else if (this.CloudsInView.length < 6){
+		else if (this.CloudsInView.length < 8){
 			this.weather = 2
 		}
 	}
@@ -727,20 +728,24 @@ function Env () {
 	this.GenerateClouds = () => {
 
 		this.CloudTimer -= 1
+		this.WeightTimer -= 1
 
-		console.log(this.CloudTimer, this.CloudWeight.toFixed());
+		if(this.WeightTimer === 0) {
+			this.CloudWeight = Number(random(200, 1000).toFixed())
+			this.WeightTimer = Number(random(1000, 2000).toFixed())
+		}
 
-		if(this.CloudTimer === 0) {
+		if(this.CloudTimer <= 0 && this.CloudsInView.length < 12) {
 
-			this.CloudTimer = Number(random(500,1200 - this.CloudWeight).toFixed())
-			this.CloudWeight += random(20, 50)
-
+			this.CloudTimer = Number(random(500, 1200).toFixed())
+			this.CloudTimer -= this.CloudWeight
+		
 			let RanNum = Number(random(0,1).toFixed()),
 					NewCloud = new Cloud
 
 			if(RanNum === 1) {
 				NewCloud.basicSetUp(TheGround, "for")
-				ForGround.unshift(NewCloud)
+				ForGround.push(NewCloud)
 			}
 			else {
 				NewCloud.basicSetUp(TheMidGround, "mid")

@@ -6,8 +6,10 @@ let TheGround,
 		MidGround = [],
 		BackGround = [],
 		LastPlacedThing = {x: 0, width:0},
-		Enviorment
+		Enviorment,
+		Ship
 
+// COLORs # "#7D7D7D" "#2B2B2B" "#303030" "#383838"
 
 function setup () {
 
@@ -35,11 +37,14 @@ function setup () {
 
 	TheMoon = new Moon
 	TheMoon.basicSetUp()
-	//
+
 	MakeForGround()
 	MakeMidGround()
 	MakeBackGround()
 
+	Ship = new AlienShip
+
+	angleMode(DEGREES);
 }
 
 function draw () {
@@ -55,20 +60,22 @@ function draw () {
 	//
 	// push()
 	// fill("red")
-	// ellipse(300, windowHeight * .50, 30, 30)
+	// ellipse(300, windowHeight * .30, 30, 30)
 	// pop()
 
 	TheMoon.draw()
 
 	TheBackGround.draw()
-	DrawBackGround()
 
 	Enviorment.CloudsInView = []
+
 	TheMidGround.draw()
-	DrawMidGround() //This Collects info on clouds in view
+
+	DrawAll() //This Collects info on clouds in view
+
+	Ship.draw()
 
 	TheGround.draw()
-	DrawForGround() //This Collects info on clouds in view
 
 	Enviorment.HandleWeather()
 	Enviorment.GenerateClouds()
@@ -531,7 +538,7 @@ function Cloud () {
 	this.type = "Cloud"
 	this.position = {
 		x: 0,
-		y: random( -30, windowHeight * .30),
+		y: random( -30, windowHeight * .40),
 		z: "for"
 	}
 	this.numOfPoofs = random(10,20)
@@ -755,6 +762,83 @@ function Env () {
 	}
 }
 
+function AlienShip () {
+
+	this.position = {x:100,y:-100}
+	this.size = {w:100,h:50}
+	this.speed = 5
+
+	this.draw = () => {
+
+		//up
+	  if (keyIsDown(87)) {
+	    this.position.y -= this.speed
+	  }
+		//down
+	  if (keyIsDown(83)) {
+	    this.position.y += this.speed
+	  }
+		//left
+	  if (keyIsDown(65)) {
+
+			this.position.x -= this.speed
+
+			push()
+			strokeWeight(2);
+			stroke("#2B2B2B");
+			translate(this.position.x - 5, this.position.y - 8)
+			rotate(-10)
+			fill("#7D7D7D")
+			ellipse(0, 0, this.size.w/2, this.size.h - 80)
+			pop()
+
+			push()
+			translate(this.position.x, this.position.y)
+			rotate(-10)
+			fill("#2B2B2B")
+			ellipse(0, 0, this.size.w, this.size.h/2)
+			pop()
+
+			return
+	  }
+		//right
+	  if (keyIsDown(68)) {
+
+	    this.position.x += this.speed
+
+			push()
+			strokeWeight(2);
+			stroke("#2B2B2B");
+			translate(this.position.x + 5, this.position.y - 8)
+			rotate(10)
+			fill("#7D7D7D")
+			ellipse(0, 0, this.size.w/2, this.size.h - 80)
+			pop()
+
+			push()
+			translate(this.position.x, this.position.y)
+			rotate(10)
+			fill("#2B2B2B")
+			ellipse(0, 0, this.size.w, this.size.h/2)
+			pop()
+
+			return
+	  }
+		push()
+		strokeWeight(2);
+		stroke("#2B2B2B");
+		fill("#7D7D7D")
+		ellipse(this.position.x, this.position.y - 10, this.size.w/2, this.size.h - 80)
+		pop()
+
+		push()
+		fill("#2B2B2B")
+		ellipse(this.position.x, this.position.y, this.size.w, this.size.h/2)
+		pop()
+	}
+
+}
+
 
 const RandomLandCreation = (Num) => {
 
@@ -932,6 +1016,35 @@ const DrawBackGround = () => {
 
 		if(Thing.position.x < windowWidth + 200 && Thing.position.x > -200) {
 			Thing.draw()
+		}
+	}
+}
+
+const DrawAll = () => {
+
+	let AllThings = BackGround.concat(MidGround).concat(ForGround)
+
+	for (let i = 0; i < AllThings.length; i++) {
+
+		let Thing = AllThings[i]
+
+		if(Thing.type === "Cloud") {
+
+			Thing.move(i)
+
+			if(Thing.position.x < windowWidth + 200 && Thing.position.x > -200) {
+
+				Enviorment.CloudsInView.push(Thing)
+				Thing.activateWeather()
+				Thing.draw()
+			}
+		}
+		else {
+			Thing.position.x = Thing.startingX + TheGround.position.x
+
+			if(Thing.position.x < windowWidth + 200 && Thing.position.x > -200) {
+				Thing.draw()
+			}
 		}
 	}
 }

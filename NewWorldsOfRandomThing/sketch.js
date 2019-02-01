@@ -716,11 +716,11 @@ function Env () {
 
 		// console.log(this.CloudsInView.length, this.weather);
 
-		if(this.CloudsInView.length >= 8 && this.weather === 2) {
+		if(this.CloudsInView.length >= 7 && this.weather === 2) {
 			this.weather = Number(random(0,1).toFixed())
 			this.CloudWeight = 0
 		}
-		else if (this.CloudsInView.length < 8){
+		else if (this.CloudsInView.length < 7){
 			this.weather = 2
 		}
 	}
@@ -735,11 +735,11 @@ function Env () {
 			this.WeightTimer = Number(random(1000, 2000).toFixed())
 		}
 
-		if(this.CloudTimer <= 0 && this.CloudsInView.length < 12) {
+		if(this.CloudTimer <= 0 && this.CloudsInView.length < 10) {
 
 			this.CloudTimer = Number(random(500, 1200).toFixed())
 			this.CloudTimer -= this.CloudWeight
-		
+
 			let RanNum = Number(random(0,1).toFixed()),
 					NewCloud = new Cloud
 

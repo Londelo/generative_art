@@ -51,7 +51,7 @@ function draw () {
 
 	background("#7D7D7D")
 
-	AddAndRemoveClouds()
+	// AddAndRemoveClouds()
 	//
 	// push()
 	// fill("red")
@@ -79,6 +79,11 @@ function draw () {
 
 	Enviorment.HandleWeather()
 	Enviorment.GenerateClouds()
+
+		var fps = frameRate();
+		fill(255);
+		stroke(0);
+		text("FPS: " + fps.toFixed(2), 100, 100);
 }
 
 

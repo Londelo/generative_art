@@ -1,4 +1,4 @@
-let TheBox
+let TheBox, zoomage = 100, xangle = 0, yangle = 0
 
 // COLORs # "#7D7D7D" "#2B2B2B" "#303030" "#383838"
 
@@ -14,19 +14,21 @@ function draw () {
 
 	background("#7D7D7D")
 
-	// rotateX(frameCount * 0.01);
-  // rotateY(frameCount * 0.01);
-  // box(50);
+	// push()
+	// fill("blue")
+	// translate(0, 0, 0)
+	// sphere(10, 10, 10)
+	// pop()
 
 	TheBox.Rotate()
-	TheBox.Draw()
 	TheBox.DrawDots()
+	TheBox.Draw()
 }
 
 function BigBox () {
 
-	this.Pos = { x:0, y:0, z:-1000, rotation: 0, axis:"x" }
-	this.Size = { w:windowWidth, h:windowHeight, d:windowHeight }
+	this.Pos = { x:0, y:0, z:-windowWidth, rotation: 0, axis:"x" }
+	this.Size = { w:windowWidth, h:windowHeight, d:windowWidth }
 	this.OrigPos = [
 		{//front
 			x: this.Pos.x - (this.Size.w/2),
@@ -57,9 +59,6 @@ function BigBox () {
 	this.Faces = this.OrigPos
 
 	this.Draw = () => {
-		// console.table(this.Faces);
-		// console.log("------------------");
-		// console.table(this.OrigPos);
 
 		push()
 		fill("red")
@@ -67,41 +66,61 @@ function BigBox () {
 
 		if(this.Pos.axis === "x") {
 			rotateX(this.Pos.rotation)
+			RotateOnX()
 		}
-		if(this.Pos.axis === "y") {
+		else if(this.Pos.axis === "y") {
 			rotateY(this.Pos.rotation)
+			RotateOnY()
 		}
-		if(this.Pos.axis === "z") {
+		else if(this.Pos.axis === "z") {
 			rotateZ(this.Pos.rotation)
+			RotateOnZ()
 		}
-
   	box(this.Size.w, this.Size.h, this.Size.d)
 		pop()
 	}
 
-	this.Rotate = () => {
+	let CheckForReset = (newAxis) => {
 
-		if(key === "w") {
+		if(newAxis !== this.Pos.axis) {
 			this.Pos.rotation = 0
-			this.Pos.rotation += .05
-			this.Pos.axis = "x"
-			rotateOnX()
-		}
-		if(key === "d") {
-			this.Pos.rotation = 0
-			this.Pos.rotation += .05
-			this.Pos.axis = "y"
-			rotateOnY()
-		}
-		if(key === "a") {
-			this.Pos.rotation = 0
-			this.Pos.rotation += .05
-			this.Pos.axis = "z"
-			rotateOnZ()
+			this.Pos.axis = newAxis
 		}
 	}
 
-	let rotateOnZ = () => {
+	let RotateOnX = () => {
+
+		let cosA = Math.cos(this.Pos.rotation), sinA = Math.sin(this.Pos.rotation)
+
+		let newFaces = this.Faces.map((Face, i) => {
+
+			return {
+				x: this.OrigPos[i].x,
+				y: this.OrigPos[i].y * cosA - (this.OrigPos[i].z - this.Pos.z) * sinA,
+				z: ((this.OrigPos[i].z - this.Pos.z) * cosA + this.OrigPos[i].y * sinA) + this.Pos.z
+			}
+		})
+
+		this.Faces = newFaces
+	}
+
+	let RotateOnY = () => {
+
+		let cosA = Math.cos(this.Pos.rotation), sinA = Math.sin(this.Pos.rotation)
+
+		let newFaces = this.Faces.map((Face, i) => {
+
+			return {
+				x: this.OrigPos[i].x * cosA + (this.OrigPos[i].z - this.Pos.z) * sinA,
+				y: this.OrigPos[i].y,
+				z: ((this.OrigPos[i].z - this.Pos.z) * cosA - this.OrigPos[i].x * sinA) + this.Pos.z
+			}
+		})
+
+		this.Faces = newFaces
+	}
+
+	let RotateOnZ = () => {
 
 		let cosA = Math.cos(this.Pos.rotation), sinA = Math.sin(this.Pos.rotation)
 
@@ -117,36 +136,20 @@ function BigBox () {
 		this.Faces = newFaces
 	}
 
-	let rotateOnY = () => {
+	this.Rotate = () => {
 
-		let cosA = Math.cos(this.Pos.rotation), sinA = Math.sin(this.Pos.rotation)
-
-		let newFaces = this.Faces.map((Face, i) => {
-
-			return {
-				x: this.OrigPos[i].x * cosA + this.OrigPos[i].z * sinA,
-				y: this.OrigPos[i].y,
-				z: this.OrigPos[i].z * cosA - this.OrigPos[i].x * sinA
-			}
-		})
-
-		this.Faces = newFaces
-	}
-
-	let rotateOnX = () => {
-
-		let cosA = Math.cos(this.Pos.rotation), sinA = Math.sin(this.Pos.rotation)
-
-		let newFaces = this.Faces.map((Face, i) => {
-
-			return {
-				x: this.OrigPos[i].x,
-				y: this.OrigPos[i].y * cosA - this.OrigPos[i].z * sinA,
-				z: this.OrigPos[i].z * cosA + this.OrigPos[i].y * sinA
-			}
-		})
-
-		this.Faces = newFaces
+		if(key === "x") {
+			CheckForReset("x")
+			this.Pos.rotation += .01
+		}
+		else if(key === "y") {
+			CheckForReset("y")
+			this.Pos.rotation += .01
+		}
+		else if(key === "z") {
+			CheckForReset("z")
+			this.Pos.rotation += .01
+		}
 	}
 
 	this.DrawDots = () => {
@@ -156,8 +159,11 @@ function BigBox () {
 			let Face = this.Faces[i]
 			push()
 			fill("black")
-			translate(Face.x, Face.y, Face.z)
-			sphere(20);
+			translate(
+				Face.x,
+				Face.y,
+				Face.z)
+			sphere(10);
 			pop()
 		}
 	}

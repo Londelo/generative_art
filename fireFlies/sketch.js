@@ -4,6 +4,12 @@ let moving = false
 let v
 let last_position = {}, rotation
 function setup () {
+	function makeFireFlies (numOfFlies) {
+		for (let i = 0; i < numOfFlies; i++) {
+			let FireFly = new fireFly
+			flies.push(FireFly)
+		}
+	}
 
 	// //find appropriate canvas width
 	// canvas_size = windowWidth < windowHeight ? windowWidth : windowHeight
@@ -19,138 +25,39 @@ function setup () {
 	background("#43454B")
 	noStroke()
 
-	for (let i = 0; i < 1; i++) {
-		let FireFly = new fireFly
-		flies.push(FireFly)
-	}
-
- ellipseMode(CENTER)
+	makeFireFlies(1)	
 }
 
 function draw () {
+
+	function makeTargetVisible(target) {
+		fill('purple')
+		ellipse(
+			target.x,
+			target.y,
+			20,
+			20
+		)
+	}
 
 	background("#43454B")
 
 	flies.forEach((flie,) => {
 
-		fill('purple')
-		ellipse(
-			flie.the_heading.x,
-			flie.the_heading.y,
-			20,
-			20
-		)
-
-		flie.fly_pieces.forEach((piece, i) => {
-
-			//make wings
-			if(i === 1) {
-				flie.wings.forEach((wing, c) => {
-
-					let radius = piece.size + 20,
-							// rotation,
-			 				angle,
-			 			 	x,
-			 			 	y
-
-					x = (radius * Math.cos(angle)) + piece.x
-					y = (radius * Math.sin(angle)) + piece.y
-
-					angle = (c / (flie.wings.length / 2)) * Math.PI;
-					rotation = atan2(flie.fly_pieces[0].y - y, flie.fly_pieces[0].x - x)
-
-					push()
-
-					rotate(rotation)
-					x = (radius * Math.cos(angle)) + piece.x
-					y = (radius * Math.sin(angle)) + piece.y
-					fill('grey')
-					ellipse(
-						x,
-						y,
-						wing.width,
-						wing.height
-					)
-					pop()
-
-					fill('red')
-					ellipse(
-						x,
-						y,
-						10,
-						10
-					)
-				})
-			}
-
-			if(piece.id === "head") {
-
-				let x1, y1, distance
-
-				x1 =  flie.the_heading.x - piece.x
-				y1 = flie.the_heading.y - piece.y
-
-				distance = Math.sqrt(x1*x1 + y1*y1)
-				x1 /= distance
-				y1 /= distance
-
-				piece.x += x1 * flie.speed
-				piece.y +=	y1 * flie.speed
-
-
-				fill('green')
-				ellipse(
-					piece.x,
-					piece.y,
-					piece.size,
-					piece.size
-				)
-
-				//if we reach out destination
-				if(distance < 10) {
-
-					flie.the_heading = {
-						x: random(flie.fly_piece_size, windowWidth - flie.fly_piece_size),
-						y: random(flie.fly_piece_size, windowHeight - flie.fly_piece_size)
-					}
-				}
-
-			}
-			else {
-				// console.log(piece, i, "HIT");
-
-				let x1, y1, distance
-
-				x1 =  flie.fly_pieces[i - 1].x - piece.x
-				y1 = flie.fly_pieces[i - 1].y - piece.y
-
-				distance = Math.sqrt(x1*x1 + y1*y1)
-
-				if(distance > flie.fly_pieces[i - 1].size + 3) {
-
-					x1 /= distance
-					y1 /= distance
-
-					piece.x += x1 * flie.speed
-					piece.y +=	y1 * flie.speed
-				}
-
-				fill('green')
-				ellipse(
-					piece.x,
-					piece.y,
-					piece.size,
-					piece.size
-				)
-			}
-
-
+		makeTargetVisible({
+			x: flie.the_heading.x,
+			y: flie.the_heading.y
 		})
+		
+		flie.drawHead()
+		// flie.drawWings()
+		flie.drawTail()
 	})
 
-	translate(50, 50);
-	rotate(rotation)
-	ellipse(0, 0, 50, 20);
+	// testing angles of a wing
+	// translate(50, 50);
+	// rotate(rotation)
+	// ellipse(0, 0, 50, 20);
 }
 
 function fireFly() {
@@ -237,6 +144,111 @@ function fireFly() {
 					height: height
 				})
 		 }
+	}
+
+	this.drawWings = () => {
+		let wingLocation = this.fly_pieces[1]
+		this.wings.forEach((wing, c) => {
+
+			let radius = wingLocation.size + 20,
+					rotation,
+					 angle,
+						x,
+						y
+
+			x = (radius * Math.cos(angle)) + wingLocation.x
+			y = (radius * Math.sin(angle)) + wingLocation.y
+
+			angle = (c / (this.wings.length / 2)) * Math.PI;
+			rotation = atan2(this.fly_pieces[0].y - y, this.fly_pieces[0].x - x)
+
+			push()
+
+			rotate(rotation)
+			x = (radius * Math.cos(angle)) + wingLocation.x
+			y = (radius * Math.sin(angle)) + wingLocation.y
+			fill('grey')
+			ellipse(
+				x,
+				y,
+				wing.width,
+				wing.height
+			)
+			pop()
+
+			fill('red')
+			ellipse(
+				x,
+				y,
+				10,
+				10
+			)
+		})
+	}
+
+	this.drawHead = () => {
+		let head = this.fly_pieces[0]
+		let x1, y1, distance
+
+		x1 =  this.the_heading.x - head.x
+		y1 = this.the_heading.y - head.y
+
+		distance = Math.sqrt(x1*x1 + y1*y1)
+		x1 /= distance
+		y1 /= distance
+
+		head.x += x1 * this.speed
+		head.y +=	y1 * this.speed
+
+
+		fill('green')
+		ellipse(
+			head.x,
+			head.y,
+			head.size,
+			head.size
+		)
+
+		//if we reach out destination
+		if(distance < 10) {
+
+			this.the_heading = {
+				x: random(this.fly_piece_size, windowWidth - this.fly_piece_size),
+				y: random(this.fly_piece_size, windowHeight - this.fly_piece_size)
+			}
+		}
+	}
+
+	this.drawTail = () => {
+		this.fly_pieces.forEach((piece, i) => {
+			if(i !== 0) {
+				// console.log(piece, i, "HIT");
+
+				let x1, y1, distance
+
+				x1 =  this.fly_pieces[i - 1].x - piece.x
+				y1 = this.fly_pieces[i - 1].y - piece.y
+
+				distance = Math.sqrt(x1*x1 + y1*y1)
+
+				if(distance > this.fly_pieces[i - 1].size + 3) {
+
+					x1 /= distance
+					y1 /= distance
+
+					piece.x += x1 * this.speed
+					piece.y +=	y1 * this.speed
+				}
+
+				fill('green')
+				ellipse(
+					piece.x,
+					piece.y,
+					piece.size,
+					piece.size
+				)
+			}
+		})
 	}
 
 	make()

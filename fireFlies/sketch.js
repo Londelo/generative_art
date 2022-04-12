@@ -22,7 +22,7 @@ function setup () {
 	// $(".p5Canvas").css("margin-left", margin_left)
 	// $(".p5Canvas").css("margin-top", 40)
 
-	background("#43454B")
+	background("#000D0D")
 	noStroke()
 
 	makeFireFlies(100)	
@@ -40,7 +40,7 @@ function draw () {
 		)
 	}
 
-	background("#43454B")
+	background("#000D0D")
 	flies.forEach((flie,) => {
 
 		if(mouseIsPressed) {
@@ -67,7 +67,7 @@ function draw () {
 
 function fireFly() {
 
-	this.fly_length = 8
+	this.fly_length = 5
 	this.fly_piece_size = 20
 	this.speed = 2.5
 	
@@ -205,7 +205,7 @@ function fireFly() {
 		head.y +=	y1 * this.speed
 
 
-		fill('green')
+		fill("#012340")
 		ellipse(
 			head.x,
 			head.y,
@@ -220,6 +220,9 @@ function fireFly() {
 	}
 
 	this.drawTail = () => {
+		let tailColors = ['#023E73', '#D2D904'],
+		colorIndex = 0
+
 		this.fly_pieces.forEach((piece, i) => {
 			if(i !== 0) {
 				// console.log(piece, i, "HIT");
@@ -240,13 +243,17 @@ function fireFly() {
 					piece.y +=	y1 * this.speed
 				}
 
-				fill('green')
+				fill(tailColors[colorIndex])
 				ellipse(
 					piece.x,
 					piece.y,
 					piece.size,
 					piece.size
 				)
+
+				if(colorIndex !== tailColors.length -1) {
+					colorIndex++
+				}
 			}
 		})
 	}

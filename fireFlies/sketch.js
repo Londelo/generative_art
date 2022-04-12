@@ -3,6 +3,14 @@ let flies = []
 let moving = false
 let v
 let last_position = {}, rotation
+
+let opacity = .5,
+headColor = {r:0, g:0, b: 0},
+bodyColor = {r:0, g:0, b: 0},
+tailColor = {r:0, g:0, b: 0},
+wingColor = {r:200, g:200, b: 200, o: .04},
+backgroundColor = {r:0, g:0, b: 0}
+
 function setup () {
 	function makeFireFlies (numOfFlies) {
 		for (let i = 0; i < numOfFlies; i++) {
@@ -25,7 +33,7 @@ function setup () {
 	background("#000D0D")
 	noStroke()
 
-	makeFireFlies(20)	
+	makeFireFlies(50)	
 }
 
 function draw () {
@@ -170,7 +178,8 @@ function fireFly() {
 			rotate(rotation)
 			x = (radius * Math.cos(angle)) + wingLocation.x
 			y = (radius * Math.sin(angle)) + wingLocation.y
-			fill('grey')
+			
+			fill(`rgba(${wingColor.r},${wingColor.g},${wingColor.b}, ${wingColor.o})`)
 			ellipse(
 				x,
 				y,
@@ -205,7 +214,7 @@ function fireFly() {
 		head.y +=	y1 * this.speed
 
 
-		fill("#012340")
+		fill(`rgba(${headColor.r},${headColor.g},${headColor.b}, ${opacity})`)
 		ellipse(
 			head.x,
 			head.y,
@@ -220,12 +229,11 @@ function fireFly() {
 	}
 
 	this.drawTail = () => {
-		let tailColors = ['#023E73', '#D2D904'],
+		let tailColors = [`rgba(${bodyColor.r},${bodyColor.g},${bodyColor.b}, ${opacity})`, `rgba(${tailColor.r},${tailColor.g},${tailColor.b}, ${opacity})`],
 		colorIndex = 0
 
 		this.fly_pieces.forEach((piece, i) => {
 			if(i !== 0) {
-				// console.log(piece, i, "HIT");
 
 				let x1, y1, distance
 
@@ -256,6 +264,10 @@ function fireFly() {
 				}
 			}
 		})
+	}
+
+	this.handleLights = () => {
+		
 	}
 
 	this.createRandomHeading = () => {

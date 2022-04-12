@@ -3,14 +3,7 @@ let flies = []
 let moving = false
 let v
 let last_position = {}, rotation
-
-let opacity = .5,
-headColor = {r:0, g:0, b: 0},
-bodyColor = {r:0, g:0, b: 0},
-tailColor = {r:0, g:0, b: 0},
-wingColor = {r:200, g:200, b: 200, o: .04},
-backgroundColor = {r:0, g:0, b: 0}
-
+let backgroundColor = "#000D0D"
 function setup () {
 	function makeFireFlies (numOfFlies) {
 		for (let i = 0; i < numOfFlies; i++) {
@@ -30,10 +23,10 @@ function setup () {
 	// $(".p5Canvas").css("margin-left", margin_left)
 	// $(".p5Canvas").css("margin-top", 40)
 
-	background("#000D0D")
+	background(backgroundColor)
 	noStroke()
 
-	makeFireFlies(50)	
+	makeFireFlies(20)	
 }
 
 function draw () {
@@ -48,7 +41,7 @@ function draw () {
 		)
 	}
 
-	background("#000D0D")
+	background(backgroundColor)
 	flies.forEach((flie,) => {
 
 		if(mouseIsPressed) {
@@ -74,6 +67,14 @@ function draw () {
 }
 
 function fireFly() {
+
+	let opacity = .5,
+	headColor = {r:0, g:0, b: 0},
+	bodyColor = {r:0, g:0, b: 0},
+	darkTailColor = {r:0, g:0, b: 0},
+	lightTailColor = {r:242, g:200, b:75},
+	tailColor = darkTailColor,
+	wingColor = {r:200, g:200, b: 200, o: .04}
 
 	this.fly_length = 5
 	this.fly_piece_size = 20
@@ -266,8 +267,36 @@ function fireFly() {
 		})
 	}
 
-	this.handleLights = () => {
+	function getRandomLightTimer() {
+		return random(3000, 10000)
+	}
+
+	function isLightOn_onStart() {
+		let randomNumber = random(0, 10).toFixed(0)
+
+		if(randomNumber > 5) {
+			tailColor = lightTailColor
+			return true
+		}
 		
+		return false
+	}
+
+	this.lightTimer = getRandomLightTimer()
+	this.isLightOn = isLightOn_onStart()
+
+	this.handleLights = () => {
+		setTimeout(() => {
+			if(this.isLightOn) {
+				tailColor = lightTailColor
+			} else {
+				tailColor = darkTailColor
+			}
+
+			this.isLightOn = !this.isLightOn
+			this.lightTimer = getRandomLightTimer()
+			this.handleLights()
+		}, this.lightTimer)
 	}
 
 	this.createRandomHeading = () => {
@@ -292,10 +321,9 @@ function fireFly() {
 	}
 
 	make()
+	this.handleLights()
 }
 
 
 
 
-
-//

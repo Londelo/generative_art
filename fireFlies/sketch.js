@@ -26,7 +26,7 @@ function setup () {
 	background(backgroundColor)
 	noStroke()
 
-	makeFireFlies(20)	
+	makeFireFlies(100)	
 }
 
 function draw () {

@@ -25,7 +25,7 @@ function setup () {
 	background("#43454B")
 	noStroke()
 
-	makeFireFlies(1)	
+	makeFireFlies(100)	
 }
 
 function draw () {
@@ -41,13 +41,18 @@ function draw () {
 	}
 
 	background("#43454B")
-
 	flies.forEach((flie,) => {
 
-		makeTargetVisible({
-			x: flie.the_heading.x,
-			y: flie.the_heading.y
-		})
+		if(mouseIsPressed) {
+			flie.headToMouse()
+		} else {
+			flie.headToRandomSpot()
+		}
+
+		// makeTargetVisible({
+		// 	x: flie.the_heading.x,
+		// 	y: flie.the_heading.y
+		// })
 		
 		flie.drawHead()
 		// flie.drawWings()
@@ -63,18 +68,16 @@ function draw () {
 function fireFly() {
 
 	this.fly_length = 8
-	this.fly_piece_size = 55
+	this.fly_piece_size = 20
+	this.speed = 2.5
+	
 	this.head_position = {
 		x: random(this.fly_piece_size, windowWidth - this.fly_piece_size),
 		y: random(this.fly_piece_size, windowHeight - this.fly_piece_size)
 	}
+
 	this.fly_pieces = []
 	this.wings = []
-	this.the_heading = {
-		x: random(this.fly_piece_size, windowWidth - this.fly_piece_size),
-		y: random(this.fly_piece_size, windowHeight - this.fly_piece_size)
-	}
-	this.speed = 2.5
 
 	let make = () => {
 
@@ -187,6 +190,7 @@ function fireFly() {
 	}
 
 	this.drawHead = () => {
+
 		let head = this.fly_pieces[0]
 		let x1, y1, distance
 
@@ -211,11 +215,7 @@ function fireFly() {
 
 		//if we reach out destination
 		if(distance < 10) {
-
-			this.the_heading = {
-				x: random(this.fly_piece_size, windowWidth - this.fly_piece_size),
-				y: random(this.fly_piece_size, windowHeight - this.fly_piece_size)
-			}
+			this.random_heading = this.createRandomHeading()
 		}
 	}
 
@@ -249,6 +249,27 @@ function fireFly() {
 				)
 			}
 		})
+	}
+
+	this.createRandomHeading = () => {
+		return {
+			x: random(this.fly_piece_size, windowWidth - this.fly_piece_size),
+			y: random(this.fly_piece_size, windowHeight - this.fly_piece_size)
+		}
+	}
+
+	this.random_heading  = this.createRandomHeading()
+	this.the_heading = this.random_heading
+
+	this.headToMouse = () => {
+		this.the_heading = {
+			x: mouseX,
+			y: mouseY
+		}
+	}
+
+	this.headToRandomSpot = () => {
+		this.the_heading = this.random_heading
 	}
 
 	make()

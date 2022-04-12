@@ -287,12 +287,6 @@ function fireFly() {
 
 	this.handleLights = () => {
 		setTimeout(() => {
-			if(this.isLightOn) {
-				tailColor = lightTailColor
-			} else {
-				tailColor = darkTailColor
-			}
-
 			this.isLightOn = !this.isLightOn
 			this.lightTimer = getRandomLightTimer()
 			this.handleLights()
@@ -314,10 +308,18 @@ function fireFly() {
 			x: mouseX,
 			y: mouseY
 		}
+
+		tailColor = lightTailColor
 	}
 
 	this.headToRandomSpot = () => {
 		this.the_heading = this.random_heading
+
+		if(this.isLightOn) {
+			tailColor = lightTailColor
+		} else {
+			tailColor = darkTailColor
+		}
 	}
 
 	make()

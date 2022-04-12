@@ -25,7 +25,7 @@ function setup () {
 	background("#000D0D")
 	noStroke()
 
-	makeFireFlies(100)	
+	makeFireFlies(20)	
 }
 
 function draw () {
@@ -55,7 +55,7 @@ function draw () {
 		// })
 		
 		flie.drawHead()
-		// flie.drawWings()
+		flie.drawWings()
 		flie.drawTail()
 	})
 
@@ -179,13 +179,13 @@ function fireFly() {
 			)
 			pop()
 
-			fill('red')
-			ellipse(
-				x,
-				y,
-				10,
-				10
-			)
+			// fill('red')
+			// ellipse(
+			// 	x,
+			// 	y,
+			// 	10,
+			// 	10
+			// )
 		})
 	}
 

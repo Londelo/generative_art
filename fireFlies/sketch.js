@@ -26,7 +26,7 @@ function setup () {
 	background(backgroundColor)
 	noStroke()
 
-	makeFireFlies(100)	
+	makeFireFlies(1)	
 }
 
 function draw () {
@@ -68,13 +68,13 @@ function draw () {
 
 function fireFly() {
 
-	let opacity = .5,
+	let opacity = 1,
 	headColor = {r:0, g:0, b: 0},
 	bodyColor = {r:0, g:0, b: 0},
 	darkTailColor = {r:0, g:0, b: 0},
 	lightTailColor = {r:242, g:200, b:75},
 	tailColor = darkTailColor,
-	wingColor = {r:200, g:200, b: 200, o: .04}
+	wingColor = {r:200, g:200, b: 200, o: 1}
 
 	this.fly_length = 5
 	this.fly_piece_size = 20
@@ -132,30 +132,18 @@ function fireFly() {
 	}
 
 	let makeWings = () => {
-
 		// I got this from http://bl.ocks.org/bycoffe/3404776
-		 let radius = this.fly_piece_size + 20,
-				 num_wings = 2,
-				 width = this.fly_piece_size + 25,
-				 height = this.fly_piece_size - 25,
-				 angle,
-				 x,
-				 y;
+		let num_wings = 2,
+		width = this.fly_piece_size + 25,
+		height = this.fly_piece_size - 25
+		
+		for (let c = 0; c < num_wings; c++) {
 
-		 for (let c = 0; c < num_wings; c++) {
-
-				angle = (c / (num_wings / 2)) * Math.PI; // Calculate the angle at which the element will be placed.
-																							// For a semicircle, we would use (i / num_wings) * Math.PI.
-				x = (radius * Math.cos(angle)) + (this.head_position.x); // Calculate the x position of the element.
-				y = (radius * Math.sin(angle)) + (this.head_position.y); // Calculate the y position of the element.
-
-				this.wings.push({
-					x: Number(x.toFixed(0)),
-					y: Number(y.toFixed(0)),
-					width: width,
-					height: height
-				})
-		 }
+			this.wings.push({
+				width: width,
+				height: height
+			})
+		}
 	}
 
 	this.drawWings = () => {
@@ -163,23 +151,19 @@ function fireFly() {
 		this.wings.forEach((wing, c) => {
 
 			let radius = wingLocation.size + 20,
-					rotation,
-					 angle,
-						x,
-						y
+			rotation, angle, x, y, rotateBy = 20 * 100
 
-			x = (radius * Math.cos(angle)) + wingLocation.x
-			y = (radius * Math.sin(angle)) + wingLocation.y
+			angle = (rotateBy) * (Math.PI/180);
+			rotation = 3.0
 
-			angle = (c / (this.wings.length / 2)) * Math.PI;
-			rotation = atan2(this.fly_pieces[0].y - y, this.fly_pieces[0].x - x)
+			let point = { x: 220, y: 220 }
+			x = Math.cos(angle) * (point.x - 200) - Math.sin(angle) * (point.y - 200) + 200;
+			y = Math.sin(angle) * (point.x - 200) + Math.cos(angle) * (point.y - 200) + 200;
 
 			push()
 
-			rotate(rotation)
-			x = (radius * Math.cos(angle)) + wingLocation.x
-			y = (radius * Math.sin(angle)) + wingLocation.y
-			
+			ellipseMode(CENTER);
+			// rotate(Math.PI / rotation)
 			fill(`rgba(${wingColor.r},${wingColor.g},${wingColor.b}, ${wingColor.o})`)
 			ellipse(
 				x,
@@ -187,15 +171,15 @@ function fireFly() {
 				wing.width,
 				wing.height
 			)
-			pop()
 
-			// fill('red')
-			// ellipse(
-			// 	x,
-			// 	y,
-			// 	10,
-			// 	10
-			// )
+			fill('red')
+				ellipse(
+					200,
+					200,
+					10,
+					10
+				)
+			pop()
 		})
 	}
 
@@ -310,6 +294,8 @@ function fireFly() {
 		}
 
 		tailColor = lightTailColor
+
+		this.speed = 5
 	}
 
 	this.headToRandomSpot = () => {
@@ -320,6 +306,8 @@ function fireFly() {
 		} else {
 			tailColor = darkTailColor
 		}
+
+		this.speed = 2.5
 	}
 
 	make()
@@ -329,3 +317,14 @@ function fireFly() {
 
 
 
+// let radius = wingLocation.size + 20,
+// 					rotation,
+// 					 angle,
+// 						x,
+// 						y
+
+// 			x = (radius * Math.cos(angle)) + wingLocation.x
+// 			y = (radius * Math.sin(angle)) + wingLocation.y
+
+// 			angle = (c / (this.wings.length / 2)) * Math.PI;
+// 			rotation = atan2(this.fly_pieces[0].y - y, this.fly_pieces[0].x - x)

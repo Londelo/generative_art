@@ -155,6 +155,9 @@ function fireFly() {
 	}
 
 	this.drawWings = () => {
+		//NOW I NEED TO HANDLE IF WE ARE GOING UP AND DOWN
+		//A BIG ANNOYANCE IS THE ROTATION BETWEEN THE TWO WINGS
+		//I MAY BE ABLE TO PERMA SET IT WITH A SEPERATE PUSH AND POP
 		let wingCenter = this.fly_pieces[1],
 		headPosition = this.fly_pieces[0]
 
@@ -360,17 +363,3 @@ function fireFly() {
 	this.handleLights()
 }
 
-
-
-
-// let radius = wingLocation.size + 20,
-// 					rotation,
-// 					 angle,
-// 						x,
-// 						y
-
-// 			x = (radius * Math.cos(angle)) + wingLocation.x
-// 			y = (radius * Math.sin(angle)) + wingLocation.y
-
-// 			angle = (c / (this.wings.length / 2)) * Math.PI;
-// 			rotation = atan2(this.fly_pieces[0].y - y, this.fly_pieces[0].x - x)

@@ -147,38 +147,57 @@ function fireFly() {
 	}
 
 	this.drawWings = () => {
-		let wingLocation = this.fly_pieces[1]
+		let wingCenter = this.fly_pieces[1]
+
 		this.wings.forEach((wing, c) => {
 
-			let radius = wingLocation.size + 20,
-			rotation, angle, x, y, rotateBy = 20 * 100
+			let radius = wingCenter.size + 20,
+			rotation, angle, x, y, rotateBy
+
+			if(c === 0) {
+				rotateBy = -120
+				rotation = .7 + wingCenter.x/700
+			} else {
+				rotateBy = -200
+				rotation = .3 + wingCenter.x/700
+			}
 
 			angle = (rotateBy) * (Math.PI/180);
-			rotation = 3.0
 
-			let point = { x: 220, y: 220 }
-			x = Math.cos(angle) * (point.x - 200) - Math.sin(angle) * (point.y - 200) + 200;
-			y = Math.sin(angle) * (point.x - 200) + Math.cos(angle) * (point.y - 200) + 200;
+			let wingLocation = {x: wingCenter.x, y:wingCenter.y + (wing.height - 5)}
+			x = Math.cos(angle) * (point.x - wingCenter.x) - Math.sin(angle) * (20 - wingCenter.y) + wingCenter.x;
+			y = Math.sin(angle) * (point.x - wingCenter.x) + Math.cos(angle) * (20 - wingCenter.y) + wingCenter.y;
+			console.log(x, y)
 
 			push()
-
-			ellipseMode(CENTER);
-			// rotate(Math.PI / rotation)
+			rectMode(CENTER);
+			translate(x, y);
+			rotate(rotation)
 			fill(`rgba(${wingColor.r},${wingColor.g},${wingColor.b}, ${wingColor.o})`)
 			ellipse(
-				x,
-				y,
+				0,
+				0,
 				wing.width,
 				wing.height
 			)
 
-			fill('red')
+			if(c === 0) {
+				fill('green')
 				ellipse(
-					200,
-					200,
+					0,
+					0,
 					10,
 					10
 				)
+			} else {
+				fill('red')
+				ellipse(
+					0,
+					0,
+					10,
+					10
+				)
+			}
 			pop()
 		})
 	}

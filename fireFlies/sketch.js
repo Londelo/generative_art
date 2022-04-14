@@ -26,7 +26,7 @@ function setup () {
 	background(backgroundColor)
 	noStroke()
 
-	makeFireFlies(1)	
+	makeFireFlies(10)	
 }
 
 function draw () {
@@ -76,13 +76,13 @@ function draw () {
 
 function fireFly() {
 
-	let opacity = 1,
+	let opacity = .5,
 	headColor = {r:0, g:0, b: 0},
 	bodyColor = {r:0, g:0, b: 0},
 	darkTailColor = {r:0, g:0, b: 0},
 	lightTailColor = {r:242, g:200, b:75},
 	tailColor = darkTailColor,
-	wingColor = {r:200, g:200, b: 200, o: 1}
+	wingColor = {r:200, g:200, b: 200, o: .2}
 
 	this.fly_length = 5
 	this.fly_piece_size = 20
@@ -92,7 +92,6 @@ function fireFly() {
 		x: random(this.fly_piece_size, windowWidth - this.fly_piece_size),
 		y: random(this.fly_piece_size, windowHeight - this.fly_piece_size)
 	}
-	this.lastHeadPosition = {x:0}
 
 	this.fly_pieces = []
 	this.wings = []
@@ -160,23 +159,21 @@ function fireFly() {
 		headPosition = this.fly_pieces[0]
 
 		let wingLocation = {x: wingCenter.x, y:wingCenter.y + (this.wings[0].height - 15)},
-			headingRight = headPosition.x < this.the_heading.x
+			headingRight = headPosition.x < this.the_heading.x,
+			headingUp = headPosition.y < this.the_heading.y
 
 		if(headingRight) {
-			console.log("going right")
 			wingLocation.x = wingLocation.x - 20
 		} else {
-			console.log("going left")
 			wingLocation.x = wingLocation.x + 20
 		}
 
 		this.wings.forEach((wing, c) => {
 
 			let radius = wingCenter.size + 20,
-			rotation, angle, x, y, rotateBy
+			rotation, angle, x, y, rotationAround_wingCenter = 0
 
 			if(c === 0) {
-				rotateBy = 0
 				if(headingRight) {
 					rotation = -103
 				} else {
@@ -185,14 +182,14 @@ function fireFly() {
 			} else {
 				if(headingRight) {
 					rotation = -103.3
-					rotateBy = -10
+					rotationAround_wingCenter = -10
 				} else {
 					rotation = 103.3
-					rotateBy = 10
+					rotationAround_wingCenter = 10
 				}
 			}
 
-			angle = (rotateBy) * (Math.PI/180);
+			angle = (rotationAround_wingCenter) * (Math.PI/180);
 
 			x = Math.cos(angle) * (wingLocation.x - wingCenter.x) - Math.sin(angle) * (wingLocation.y - wingCenter.y) + wingCenter.x;
 			y = Math.sin(angle) * (wingLocation.x - wingCenter.x) + Math.cos(angle) * (wingLocation.y - wingCenter.y) + wingCenter.y;
@@ -234,7 +231,6 @@ function fireFly() {
 	this.drawHead = () => {
 
 		let head = this.fly_pieces[0]
-		this.lastHeadPosition = head
 
 		let x1, y1, distance
 

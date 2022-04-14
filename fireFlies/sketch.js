@@ -42,6 +42,14 @@ function draw () {
 	}
 
 	background(backgroundColor)
+
+	fill('white')
+	ellipse(
+		width/2,
+		height/2,
+		10,
+		10
+	)
 	flies.forEach((flie,) => {
 
 		if(mouseIsPressed) {
@@ -55,8 +63,8 @@ function draw () {
 		// 	y: flie.the_heading.y
 		// })
 		
-		flie.drawHead()
 		flie.drawWings()
+		flie.drawHead()
 		flie.drawTail()
 	})
 
@@ -84,6 +92,7 @@ function fireFly() {
 		x: random(this.fly_piece_size, windowWidth - this.fly_piece_size),
 		y: random(this.fly_piece_size, windowHeight - this.fly_piece_size)
 	}
+	this.lastHeadPosition = {x:0}
 
 	this.fly_pieces = []
 	this.wings = []
@@ -134,8 +143,8 @@ function fireFly() {
 	let makeWings = () => {
 		// I got this from http://bl.ocks.org/bycoffe/3404776
 		let num_wings = 2,
-		width = this.fly_piece_size + 25,
-		height = this.fly_piece_size - 25
+		width = this.fly_piece_size + 18,
+		height = this.fly_piece_size - 22
 		
 		for (let c = 0; c < num_wings; c++) {
 
@@ -147,7 +156,19 @@ function fireFly() {
 	}
 
 	this.drawWings = () => {
-		let wingCenter = this.fly_pieces[1]
+		let wingCenter = this.fly_pieces[1],
+		headPosition = this.fly_pieces[0]
+
+		let wingLocation = {x: wingCenter.x, y:wingCenter.y + (this.wings[0].height - 15)},
+			headingRight = headPosition.x < this.the_heading.x
+
+		if(headingRight) {
+			console.log("going right")
+			wingLocation.x = wingLocation.x - 20
+		} else {
+			console.log("going left")
+			wingLocation.x = wingLocation.x + 20
+		}
 
 		this.wings.forEach((wing, c) => {
 
@@ -155,19 +176,27 @@ function fireFly() {
 			rotation, angle, x, y, rotateBy
 
 			if(c === 0) {
-				rotateBy = -120
-				rotation = .7 + wingCenter.x/700
+				rotateBy = 0
+				if(headingRight) {
+					rotation = -103
+				} else {
+					rotation = 103
+				}
 			} else {
-				rotateBy = -200
-				rotation = .3 + wingCenter.x/700
+				if(headingRight) {
+					rotation = -103.3
+					rotateBy = -10
+				} else {
+					rotation = 103.3
+					rotateBy = 10
+				}
 			}
 
 			angle = (rotateBy) * (Math.PI/180);
 
-			let wingLocation = {x: wingCenter.x, y:wingCenter.y + (wing.height - 5)}
-			x = Math.cos(angle) * (point.x - wingCenter.x) - Math.sin(angle) * (20 - wingCenter.y) + wingCenter.x;
-			y = Math.sin(angle) * (point.x - wingCenter.x) + Math.cos(angle) * (20 - wingCenter.y) + wingCenter.y;
-			console.log(x, y)
+			x = Math.cos(angle) * (wingLocation.x - wingCenter.x) - Math.sin(angle) * (wingLocation.y - wingCenter.y) + wingCenter.x;
+			y = Math.sin(angle) * (wingLocation.x - wingCenter.x) + Math.cos(angle) * (wingLocation.y - wingCenter.y) + wingCenter.y;
+
 
 			push()
 			rectMode(CENTER);
@@ -181,23 +210,23 @@ function fireFly() {
 				wing.height
 			)
 
-			if(c === 0) {
-				fill('green')
-				ellipse(
-					0,
-					0,
-					10,
-					10
-				)
-			} else {
-				fill('red')
-				ellipse(
-					0,
-					0,
-					10,
-					10
-				)
-			}
+			// if(c === 0) {
+			// 	fill('green')
+			// 	ellipse(
+			// 		0,
+			// 		0,
+			// 		10,
+			// 		10
+			// 	)
+			// } else {
+			// 	fill('red')
+			// 	ellipse(
+			// 		0,
+			// 		0,
+			// 		10,
+			// 		10
+			// 	)
+			// }
 			pop()
 		})
 	}
@@ -205,6 +234,8 @@ function fireFly() {
 	this.drawHead = () => {
 
 		let head = this.fly_pieces[0]
+		this.lastHeadPosition = head
+
 		let x1, y1, distance
 
 		x1 =  this.the_heading.x - head.x

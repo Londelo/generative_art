@@ -2,14 +2,14 @@ const State = {
 	cells: [],
 	cellSize: 10,
 	framesCounted: 0,
-	gridW: 600,
-	gridH: 600,
+	gridSize: 60,
 	freeze: false,
-	lifeSpeed: 5
+	lifeSpeed: 15
 }
 
 const Cell = {
 	position: { x: 0, y: 0 },
+	gridPosition: { x: 1, y: 1 },
 	size: State.cellSize,
 	hasLife: false,
 	age: 1
@@ -22,16 +22,23 @@ function setup () {
 
 	createGrid()
 	startLife()
+	drawLife()
 }
 
 function draw () {
 	State.framesCounted ++
+	
 
 	if(State.framesCounted === State.lifeSpeed) {
 		lifeHappens()
+		drawLife()
 		State.framesCounted = 0
 	}
 
+	// testCellLogic(17)
+}
+
+function drawLife() {
 	if(!State.freeze) {
 		background("black")
 		for (let index = 0; index < State.cells.length; index++) {
@@ -43,33 +50,37 @@ function draw () {
 
 function createGrid () {
 	const position = { x: 0, y: 0 }
+	const gridPosition = { x: 1, y: 1 }
+
 	const {
-		gridH,
-		gridW,
+		gridSize,
 		cellSize
 	} = State
 
-	while(position.y < gridH) {
-
+	while(gridPosition.y <= gridSize) {
 		const newCell = {
 			...Cell,
-			position: { ...position }
+			position: { ...position },
+			gridPosition: { ...gridPosition }
 		}
 		State.cells.push(newCell)
 
-		if(position.x < (gridW - cellSize)) {
+		if(gridPosition.x < gridSize) {
 			position.x += cellSize
+			gridPosition.x ++
 		} else {
 			position.y += cellSize
 			position.x = 0
+			gridPosition.y ++
+			gridPosition.x = 1
 		}
 	}
 }
 
 function startLife () {
-	const numOfFirstArivals = 1000
+	const numOfFirstArivals = 300
 	for (let index = 0; index < numOfFirstArivals; index++) {
-		let randomIndex = random(500, 800).toFixed(0)
+		let randomIndex = random(0, State.cells.length).toFixed(0)
 		const cell = State.cells[randomIndex ];
 		cell.hasLife = true
 	}
@@ -95,22 +106,29 @@ function countLivingNeighbors (cellIndex) {
 
 	const {
 		cells,
-		gridW,
+		gridSize,
 		cellSize
 	} = State
 
-	const numOfRows = gridW/cellSize
+	const theCell = cells[cellIndex]
 
-	const left = cells[cellIndex - 1]
-	const right = cells[cellIndex + 1]
-	const topMiddle = cells[cellIndex - numOfRows]
-	const topRight = cells[(cellIndex - numOfRows) + 1]
-	const topLeft = cells[(cellIndex - numOfRows) - 1]
-	const bottomMiddle = cells[(cellIndex + numOfRows)]
-	const bottomRight = cells[(cellIndex + numOfRows) + 1]
-	const bottomLeft = cells[(cellIndex + numOfRows) - 1]
+	const onTopOfGrid = theCell.gridPosition.y === 1
+	const onBottomOfGrid = theCell.gridPosition.y === gridSize
+	const onLeftOfGrid = theCell.gridPosition.x === 1
+	const onRightOfGrid = theCell.gridPosition.x === gridSize
 
-	const arrayOfCells = [ 
+	const right = !onRightOfGrid ? cells[cellIndex + 1] : undefined
+	const left = !onLeftOfGrid ? cells[cellIndex - 1] : undefined
+
+	const topMiddle = !onTopOfGrid ? cells[cellIndex - gridSize] : undefined
+	const topRight = !onTopOfGrid && !onRightOfGrid ? cells[(cellIndex - gridSize) + 1] : undefined
+	const topLeft = !onTopOfGrid && !onLeftOfGrid ? cells[(cellIndex - gridSize) - 1] : undefined
+
+	const bottomMiddle = !onBottomOfGrid ? cells[(cellIndex + gridSize)] : undefined
+	const bottomRight = !onBottomOfGrid && !onRightOfGrid ? cells[(cellIndex + gridSize) + 1] : undefined
+	const bottomLeft = !onBottomOfGrid && !onLeftOfGrid ? cells[(cellIndex + gridSize) - 1] : undefined
+
+	const arrayOfNeightbors = [ 
 		left,
 		right,
 		topMiddle,
@@ -123,13 +141,13 @@ function countLivingNeighbors (cellIndex) {
 
 	let numOfAliveNeighbors = 0
 
-	arrayOfCells.forEach(cell => {
+	arrayOfNeightbors.forEach(cell => {
 		if(cell && cell.hasLife) {
 			numOfAliveNeighbors++
 		}
 	})
 
-	return numOfAliveNeighbors
+	return { arrayOfNeightbors, numOfAliveNeighbors }
 }
 
 function lifeHappens() {
@@ -147,13 +165,14 @@ function lifeHappens() {
 
 	for (let index = 0; index < cells.length; index++) {
 		const cell = cells[index]
-		const numOfAliveNeighbors = countLivingNeighbors(index)
+		const { numOfAliveNeighbors } = countLivingNeighbors(index)
 
 		if(cell.hasLife) {
 			if(numOfAliveNeighbors < 2 || numOfAliveNeighbors > 3) {
 				cell.hasLife = false
 			} else if (cell.age > 0.1) {
 				cell.age -= 0.1
+				cell.age = cell.age.toFixed(1)
 			}
 		} else {
 			if(numOfAliveNeighbors === 3) {
@@ -164,4 +183,17 @@ function lifeHappens() {
 	}
 }
 
+function testCellLogic(testIndex) {
+	State.freeze = true
+
+	State.cells[testIndex].hasLife = true
+	drawCell(State.cells[testIndex])
+
+	const { arrayOfNeightbors } = countLivingNeighbors(testIndex)
+	arrayOfNeightbors.forEach(cell => {
+		if(cell) {
+			drawCell(cell, true)
+		}
+	})
+}
 

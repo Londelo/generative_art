@@ -1,16 +1,23 @@
-function GameOfLife() {
-	this.state = {
-		cells: [],
-		cellSize: 20,
-		framesCounted: 0,
-		gridSize: 6,
-		freeze: false,
-		lifeSpeed: 15,
-		livingLife: false,
-		drawCells: true
+let gameOfLife
+const defaultGameState = {
+	cells: [],
+	cellSize: 20,
+	framesCounted: 0,
+	gridSize: 3,
+	lifeSpeed: 3000
+}
+
+function GameOfLife(state = defaultGameState) {
+	this.state = state
+
+	const setState = (newState) => {
+		this.state = {
+			...this.state,
+			...newState
+		}
 	}
 
-	this.createGrid = () => {
+	const createGrid = () => {
 		const position = { x: 0, y: 0 }
 		const gridPosition = { x: 1, y: 1 }
 		let cellIndex = 0
@@ -39,83 +46,79 @@ function GameOfLife() {
 		}
 	}
 
-	this.startLife = (numOfFirstArivals) => {
+	const startLife = (numOfFirstArivals) => {
+		const randomCellIndexs = []
 		for (let index = 0; index < numOfFirstArivals; index++) {
-			let randomIndex = random(0, this.state.cells.length).toFixed(0)
-			const cell = this.state.cells[randomIndex];
-			cell.hasLife = true
+			let randomIndex = Number( random(0, this.state.cells.length).toFixed(0) )
+			randomCellIndexs.push(randomIndex)
 		}
+
+		this.state.cells = this.state.cells.map((cell, index) => {
+			if(randomCellIndexs.includes(index)) {
+				cell.hasLife = true
+			}
+			return cell
+		})
 	}
 	
-	this.drawCells = () => {
-		let {
-			drawCells,
-			cells
-		} = this.state 
-	
-		if(drawCells) {
-			background("black")
-			for (let index = 0; index < cells.length; index++) {
-				let cell = cells[index];
-				cell.draw()
-			}
-			this.state.drawCells = false
+	const drawCells = () => {
+		background("black")
+		for (let index = 0; index < this.state.cells.length; index++) {
+			this.state.cells[index].draw()
 		}
 	}
 
+	const identifyLivingNeighbors = () => {
+		this.state.cells.forEach(cell => {
+			cell.countLivingNeighbors(this.state)
+		})
+	}
+
 	this.lifeHappens = () => {
+		console.log('hit')
 		//THE RULES
 		// Any cell with less than two neighbors dies
 		// Any live cell with more than three live neighbours dies 
 		// Any live cell with two or three live neighbours lives, unchanged, to the next generation
 		// Any dead cell with exactly three live neighbours will come to life
 		
-		let {
-			framesCounted,
-			lifeSpeed,
-			livingLife,
-			cells,
-			gridSize
-		} = this.state
-	
-		this.state.framesCounted ++
-	
-		if(framesCounted >= lifeSpeed && livingLife) {
-			framesCounted = 0
-	
-			for (let index = 0; index < cells.length; index++) {
-				const cell = cells[index]
-				let { numOfAliveNeighbors, arrayOfNeightbors } = cell.countLivingNeighbors(cells, gridSize)
-	
+		identifyLivingNeighbors()
+
+		setState({
+			cells: this.state.cells.map(cell => {
+
 				if(cell.hasLife) {
-					if(numOfAliveNeighbors < 2 || numOfAliveNeighbors > 3) {
+					if(cell.numOfAliveNeighbors < 2 || cell.numOfAliveNeighbors > 3) {
 						cell.hasLife = false
 					} else if (cell.age > 0.1) {
 						cell.age -= 0.1
 						cell.age = cell.age.toFixed(1)
 					}
 				} else {
-					console.log(index, numOfAliveNeighbors, arrayOfNeightbors)
-					if(numOfAliveNeighbors === 3) {
+					if(cell.numOfAliveNeighbors === 3) {
 						cell.hasLife = true
 						cell.age = 1
 					}
 				}
-			}
 	
-			this.state.livingLife = false
-		}
+				return cell
+			})
+		})
+
+		drawCells()
 	}
 
 	this.handleMouseControls = () => {
-		for (let index = 0; index < this.state.cells.length; index++) {
-			let cell = this.state.cells[index];
-			// cell.isMouseOverCell = isMouseOverCell(cell)
-			if(cell.isMouseOverCell() && mouseIsPressed) {
-				this.test(index)
-				cell.hasLife = true
-			}
-		}
+		setState({
+			cells: this.state.cells.map((cell, index) => {
+				if(cell.isMouseOverCell() && mouseIsPressed) {
+					this.test(index)
+					cell.hasLife = true
+				}
+				
+				return cell
+			})
+		})
 	}
 
 	this.test = (testIndex) => {
@@ -124,17 +127,20 @@ function GameOfLife() {
 		cell.hasLife = true
 		cell.draw()
 
-		let { numOfAliveNeighbors, arrayOfNeightbors } = cell.countLivingNeighbors(this.state.cells, this.state.gridSize)
+		identifyLivingNeighbors(this.state)
 	
-		arrayOfNeightbors.forEach((cell) => {
+		cell.arrayOfNeightbors.forEach((cell) => {
 			if(cell) {
 				cell.draw(true)
 			}
 		})
 	}
-}
 
-let gameOfLife
+	createGrid()
+	// startLife(1)
+	drawCells()
+	setInterval(this.lifeHappens, this.state.lifeSpeed)
+}
 
 function Cell(index, size, position, gridPosition) {
 	this.index = index
@@ -164,25 +170,25 @@ function Cell(index, size, position, gridPosition) {
 		text(this.index, this.position.x, this.position.y + this.size)
 	}
 
-	this.countLivingNeighbors = (potentialNeighbors, gridSize) => {
-	
+	this.countLivingNeighbors = ({ cells, gridSize }) => {
+
 		const onTopOfGrid = this.gridPosition.y === 1
 		const onBottomOfGrid = this.gridPosition.y === gridSize
 		const onLeftOfGrid = this.gridPosition.x === 1
 		const onRightOfGrid = this.gridPosition.x === gridSize
 	
-		const right = !onRightOfGrid ? potentialNeighbors[this.index + 1] : undefined
-		const left = !onLeftOfGrid ? potentialNeighbors[this.index - 1] : undefined
+		const right = !onRightOfGrid ? this.index + 1 : undefined
+		const left = !onLeftOfGrid ? this.index - 1 : undefined
 	
-		const topMiddle = !onTopOfGrid ? potentialNeighbors[this.index - gridSize] : undefined
-		const topRight = !onTopOfGrid && !onRightOfGrid ? potentialNeighbors[(this.index - gridSize) + 1] : undefined
-		const topLeft = !onTopOfGrid && !onLeftOfGrid ? potentialNeighbors[(this.index - gridSize) - 1] : undefined
+		const topMiddle = !onTopOfGrid ? this.index - gridSize : undefined
+		const topRight = !onTopOfGrid && !onRightOfGrid ? (this.index - gridSize) + 1 : undefined
+		const topLeft = !onTopOfGrid && !onLeftOfGrid ? (this.index - gridSize) - 1 : undefined
 	
-		const bottomMiddle = !onBottomOfGrid ? potentialNeighbors[(this.index + gridSize)] : undefined
-		const bottomRight = !onBottomOfGrid && !onRightOfGrid ? potentialNeighbors[(this.index + gridSize) + 1] : undefined
-		const bottomLeft = !onBottomOfGrid && !onLeftOfGrid ? potentialNeighbors[(this.index + gridSize) - 1] : undefined
+		const bottomMiddle = !onBottomOfGrid ? (this.index + gridSize) : undefined
+		const bottomRight = !onBottomOfGrid && !onRightOfGrid ? (this.index + gridSize) + 1 : undefined
+		const bottomLeft = !onBottomOfGrid && !onLeftOfGrid ? (this.index + gridSize) - 1 : undefined
 	
-		const arrayOfNeightbors = [ 
+		const neighborIndexs = [ 
 			left,
 			right,
 			topMiddle,
@@ -194,14 +200,24 @@ function Cell(index, size, position, gridPosition) {
 		]
 	
 		let numOfAliveNeighbors = 0
-	
-		arrayOfNeightbors.forEach(cell => {
+		
+		// console.log('\n -------- \n')
+		// console.log(this.index, this.hasLife)
+		const arrayOfNeightbors = neighborIndexs.map(neighborsIndex => {
+			const cell = cells[neighborsIndex]
+			// console.log(cell)
 			if(cell && cell.hasLife) {
 				numOfAliveNeighbors++
 			}
+			
+			return cell
 		})
-	
-		return { arrayOfNeightbors, numOfAliveNeighbors }
+		
+		// console.log(numOfAliveNeighbors, arrayOfNeightbors)
+		// console.log('\n -------- \n')
+
+		this.numOfAliveNeighbors = numOfAliveNeighbors
+		this.arrayOfNeightbors = arrayOfNeightbors
 	}
 
 	this.isMouseOverCell = () => {
@@ -230,31 +246,15 @@ function setup () {
 	noStroke()
 
 	gameOfLife = new GameOfLife()
-	gameOfLife.createGrid()
-	gameOfLife.startLife(1)
 }
 
 function draw () {
-	const {
-		handleMouseControls,
-		drawCells,
-		lifeHappens
-	} = gameOfLife
-
-	console.log('living life', gameOfLife.state.livingLife)
-	
-	handleMouseControls()
-	drawCells()
-	lifeHappens()
+	gameOfLife.handleMouseControls()
 }
 
 function keyPressed() {
-	if(key == 'p') {
-		gameOfLife.state.livingLife = !gameOfLife.state.livingLife
-		gameOfLife.state.drawCells = !gameOfLife.state.drawCells
-	}
 	if(key == 'd') {
-		gameOfLife.state.drawCells = !gameOfLife.state.drawCells
+		console.log("piiinnkkk")
 	}
 }
 

@@ -7,16 +7,15 @@
     body {
       margin: 0;
       padding: 0;
-      background: #0d0d0d;
-      color: #f0f0f0;
+      background: #181818;
+      color: #A8A8A8;
       font-family: "Helvetica Neue", sans-serif;
     }
 
     header {
       padding: 2rem 0;
       text-align: center;
-      background: #111;
-      border-bottom: 1px solid #222;
+      background: #181818;
     }
 
     h1 {
@@ -26,37 +25,33 @@
     }
 
     .grid {
+      border-top: 1px solid #4C4C4C;
+
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 1.5rem;
       padding: 3rem;
-      max-width: 960px;
+      width: 50%;
       margin: auto;
     }
 
     .card {
-      background: #1a1a1a;
-      padding: 1.5rem;
-      border-radius: 8px;
-      text-align: center;
-      transition: background 0.3s;
+      width: 100px;
+      height: 100px;
+      padding: 20px;
+      background: #181818;
+      border: 1px solid #DBDBDB;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
     }
 
     .card:hover {
-      background: #222;
+      border: 2px dotted #DBDBDB;
     }
 
-    .card a {
-      text-decoration: none;
-      color: #66ccff;
-      font-size: 1.1rem;
-      font-weight: bold;
-      letter-spacing: 0.5px;
-    }
-
-    .card a:hover {
-      text-decoration: underline;
-    }
   </style>
 </head>
 <body>
@@ -64,17 +59,9 @@
     <h1>Generative Art Gallery</h1>
   </header>
   <section class="grid">
-    <div class="card"><a href="GameOfLife/index.html">GameOfLife</a></div>
-    <!-- <div class="card"><a href="CrazySquare/index.html">CrazySquare</a></div>
-    <div class="card"><a href="CurvesBaby/index.html">CurvesBaby</a></div>
-    <div class="card"><a href="ExpansiveDots/index.html">ExpansiveDots</a></div>
-    <div class="card"><a href="FillTheGaps/index.html">FillTheGaps</a></div>
-    <div class="card"><a href="FireFlies/index.html">FireFlies</a></div>
-    <div class="card"><a href="NeedyCircles/index.html">NeedyCircles</a></div>
-    <div class="card"><a href="PlanetsBaby/index.html">PlanetsBaby</a></div>
-    <div class="card"><a href="PrettyDotsAndLine/index.html">PrettyDotsAndLine</a></div>
-    <div class="card"><a href="SimpleWorld/index.html">SimpleWorld</a></div>
-    <div class="card"><a href="StrangeCircles/index.html">StrangeCircles</a></div> -->
+    <div class="card" onclick="location.href='GameOfLife/index.html'">
+      Game of Life
+    </div>
   </section>
 </body>
 </html>

@@ -5,7 +5,7 @@ const defaultGameState = {
   cells: [],
   cellSize: 20,
   framesCounted: 0,
-  gridSize: 60,
+  gridSize: 50,
   lifeSpeed: 100,
   livingLife: true
 };
@@ -14,9 +14,12 @@ function GameOfLife( state = defaultGameState ) {
   this.state = state;
 
   const createGrid = () => {
+    const startingX = windowWidth * 0.3;
+    const startingY = windowHeight * 0.05;
+
     const position = {
-      x: 0,
-      y: 0
+      x: startingX,
+      y: startingY
     };
     const gridPosition = {
       x: 1,
@@ -39,7 +42,7 @@ function GameOfLife( state = defaultGameState ) {
         gridPosition.x ++;
       } else {
         position.y += cellSize;
-        position.x = 0;
+        position.x = startingX;
         gridPosition.y ++;
         gridPosition.x = 1;
       }
@@ -65,7 +68,6 @@ function GameOfLife( state = defaultGameState ) {
   };
 
   const drawCells = () => {
-    background( 'black' );
     for ( let index = 0; index < this.state.cells.length; index++ ) {
       this.state.cells[index].draw();
     }
@@ -158,7 +160,7 @@ function Cell( index, size, position, gridPosition ) {
     if( this.hasLife ) {
       fill( `rgba(0,255,0, ${this.age})` );
     } else {
-      fill( 'black' );
+      fill( '#181818' );
     }
 
     if( test ) {
@@ -246,7 +248,8 @@ function Cell( index, size, position, gridPosition ) {
 function setup() {
 
   createCanvas( windowWidth, windowHeight );
-  noStroke();
+  stroke( 'grey' );
+  // noStroke();
 
   gameOfLife = new GameOfLife();
 }

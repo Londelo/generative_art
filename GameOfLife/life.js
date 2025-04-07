@@ -3,7 +3,7 @@ const defaultGameState = {
   cells: [],
   cellSize: 20,
   framesCounted: 0,
-  lifeSpeed: 100,
+  lifeSpeed: 200,
   livingLife: true
 };
 
@@ -77,12 +77,6 @@ function GameOfLife( state = defaultGameState ) {
     }
   };
 
-  const identifyLivingNeighbors = () => {
-    this.state.cells.forEach( ( cell ) => {
-      cell.countLivingNeighbors( this.state );
-    } );
-  };
-
   const lifeHappens = () => {
     // THE RULES
     // Any cell with less than two neighbors dies
@@ -91,9 +85,9 @@ function GameOfLife( state = defaultGameState ) {
     // Any dead cell with exactly three living neighbors will come to life
 
     if( this.state.livingLife ) {
-      identifyLivingNeighbors();
 
       this.state.cells.map( ( cell ) => {
+        cell.countLivingNeighbors( this.state );
 
         if( cell.hasLife ) {
           if( cell.numOfLivingNeighbors < 2 || cell.numOfLivingNeighbors > 3 ) {
@@ -136,7 +130,10 @@ function GameOfLife( state = defaultGameState ) {
     }
   };
 
-  createGrid();
-  startLife( 300 );
-  setInterval( lifeHappens, this.state.lifeSpeed );
+  this.startLife = () => {
+    createGrid();
+    startLife( 3000 );
+    drawCells();
+    setInterval( lifeHappens, this.state.lifeSpeed );
+  };
 }

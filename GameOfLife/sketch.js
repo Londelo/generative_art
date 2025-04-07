@@ -14,13 +14,14 @@ const createSketch = () => {
 function setup() {
   createSketch();
   gameOfLife = new GameOfLife();
+  gameOfLife.startLife();
 }
 
 function draw() {
-  gameOfLife.onClickLife();
+  // gameOfLife.onClickLife();
 }
 
 function keyPressed() {
-  gameOfLife.onKeyPause();
+  // gameOfLife.onKeyPause();
 }
 

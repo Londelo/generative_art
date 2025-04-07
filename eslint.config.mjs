@@ -63,7 +63,7 @@ const formattingRules = {
     '@stylistic/max-len': [ 'error', { 'code': 200 } ],
     '@stylistic/semi': [ 'error', 'always' ],
     '@stylistic/quotes': [ 'error', 'single' ],
-    '@stylistic/no-extra-parens': 'error',
+    '@stylistic/no-extra-parens': 'off',
     '@stylistic/no-extra-semi': 'error',
     '@stylistic/comma-dangle': [ 'error', 'never' ],
     '@stylistic/arrow-parens': [ 'error', 'always' ],

@@ -1,8 +1,8 @@
+
 const defaultGameState = {
   cells: [],
   cellSize: 20,
   framesCounted: 0,
-  gridSize: 50,
   lifeSpeed: 100,
   livingLife: true
 };
@@ -10,9 +10,17 @@ const defaultGameState = {
 function GameOfLife( state = defaultGameState ) {
   this.state = state;
 
+  const findGridSize = ( targetSize, padding ) => {
+    const { cellSize } = this.state;
+    return Math.floor( targetSize / cellSize ) - padding;
+  };
+
   const createGrid = () => {
-    const startingX = windowWidth * 0.3;
-    const startingY = windowHeight * 0.05;
+    const gridPadding = this.state.cellSize * 1;
+    const startingX = gridPadding;
+    const startingY = gridPadding;
+    const gridHeight = findGridSize( windowHeight, 1 );
+    const gridWidth = findGridSize( windowWidth, 2 );
 
     const position = {
       x: startingX,
@@ -24,17 +32,16 @@ function GameOfLife( state = defaultGameState ) {
     };
     let cellIndex = 0;
     const {
-      gridSize,
       cellSize,
       cells
     } = this.state;
 
-    while( gridPosition.y <= gridSize ) {
+    while( gridPosition.y <= gridHeight ) {
       const newCell = new Cell( cellIndex, cellSize, { ...position }, { ...gridPosition } );
 
       cells.push( newCell );
 
-      if( gridPosition.x < gridSize ) {
+      if( gridPosition.x < gridWidth ) {
         position.x += cellSize;
         gridPosition.x ++;
       } else {

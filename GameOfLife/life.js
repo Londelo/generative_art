@@ -1,26 +1,17 @@
 
-const defaultGameState = {
-  cells: [],
-  cellSize: 20,
-  framesCounted: 0,
-  lifeSpeed: 200,
-  livingLife: true
-};
-
-function GameOfLife( state = defaultGameState ) {
-  this.state = state;
-
-  const findGridSize = ( targetSize, padding ) => {
-    const { cellSize } = this.state;
-    return Math.floor( targetSize / cellSize ) - padding;
+function GameOfLife() {
+  this.state = {
+    cells: [],
+    cellSize: 8,
+    framesCounted: 0,
+    lifeSpeed: 500,
+    livingLife: true,
+    gridSize: 100
   };
 
   const createGrid = () => {
-    const gridPadding = this.state.cellSize * 1;
-    const startingX = gridPadding;
-    const startingY = gridPadding;
-    const gridHeight = findGridSize( windowHeight, 1 );
-    const gridWidth = findGridSize( windowWidth, 2 );
+    const startingX = 0;
+    const startingY = 0;
 
     const position = {
       x: startingX,
@@ -32,16 +23,17 @@ function GameOfLife( state = defaultGameState ) {
     };
     let cellIndex = 0;
     const {
+      gridSize,
       cellSize,
       cells
     } = this.state;
 
-    while( gridPosition.y <= gridHeight ) {
+    while( gridPosition.y <= gridSize ) {
       const newCell = new Cell( cellIndex, cellSize, { ...position }, { ...gridPosition } );
 
       cells.push( newCell );
 
-      if( gridPosition.x < gridWidth ) {
+      if( gridPosition.x < gridSize ) {
         position.x += cellSize;
         gridPosition.x ++;
       } else {
@@ -77,6 +69,12 @@ function GameOfLife( state = defaultGameState ) {
     }
   };
 
+  const identifyLivingNeighbors = () => {
+    this.state.cells.forEach( ( cell ) => {
+      cell.countLivingNeighbors( this.state );
+    } );
+  };
+
   const lifeHappens = () => {
     // THE RULES
     // Any cell with less than two neighbors dies
@@ -85,9 +83,9 @@ function GameOfLife( state = defaultGameState ) {
     // Any dead cell with exactly three living neighbors will come to life
 
     if( this.state.livingLife ) {
+      identifyLivingNeighbors();
 
       this.state.cells.map( ( cell ) => {
-        cell.countLivingNeighbors( this.state );
 
         if( cell.hasLife ) {
           if( cell.numOfLivingNeighbors < 2 || cell.numOfLivingNeighbors > 3 ) {
@@ -132,7 +130,7 @@ function GameOfLife( state = defaultGameState ) {
 
   this.startLife = () => {
     createGrid();
-    startLife( 3000 );
+    startLife( 10000 );
     drawCells();
     setInterval( lifeHappens, this.state.lifeSpeed );
   };

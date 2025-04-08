@@ -6,6 +6,7 @@ const blackColor = '#181818';
 const createSketch = () => {
   push();
   createCanvas( windowWidth, windowHeight );
+  noStroke();
   // background( blackColor );
   // stroke( 'grey' );
   pop();
@@ -18,10 +19,10 @@ function setup() {
 }
 
 function draw() {
-  // gameOfLife.onClickLife();
+  gameOfLife.onClickLife();
 }
 
 function keyPressed() {
-  // gameOfLife.onKeyPause();
+  gameOfLife.onKeyPause();
 }
 

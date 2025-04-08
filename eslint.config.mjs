@@ -3,18 +3,15 @@ import globals from 'globals';
 
 /** @type {import('eslint').Linter.Config[]} */
 
-const basicSettings = {
-  files: [ '**/*.{js,mjs,cjs,.html,.css}' ],
+const basicSettings = {files: [ '**/*.{js,mjs,cjs,.html,.css}' ],
   languageOptions: {globals: {
     ...globals.jest,
     ...globals.commonjs,
     ...globals.node,
     ...globals.browser
-  }}
-};
+  }}};
 
-const basicJsRules = {
-  name: 'basicJsRules',
+const basicJsRules = {name: 'basicJsRules',
   rules: {
     // 🔹 General JavaScript & TypeScript rules
     'no-var': 'error',
@@ -28,10 +25,8 @@ const basicJsRules = {
     'consistent-return': 'off',
     'curly': 'error',
     'dot-notation': 'error',
-    'id-length': [ 'error', {
-      min: 2,
-      exceptions: [ '_', 't', 'x', 'y' ]
-    } ],
+    'id-length': [ 'error', {min: 2,
+      exceptions: [ '_', 't', 'x', 'y' ]} ],
     'max-lines': [ 'error', 200 ],
     'max-depth': [ 'error', 2 ],
     'no-await-in-loop': 'error',
@@ -52,11 +47,9 @@ const basicJsRules = {
     'object-shorthand': 'error',
     'prefer-template': 'error',
     'prefer-arrow-callback': 'error'
-  }
-};
+  }};
 
-const formattingRules = {
-  name: 'formattingRules',
+const formattingRules = {name: 'formattingRules',
   plugins: { '@stylistic': stylistic },
   rules: {
     '@stylistic/indent': [ 'error', 2 ],
@@ -75,28 +68,21 @@ const formattingRules = {
     '@stylistic/function-call-spacing': [ 'error', 'never' ],
     '@stylistic/implicit-arrow-linebreak': [ 'error', 'beside' ],
     '@stylistic/lines-around-comment': [ 'error', { 'beforeBlockComment': true } ],
-    '@stylistic/object-curly-newline': [ 'error', { 'minProperties': 2 } ],
-    '@stylistic/object-property-newline': 'error',
+    '@stylistic/object-curly-newline': [ 'error', { 'minProperties': 4 } ],
+    '@stylistic/object-property-newline': 'off',
     '@stylistic/space-before-blocks': 'error',
     '@stylistic/space-before-function-paren': [ 'error', 'never' ],
     '@stylistic/space-in-parens': [ 'error', 'always' ],
     '@stylistic/space-infix-ops': 'error',
     '@stylistic/spaced-comment': [ 'error', 'always' ],
-    '@stylistic/arrow-spacing': [ 'error', {
-      'before': true,
-      'after': true
-    } ],
-    '@stylistic/array-bracket-spacing': [ 'error', 'always', {
-      objectsInArrays: true,
-      arraysInArrays: true
-    } ]
-  }
-};
+    '@stylistic/arrow-spacing': [ 'error', {'before': true,
+      'after': true} ],
+    '@stylistic/array-bracket-spacing': [ 'error', 'always', {objectsInArrays: true,
+      arraysInArrays: true} ]
+  }};
 
-const customRules = {
-  name: 'customRules',
-  rules: {}
-};
+const customRules = {name: 'customRules',
+  rules: {}};
 
 export default [
   basicSettings,

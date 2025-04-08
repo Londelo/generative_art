@@ -1,96 +1,85 @@
 
-function Cell( index, size, position, gridPosition ) {
-  this.index = index;
-  this.position = position;
-  this.gridPosition = gridPosition;
-  this.size = size;
-  this.hasLife = false;
-  this.age = 1;
+// eslint-disable-next-line complexity
+const getCellsNeighborsIndex = ( { cell, gridSize } ) => {
+  const onTopOfGrid = cell.gridPosition.y === 1;
+  const onBottomOfGrid = cell.gridPosition.y === gridSize;
+  const onLeftOfGrid = cell.gridPosition.x === 1;
+  const onRightOfGrid = cell.gridPosition.x === gridSize;
 
-  this.draw = ( test ) => {
-    push();
+  const right = !onRightOfGrid ? cell.index + 1 : undefined;
+  const left = !onLeftOfGrid ? cell.index - 1 : undefined;
 
-    if( this.hasLife ) {
-      fill( `rgba(0,255,0, ${this.age})` );
-    } else {
-      fill( blackColor );
+  const topMiddle = !onTopOfGrid ? cell.index - gridSize : undefined;
+  const topRight = !onTopOfGrid && !onRightOfGrid ? cell.index - gridSize + 1 : undefined;
+  const topLeft = !onTopOfGrid && !onLeftOfGrid ? cell.index - gridSize - 1 : undefined;
+
+  const bottomMiddle = !onBottomOfGrid ? cell.index + gridSize : undefined;
+  const bottomRight = !onBottomOfGrid && !onRightOfGrid ? cell.index + gridSize + 1 : undefined;
+  const bottomLeft = !onBottomOfGrid && !onLeftOfGrid ? cell.index + gridSize - 1 : undefined;
+
+  return [
+    left,
+    right,
+    topMiddle,
+    topRight,
+    topLeft,
+    bottomMiddle,
+    bottomLeft,
+    bottomRight
+  ];
+};
+
+const countCellsLivingNeighbors = ( { cells, cell, gridSize } ) => {
+
+  const neighborsIndex = getCellsNeighborsIndex( { cell, gridSize } );
+
+  return neighborsIndex.reduce( ( numOfLivingNeighbors, index ) => {
+    const cell = cells[index];
+    if( cell && ( cell.hasLife || cell.justDied ) ) {
+      return numOfLivingNeighbors + 1;
     }
 
-    if( test ) {
-      stroke( 'red' );
-    }
+    return numOfLivingNeighbors;
+  }, 0 );
+};
 
-    square( this.position.x, this.position.y, this.size );
-    pop();
-  };
+const drawCell = ( { cell, isTesting } ) => {
+  push();
 
-  // eslint-disable-next-line complexity
-  const getNeighborsIndex = ( gridSize ) => {
-    const onTopOfGrid = this.gridPosition.y === 1;
-    const onBottomOfGrid = this.gridPosition.y === gridSize;
-    const onLeftOfGrid = this.gridPosition.x === 1;
-    const onRightOfGrid = this.gridPosition.x === gridSize;
+  if( cell.hasLife ) {
+    fill( `rgba(0,255,0, ${cell.age})` );
+  } else {
+    fill( blackColor );
+  }
 
-    const right = !onRightOfGrid ? this.index + 1 : undefined;
-    const left = !onLeftOfGrid ? this.index - 1 : undefined;
+  if( isTesting ) {
+    stroke( 'red' );
+  }
 
-    const topMiddle = !onTopOfGrid ? this.index - gridSize : undefined;
-    const topRight = !onTopOfGrid && !onRightOfGrid ? this.index - gridSize + 1 : undefined;
-    const topLeft = !onTopOfGrid && !onLeftOfGrid ? this.index - gridSize - 1 : undefined;
+  square( cell.position.x, cell.position.y, cell.size );
+  pop();
+};
 
-    const bottomMiddle = !onBottomOfGrid ? this.index + gridSize : undefined;
-    const bottomRight = !onBottomOfGrid && !onRightOfGrid ? this.index + gridSize + 1 : undefined;
-    const bottomLeft = !onBottomOfGrid && !onLeftOfGrid ? this.index + gridSize - 1 : undefined;
+const isMouseOverCell = ( cell ) => {
+  const { position: { x: cellX, y: cellY }, size } = cell;
 
-    return [
-      left,
-      right,
-      topMiddle,
-      topRight,
-      topLeft,
-      bottomMiddle,
-      bottomLeft,
-      bottomRight
-    ];
-  };
+  const inXRange = mouseX > cellX && mouseX < cellX + size;
+  const inYRange = mouseY > cellY && mouseY < cellY + size;
 
-  this.countLivingNeighbors = ( {
-    cells, gridSize
-  } ) => {
+  if( inXRange && inYRange ) {
+    return true;
+  }
 
-    const neighborsIndex = getNeighborsIndex( gridSize );
+  return false;
+};
 
-    let numOfLivingNeighbors = 0;
-
-    const arrayOfNeighbors = neighborsIndex.map( ( index ) => {
-      const cell = cells[index];
-      if( cell && cell.hasLife ) {
-        numOfLivingNeighbors++;
-      }
-
-      return cell;
-    } );
-
-    this.numOfLivingNeighbors = numOfLivingNeighbors;
-    this.arrayOfNeighbors = arrayOfNeighbors;
-  };
-
-  this.isMouseOverCell = () => {
-    const {
-      position: {
-        x: cellX,
-        y: cellY
-      },
-      size
-    } = this;
-
-    const inXRange = mouseX > cellX && mouseX < cellX + size;
-    const inYRange = mouseY > cellY && mouseY < cellY + size;
-
-    if( inXRange && inYRange ) {
-      return true;
-    }
-
-    return false;
+function createCell( index, size, position, gridPosition, hasLife = false ) {
+  return {
+    index,
+    position,
+    gridPosition,
+    size,
+    hasLife,
+    age: 1
   };
 }

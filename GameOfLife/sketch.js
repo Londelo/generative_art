@@ -3,8 +3,8 @@
 const gameState = {
   cells: [],
   livingLife: false,
-  cellSize: 5,
-  gridSize: 300,
+  cellSize: 8,
+  gridSize: 150,
   lifeSpeed: 100,
   numOfFirstArrivals: 10000
 };
@@ -55,7 +55,9 @@ const createCells = ( {
   while( gridPosition.y <= gridSize ) {
     const hasLife = theChosenCells.includes( cellIndex );
     const newCell = new createCell( {
-      index: cellIndex, size: cellSize, hasLife,
+      index: cellIndex, size: cellSize,
+      hasLife,
+      status: hasLife ? 'born' : 'dead',
       position: { ...position },
       gridPosition: { ...gridPosition }
     } );

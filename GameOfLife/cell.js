@@ -57,7 +57,10 @@ const setLife = ( cell ) => {
     } else if ( cell.age > 0.1 ) {
       cell.status = 'living';
       cell.age -= 0.1;
-      cell.age = cell.age.toFixed( 1 );
+    } else if ( cell.age <= 0.1 ) {
+      cell.status = 'just died';
+      cell.hasLife = false;
+      cell.age = 1;
     }
   } else {
     if( cell.numOfLivingNeighbors === 3 ) {
@@ -109,7 +112,7 @@ const isMouseOverCell = ( cell ) => {
 };
 
 function createCell( {
-  index, size, position, gridPosition, hasLife = false
+  index, size, position, gridPosition, hasLife = false, status
 } ) {
   return {
     index,
@@ -117,6 +120,7 @@ function createCell( {
     gridPosition,
     size,
     hasLife,
+    status,
     numOfLivingNeighbors: 0,
     age: 1,
     watch: false

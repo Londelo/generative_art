@@ -3,10 +3,10 @@
 const gameState = {
   cells: [],
   livingLife: false,
-  cellSize: 20,
-  gridSize: 10,
-  lifeSpeed: 2000,
-  numOfFirstArrivals: 0
+  cellSize: 5,
+  gridSize: 300,
+  lifeSpeed: 100,
+  numOfFirstArrivals: 10000
 };
 
 const blackColor = '#181818';
@@ -24,14 +24,13 @@ const logTestCell = ( cell ) => {
 const createSketch = () => {
   push();
   createCanvas( windowWidth, windowHeight );
-  // noStroke();
+  noStroke();
   // background( blackColor );
-  stroke( 'grey' );
+  // stroke( 'grey' );
   pop();
 };
 
-const selectTheChosenCells = () => {
-  const { gridSize, numOfFirstArrivals } = gameState;
+const selectTheChosenCells = ( { gridSize, numOfFirstArrivals } ) => {
   const totalCells = gridSize * gridSize;
   const theChosenCells = [];
 
@@ -42,18 +41,19 @@ const selectTheChosenCells = () => {
   return theChosenCells;
 };
 
-const createCells = () => {
-  const { gridSize, cellSize, cells } = gameState;
+const createCells = ( {
+  gridSize, cellSize, cells, numOfFirstArrivals
+} ) => {
 
   const startingX = 0;
   const startingY = 0;
   const position = { x: startingX, y: startingY };
   const gridPosition = { x: 1, y: 1 };
-  const theChosenCells = selectTheChosenCells();
+  const theChosenCells = selectTheChosenCells( { gridSize, numOfFirstArrivals } );
   let cellIndex = 0;
 
   while( gridPosition.y <= gridSize ) {
-    const hasLife = !!theChosenCells[cellIndex];
+    const hasLife = theChosenCells.includes( cellIndex );
     const newCell = new createCell( {
       index: cellIndex, size: cellSize, hasLife,
       position: { ...position },
@@ -97,8 +97,14 @@ const conwaysGame = () => {
 };
 
 function setup() {
+  const {
+    gridSize, cellSize, cells, numOfFirstArrivals
+  } = gameState;
+
   createSketch();
-  createCells();
+  createCells( {
+    gridSize, cellSize, cells, numOfFirstArrivals
+  } );
   setInterval( conwaysGame, gameState.lifeSpeed );
   console.log( 'LIFE STATUS: ', gameState.livingLife );
 }

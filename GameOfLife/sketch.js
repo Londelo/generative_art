@@ -2,7 +2,7 @@
 
 const gameState = {
   cells: [],
-  livingLife: true,
+  livingLife: false,
   cellSize: 20,
   gridSize: 10,
   lifeSpeed: 2000,
@@ -11,12 +11,22 @@ const gameState = {
 
 const blackColor = '#181818';
 
+const logTestCell = ( cell ) => {
+
+  if( !cell.watch ) {
+    return;
+  }
+  const { index, status, numOfLivingNeighbors } = cell;
+  console.log( 'WATCHING', { index, status, numOfLivingNeighbors } );
+  drawCell( { cell, isTesting: true } );
+};
+
 const createSketch = () => {
   push();
   createCanvas( windowWidth, windowHeight );
-  noStroke();
+  // noStroke();
   // background( blackColor );
-  // stroke( 'grey' );
+  stroke( 'grey' );
   pop();
 };
 
@@ -44,9 +54,15 @@ const createCells = () => {
 
   while( gridPosition.y <= gridSize ) {
     const hasLife = !!theChosenCells[cellIndex];
-    const newCell = new createCell( cellIndex, cellSize, hasLife, { ...position }, { ...gridPosition } );
+    const newCell = new createCell( {
+      index: cellIndex, size: cellSize, hasLife,
+      position: { ...position },
+      gridPosition: { ...gridPosition }
+    } );
 
     cells.push( newCell );
+
+    drawCell( { cell: newCell } );
 
     if( gridPosition.x < gridSize ) {
       position.x += cellSize;
@@ -62,61 +78,40 @@ const createCells = () => {
   }
 };
 
-const conwaysGame = ( { cell, cells, gridSize } ) => {
-  // THE RULES
-  // Any live cell with fewer than two live neighbors dies, as if by under population.
-  // Any live cell with two or three live neighbors lives on to the next generation.
-  // Any live cell with more than three live neighbors dies, as if by overpopulation.
-  // Any dead cell with exactly three live neighbors becomes a live cell, as if by reproduction.
-
-
-  // TODO: the big problem here is i need to count all the living neighbors before changing the living state,
-  // but id live to one have one for loop here.
-  const numOfLivingNeighbors = countCellsLivingNeighbors( { cells, cell, gridSize } );
-  if( cell.hasLife ) {
-    if( numOfLivingNeighbors < 2 || numOfLivingNeighbors > 3 ) {
-      console.log( numOfLivingNeighbors, 'just died' );
-      cell.justDied = true; // Maybe this is the solution
-      cell.hasLife = false;
-    } else if ( cell.age > 0.1 ) {
-      console.log( numOfLivingNeighbors, 'aged' );
-      cell.age -= 0.1;
-      cell.age = cell.age.toFixed( 1 );
-    }
-  } else {
-    if( numOfLivingNeighbors === 3 ) {
-      console.log( numOfLivingNeighbors, 'born' );
-      cell.hasLife = true;
-      cell.age = 1;
-    }
-  }
-};
-
-const playTheGame = () => {
+const conwaysGame = () => {
   const { livingLife, cells, gridSize } = gameState;
-  console.log( 'draw start' );
   if( livingLife ) {
+    console.log( 'Life is Happening' );
     for ( let index = 0; index < cells.length; index++ ) {
       const cell = cells[index];
-      conwaysGame( { cell, cells, gridSize } );
+      setLivingNeighborsCount( { cells, cell, gridSize } );
+    }
+
+    for ( let index = 0; index < cells.length; index++ ) {
+      const cell = cells[index];
+      setLife( cell );
       drawCell( { cell } );
+      logTestCell( cell );
     }
   }
-  console.log( 'draw end' );
 };
 
 function setup() {
   createSketch();
   createCells();
-  playTheGame();
-  setInterval( playTheGame, gameState.lifeSpeed );
+  setInterval( conwaysGame, gameState.lifeSpeed );
+  console.log( 'LIFE STATUS: ', gameState.livingLife );
 }
 
 function draw() {
-  // gameOfLife.onClickLife();
+  const { cells } = gameState;
+  onClickGiveLife( cells );
 }
 
 function keyPressed() {
-  // gameOfLife.onKeyPause();
+  const { cells } = gameState;
+
+  onKeyPause( gameState );
+  onKeyWatchCell( cells );
 }
 

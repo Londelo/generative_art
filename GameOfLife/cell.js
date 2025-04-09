@@ -29,18 +29,53 @@ const getCellsNeighborsIndex = ( { cell, gridSize } ) => {
   ];
 };
 
-const countCellsLivingNeighbors = ( { cells, cell, gridSize } ) => {
+const setLivingNeighborsCount = ( { cells, cell, gridSize } ) => {
 
   const neighborsIndex = getCellsNeighborsIndex( { cell, gridSize } );
 
-  return neighborsIndex.reduce( ( numOfLivingNeighbors, index ) => {
-    const cell = cells[index];
-    if( cell && ( cell.hasLife || cell.justDied ) ) {
+  cell.numOfLivingNeighbors = neighborsIndex.reduce( ( numOfLivingNeighbors, index ) => {
+    const neighbor = cells[index];
+    if( neighbor && neighbor.hasLife ) {
       return numOfLivingNeighbors + 1;
     }
 
     return numOfLivingNeighbors;
   }, 0 );
+};
+
+const setLife = ( cell ) => {
+  // THE RULES
+  // Any live cell with fewer than two live neighbors dies, as if by under population.
+  // Any live cell with two or three live neighbors lives on to the next generation.
+  // Any live cell with more than three live neighbors dies, as if by overpopulation.
+  // Any dead cell with exactly three live neighbors becomes a live cell, as if by reproduction.
+
+  if( cell.hasLife ) {
+    if( cell.numOfLivingNeighbors < 2 || cell.numOfLivingNeighbors > 3 ) {
+      cell.status = 'just died';
+      cell.hasLife = false;
+    } else if ( cell.age > 0.1 ) {
+      cell.status = 'living';
+      cell.age -= 0.1;
+      cell.age = cell.age.toFixed( 1 );
+    }
+  } else {
+    if( cell.numOfLivingNeighbors === 3 ) {
+      cell.status = 'born';
+      cell.hasLife = true;
+      cell.age = 1;
+    } else {
+      cell.status = 'dead';
+    }
+  }
+};
+
+const setLifeOn = ( cell ) => {
+  cell.hasLife = true;
+};
+
+const setWatchCell = ( cell ) => {
+  cell.watch = true;
 };
 
 const drawCell = ( { cell, isTesting } ) => {
@@ -73,13 +108,17 @@ const isMouseOverCell = ( cell ) => {
   return false;
 };
 
-function createCell( index, size, position, gridPosition, hasLife = false ) {
+function createCell( {
+  index, size, position, gridPosition, hasLife = false
+} ) {
   return {
     index,
     position,
     gridPosition,
     size,
     hasLife,
-    age: 1
+    numOfLivingNeighbors: 0,
+    age: 1,
+    watch: false
   };
 }

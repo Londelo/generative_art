@@ -1,365 +1,354 @@
 
-let flies = []
-let moving = false
-let v
-let last_position = {}, rotation
-let backgroundColor = "#000D0D"
-function setup () {
-	function makeFireFlies (numOfFlies) {
-		for (let i = 0; i < numOfFlies; i++) {
-			let FireFly = new fireFly
-			flies.push(FireFly)
-		}
-	}
+const flies = [];
+const moving = false;
+let v;
+let last_position = {}, rotation;
+const backgroundColor = '#000D0D';
+function setup() {
+  function makeFireFlies( numOfFlies ) {
+    for ( let i = 0; i < numOfFlies; i++ ) {
+      const FireFly = new fireFly;
+      flies.push( FireFly );
+    }
+  }
 
-	// //find appropriate canvas width
-	// canvas_size = windowWidth < windowHeight ? windowWidth : windowHeight
-	// canvas_size -= 80
+  // //find appropriate canvas width
+  // canvas_size = windowWidth < windowHeight ? windowWidth : windowHeight
+  // canvas_size -= 80
 
-	createCanvas( windowWidth, windowHeight)
+  createCanvas( windowWidth, windowHeight );
 
-	// //set canvas in center
-	// let margin_left = (windowWidth - canvas_size) / 2
-	// $(".p5Canvas").css("margin-left", margin_left)
-	// $(".p5Canvas").css("margin-top", 40)
+  background( backgroundColor );
+  noStroke();
 
-	background(backgroundColor)
-	noStroke()
-
-	makeFireFlies(10)	
+  makeFireFlies( 10 );
 }
 
-function draw () {
+function draw() {
 
-	function makeTargetVisible(target) {
-		fill('purple')
-		ellipse(
-			target.x,
-			target.y,
-			20,
-			20
-		)
-	}
+  function makeTargetVisible( target ) {
+    fill( 'purple' );
+    ellipse(
+      target.x,
+      target.y,
+      20,
+      20
+    );
+  }
 
-	background(backgroundColor)
+  background( backgroundColor );
 
-	fill('white')
-	ellipse(
-		width/2,
-		height/2,
-		10,
-		10
-	)
-	flies.forEach((flie,) => {
+  fill( 'white' );
+  ellipse(
+    width / 2,
+    height / 2,
+    10,
+    10
+  );
+  flies.forEach( ( flie ) => {
 
-		if(mouseIsPressed) {
-			flie.headToMouse()
-		} else {
-			flie.headToRandomSpot()
-		}
+    if( mouseIsPressed ) {
+      flie.headToMouse();
+    } else {
+      flie.headToRandomSpot();
+    }
 
-		// makeTargetVisible({
-		// 	x: flie.the_heading.x,
-		// 	y: flie.the_heading.y
-		// })
-		
-		flie.drawWings()
-		flie.drawHead()
-		flie.drawTail()
-	})
+    // makeTargetVisible({
+    // 	x: flie.the_heading.x,
+    // 	y: flie.the_heading.y
+    // })
 
-	// testing angles of a wing
-	// translate(50, 50);
-	// rotate(rotation)
-	// ellipse(0, 0, 50, 20);
+    flie.drawWings();
+    flie.drawHead();
+    flie.drawTail();
+  } );
+
+  // testing angles of a wing
+  // translate(50, 50);
+  // rotate(rotation)
+  // ellipse(0, 0, 50, 20);
 }
 
 function fireFly() {
 
-	let opacity = .5,
-	headColor = {r:0, g:0, b: 0},
-	bodyColor = {r:0, g:0, b: 0},
-	darkTailColor = {r:0, g:0, b: 0},
-	lightTailColor = {r:242, g:200, b:75},
-	tailColor = darkTailColor,
-	wingColor = {r:200, g:200, b: 200, o: .2}
+  let opacity = .5,
+    headColor = {r:0, g:0, b: 0},
+    bodyColor = {r:0, g:0, b: 0},
+    darkTailColor = {r:0, g:0, b: 0},
+    lightTailColor = {r:242, g:200, b:75},
+    tailColor = darkTailColor,
+    wingColor = {
+      r:200, g:200, b: 200, o: .2
+    };
 
-	this.fly_length = 5
-	this.fly_piece_size = 20
-	this.speed = 2.5
-	
-	this.head_position = {
-		x: random(this.fly_piece_size, windowWidth - this.fly_piece_size),
-		y: random(this.fly_piece_size, windowHeight - this.fly_piece_size)
-	}
+  this.fly_length = 5;
+  this.fly_piece_size = 20;
+  this.speed = 2.5;
 
-	this.fly_pieces = []
-	this.wings = []
+  this.head_position = {x: random( this.fly_piece_size, windowWidth - this.fly_piece_size ),
+    y: random( this.fly_piece_size, windowHeight - this.fly_piece_size )};
 
-	let make = () => {
+  this.fly_pieces = [];
+  this.wings = [];
 
-		for (let i = 0; i < this.fly_length; i++) {
+  const make = () => {
 
-			//the head
-			if(i === 0) {
+    for ( let i = 0; i < this.fly_length; i++ ) {
 
-				this.fly_pieces.push({
-					id: "head",
-					x: Number(this.head_position.x.toFixed(0)),
-					y: Number(this.head_position.y.toFixed(0)),
-					size: this.fly_piece_size
-				})
-			}
-			else if(i === 1) {
+      // the head
+      if( i === 0 ) {
 
-				this.head_position.y += this.fly_piece_size
-				this.fly_piece_size -= (this.fly_piece_size - 7) < 3 ? 0 : 7
+        this.fly_pieces.push( {
+          id: 'head',
+          x: Number( this.head_position.x.toFixed( 0 ) ),
+          y: Number( this.head_position.y.toFixed( 0 ) ),
+          size: this.fly_piece_size
+        } );
+      } else if( i === 1 ) {
 
-				this.fly_pieces.push({
-					id: i,
-					x: Number(this.head_position.x.toFixed(0)),
-					y: Number(this.head_position.y.toFixed(0)),
-					size: this.fly_piece_size
-				})
+        this.head_position.y += this.fly_piece_size;
+        this.fly_piece_size -= ( this.fly_piece_size - 7 ) < 3 ? 0 : 7;
 
-				makeWings()
-			}
-			//the tail
-			else {
+        this.fly_pieces.push( {
+          id: i,
+          x: Number( this.head_position.x.toFixed( 0 ) ),
+          y: Number( this.head_position.y.toFixed( 0 ) ),
+          size: this.fly_piece_size
+        } );
 
-				this.head_position.y += this.fly_piece_size
-				this.fly_piece_size -= (this.fly_piece_size - 7) < 3 ? 0 : 7
+        makeWings();
+      }
+      // the tail
+      else {
 
-				this.fly_pieces.push({
-					id: i,
-					x: Number(this.head_position.x.toFixed(0)),
-					y: Number(this.head_position.y.toFixed(0)),
-					size: this.fly_piece_size})
-			}
-		}
-	}
+        this.head_position.y += this.fly_piece_size;
+        this.fly_piece_size -= ( this.fly_piece_size - 7 ) < 3 ? 0 : 7;
 
-	let makeWings = () => {
-		// I got this from http://bl.ocks.org/bycoffe/3404776
-		let num_wings = 2,
-		width = this.fly_piece_size + 18,
-		height = this.fly_piece_size - 22
-		
-		for (let c = 0; c < num_wings; c++) {
+        this.fly_pieces.push( {
+          id: i,
+          x: Number( this.head_position.x.toFixed( 0 ) ),
+          y: Number( this.head_position.y.toFixed( 0 ) ),
+          size: this.fly_piece_size
+        } );
+      }
+    }
+  };
 
-			this.wings.push({
-				width: width,
-				height: height
-			})
-		}
-	}
+  const makeWings = () => {
+    // I got this from http://bl.ocks.org/bycoffe/3404776
+    const num_wings = 2,
+      width = this.fly_piece_size + 18,
+      height = this.fly_piece_size - 22;
 
-	this.drawWings = () => {
-		//NOW I NEED TO HANDLE IF WE ARE GOING UP AND DOWN
-		//A BIG ANNOYANCE IS THE ROTATION BETWEEN THE TWO WINGS
-		//I MAY BE ABLE TO PERMA SET IT WITH A SEPERATE PUSH AND POP
-		let wingCenter = this.fly_pieces[1],
-		headPosition = this.fly_pieces[0]
+    for ( let c = 0; c < num_wings; c++ ) {
 
-		let wingLocation = {x: wingCenter.x, y:wingCenter.y + (this.wings[0].height - 15)},
-			headingRight = headPosition.x < this.the_heading.x,
-			headingUp = headPosition.y < this.the_heading.y
+      this.wings.push( {width,
+        height} );
+    }
+  };
 
-		if(headingRight) {
-			wingLocation.x = wingLocation.x - 20
-		} else {
-			wingLocation.x = wingLocation.x + 20
-		}
+  this.drawWings = () => {
+    // NOW I NEED TO HANDLE IF WE ARE GOING UP AND DOWN
+    // A BIG ANNOYANCE IS THE ROTATION BETWEEN THE TWO WINGS
+    // I MAY BE ABLE TO PERMA SET IT WITH A SEPERATE PUSH AND POP
+    const wingCenter = this.fly_pieces[1],
+      headPosition = this.fly_pieces[0];
 
-		this.wings.forEach((wing, c) => {
+    const wingLocation = {x: wingCenter.x, y:wingCenter.y + ( this.wings[0].height - 15 )},
+      headingRight = headPosition.x < this.the_heading.x,
+      headingUp = headPosition.y < this.the_heading.y;
 
-			let radius = wingCenter.size + 20,
-			rotation, angle, x, y, rotationAround_wingCenter = 0
+    if( headingRight ) {
+      wingLocation.x = wingLocation.x - 20;
+    } else {
+      wingLocation.x = wingLocation.x + 20;
+    }
 
-			if(c === 0) {
-				if(headingRight) {
-					rotation = -103
-				} else {
-					rotation = 103
-				}
-			} else {
-				if(headingRight) {
-					rotation = -103.3
-					rotationAround_wingCenter = -10
-				} else {
-					rotation = 103.3
-					rotationAround_wingCenter = 10
-				}
-			}
+    this.wings.forEach( ( wing, c ) => {
 
-			angle = (rotationAround_wingCenter) * (Math.PI/180);
+      let radius = wingCenter.size + 20,
+        rotation, angle, x, y, rotationAround_wingCenter = 0;
 
-			x = Math.cos(angle) * (wingLocation.x - wingCenter.x) - Math.sin(angle) * (wingLocation.y - wingCenter.y) + wingCenter.x;
-			y = Math.sin(angle) * (wingLocation.x - wingCenter.x) + Math.cos(angle) * (wingLocation.y - wingCenter.y) + wingCenter.y;
+      if( c === 0 ) {
+        if( headingRight ) {
+          rotation = -103;
+        } else {
+          rotation = 103;
+        }
+      } else {
+        if( headingRight ) {
+          rotation = -103.3;
+          rotationAround_wingCenter = -10;
+        } else {
+          rotation = 103.3;
+          rotationAround_wingCenter = 10;
+        }
+      }
+
+      angle = ( rotationAround_wingCenter ) * ( Math.PI / 180 );
+
+      x = Math.cos( angle ) * ( wingLocation.x - wingCenter.x ) - Math.sin( angle ) * ( wingLocation.y - wingCenter.y ) + wingCenter.x;
+      y = Math.sin( angle ) * ( wingLocation.x - wingCenter.x ) + Math.cos( angle ) * ( wingLocation.y - wingCenter.y ) + wingCenter.y;
 
 
-			push()
-			rectMode(CENTER);
-			translate(x, y);
-			rotate(rotation)
-			fill(`rgba(${wingColor.r},${wingColor.g},${wingColor.b}, ${wingColor.o})`)
-			ellipse(
-				0,
-				0,
-				wing.width,
-				wing.height
-			)
+      push();
+      rectMode( CENTER );
+      translate( x, y );
+      rotate( rotation );
+      fill( `rgba(${wingColor.r},${wingColor.g},${wingColor.b}, ${wingColor.o})` );
+      ellipse(
+        0,
+        0,
+        wing.width,
+        wing.height
+      );
 
-			// if(c === 0) {
-			// 	fill('green')
-			// 	ellipse(
-			// 		0,
-			// 		0,
-			// 		10,
-			// 		10
-			// 	)
-			// } else {
-			// 	fill('red')
-			// 	ellipse(
-			// 		0,
-			// 		0,
-			// 		10,
-			// 		10
-			// 	)
-			// }
-			pop()
-		})
-	}
+      // if(c === 0) {
+      // 	fill('green')
+      // 	ellipse(
+      // 		0,
+      // 		0,
+      // 		10,
+      // 		10
+      // 	)
+      // } else {
+      // 	fill('red')
+      // 	ellipse(
+      // 		0,
+      // 		0,
+      // 		10,
+      // 		10
+      // 	)
+      // }
+      pop();
+    } );
+  };
 
-	this.drawHead = () => {
+  this.drawHead = () => {
 
-		let head = this.fly_pieces[0]
+    const head = this.fly_pieces[0];
 
-		let x1, y1, distance
+    let x1, y1, distance;
 
-		x1 =  this.the_heading.x - head.x
-		y1 = this.the_heading.y - head.y
+    x1 =  this.the_heading.x - head.x;
+    y1 = this.the_heading.y - head.y;
 
-		distance = Math.sqrt(x1*x1 + y1*y1)
-		x1 /= distance
-		y1 /= distance
+    distance = Math.sqrt( x1 * x1 + y1 * y1 );
+    x1 /= distance;
+    y1 /= distance;
 
-		head.x += x1 * this.speed
-		head.y +=	y1 * this.speed
+    head.x += x1 * this.speed;
+    head.y +=	y1 * this.speed;
 
 
-		fill(`rgba(${headColor.r},${headColor.g},${headColor.b}, ${opacity})`)
-		ellipse(
-			head.x,
-			head.y,
-			head.size,
-			head.size
-		)
+    fill( `rgba(${headColor.r},${headColor.g},${headColor.b}, ${opacity})` );
+    ellipse(
+      head.x,
+      head.y,
+      head.size,
+      head.size
+    );
 
-		//if we reach out destination
-		if(distance < 10) {
-			this.random_heading = this.createRandomHeading()
-		}
-	}
+    // if we reach out destination
+    if( distance < 10 ) {
+      this.random_heading = this.createRandomHeading();
+    }
+  };
 
-	this.drawTail = () => {
-		let tailColors = [`rgba(${bodyColor.r},${bodyColor.g},${bodyColor.b}, ${opacity})`, `rgba(${tailColor.r},${tailColor.g},${tailColor.b}, ${opacity})`],
-		colorIndex = 0
+  this.drawTail = () => {
+    let tailColors = [ `rgba(${bodyColor.r},${bodyColor.g},${bodyColor.b}, ${opacity})`, `rgba(${tailColor.r},${tailColor.g},${tailColor.b}, ${opacity})` ],
+      colorIndex = 0;
 
-		this.fly_pieces.forEach((piece, i) => {
-			if(i !== 0) {
+    this.fly_pieces.forEach( ( piece, i ) => {
+      if( i !== 0 ) {
 
-				let x1, y1, distance
+        let x1, y1, distance;
 
-				x1 =  this.fly_pieces[i - 1].x - piece.x
-				y1 = this.fly_pieces[i - 1].y - piece.y
+        x1 =  this.fly_pieces[i - 1].x - piece.x;
+        y1 = this.fly_pieces[i - 1].y - piece.y;
 
-				distance = Math.sqrt(x1*x1 + y1*y1)
+        distance = Math.sqrt( x1 * x1 + y1 * y1 );
 
-				if(distance > this.fly_pieces[i - 1].size + 3) {
+        if( distance > this.fly_pieces[i - 1].size + 3 ) {
 
-					x1 /= distance
-					y1 /= distance
+          x1 /= distance;
+          y1 /= distance;
 
-					piece.x += x1 * this.speed
-					piece.y +=	y1 * this.speed
-				}
+          piece.x += x1 * this.speed;
+          piece.y +=	y1 * this.speed;
+        }
 
-				fill(tailColors[colorIndex])
-				ellipse(
-					piece.x,
-					piece.y,
-					piece.size,
-					piece.size
-				)
+        fill( tailColors[colorIndex] );
+        ellipse(
+          piece.x,
+          piece.y,
+          piece.size,
+          piece.size
+        );
 
-				if(colorIndex !== tailColors.length -1) {
-					colorIndex++
-				}
-			}
-		})
-	}
+        if( colorIndex !== tailColors.length - 1 ) {
+          colorIndex++;
+        }
+      }
+    } );
+  };
 
-	function getRandomLightTimer() {
-		return random(3000, 10000)
-	}
+  function getRandomLightTimer() {
+    return random( 3000, 10000 );
+  }
 
-	function isLightOn_onStart() {
-		let randomNumber = random(0, 10).toFixed(0)
+  function isLightOn_onStart() {
+    const randomNumber = random( 0, 10 ).toFixed( 0 );
 
-		if(randomNumber > 5) {
-			tailColor = lightTailColor
-			return true
-		}
-		
-		return false
-	}
+    if( randomNumber > 5 ) {
+      tailColor = lightTailColor;
+      return true;
+    }
 
-	this.lightTimer = getRandomLightTimer()
-	this.isLightOn = isLightOn_onStart()
+    return false;
+  }
 
-	this.handleLights = () => {
-		setTimeout(() => {
-			this.isLightOn = !this.isLightOn
-			this.lightTimer = getRandomLightTimer()
-			this.handleLights()
-		}, this.lightTimer)
-	}
+  this.lightTimer = getRandomLightTimer();
+  this.isLightOn = isLightOn_onStart();
 
-	this.createRandomHeading = () => {
-		return {
-			x: random(this.fly_piece_size, windowWidth - this.fly_piece_size),
-			y: random(this.fly_piece_size, windowHeight - this.fly_piece_size)
-		}
-	}
+  this.handleLights = () => {
+    setTimeout( () => {
+      this.isLightOn = !this.isLightOn;
+      this.lightTimer = getRandomLightTimer();
+      this.handleLights();
+    }, this.lightTimer );
+  };
 
-	this.random_heading  = this.createRandomHeading()
-	this.the_heading = this.random_heading
+  this.createRandomHeading = () => {
+    return {x: random( this.fly_piece_size, windowWidth - this.fly_piece_size ),
+      y: random( this.fly_piece_size, windowHeight - this.fly_piece_size )};
+  };
 
-	this.headToMouse = () => {
-		this.the_heading = {
-			x: mouseX,
-			y: mouseY
-		}
+  this.random_heading  = this.createRandomHeading();
+  this.the_heading = this.random_heading;
 
-		tailColor = lightTailColor
+  this.headToMouse = () => {
+    this.the_heading = {x: mouseX,
+      y: mouseY};
 
-		this.speed = 5
-	}
+    tailColor = lightTailColor;
 
-	this.headToRandomSpot = () => {
-		this.the_heading = this.random_heading
+    this.speed = 5;
+  };
 
-		if(this.isLightOn) {
-			tailColor = lightTailColor
-		} else {
-			tailColor = darkTailColor
-		}
+  this.headToRandomSpot = () => {
+    this.the_heading = this.random_heading;
 
-		this.speed = 2.5
-	}
+    if( this.isLightOn ) {
+      tailColor = lightTailColor;
+    } else {
+      tailColor = darkTailColor;
+    }
 
-	make()
-	this.handleLights()
+    this.speed = 2.5;
+  };
+
+  make();
+  this.handleLights();
 }
 

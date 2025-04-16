@@ -1,6 +1,6 @@
 
-	let allCurves = [],
-	circles = []
+const allCurves = [],
+  circles = [];
 
 // function preload() {
 //   soundFormats('mp3');
@@ -8,266 +8,258 @@
 // }
 
 
-function setup () {
-	// //find appropriate canvas width
-	// canvas_size = windowWidth < windowHeight ? windowWidth : windowHeight
-	// canvas_size -= 80
+function setup() {
+  // //find appropriate canvas width
+  // canvas_size = windowWidth < windowHeight ? windowWidth : windowHeight
+  // canvas_size -= 80
 
-	createCanvas( windowWidth, windowHeight)
+  createCanvas( windowWidth, windowHeight );
 
-	// //set canvas in center
-	// let margin_left = (windowWidth - canvas_size) / 2
-	// $(".p5Canvas").css("margin-left", margin_left)
-	// $(".p5Canvas").css("margin-top", 40)
+  const num_curves = 1000;
+  for ( let i = 0; i < num_curves; i++ ) {
 
-	let num_curves = 1000
-	for (let i = 0; i < num_curves; i++) {
+    const newCurve = new kurve;
 
-		let newCurve = new kurve
+    if( i === 0 ) {
 
-		if(i === 0) {
+      newCurve.points.x1 = windowWidth / 2;
+      newCurve.points.y1 = windowHeight / 2;
 
-			newCurve.points.x1 = windowWidth/2
-			newCurve.points.y1 = windowHeight/2
+      newCurve.points.x2 = windowWidth / 4;
+      newCurve.points.y2 = windowHeight / 2;
 
-			newCurve.points.x2 = windowWidth/4
-			newCurve.points.y2 = windowHeight/2
+      newCurve.points.x3 = ( windowWidth / 4 ) * 3;
+      newCurve.points.y3 = windowHeight / 2;
 
-			newCurve.points.x3 = (windowWidth/4) * 3
-			newCurve.points.y3 = windowHeight/2
+      newCurve.points.x4 = windowWidth / 2;
+      newCurve.points.y4 = windowHeight / 2;
 
-			newCurve.points.x4 = windowWidth/2
-			newCurve.points.y4 = windowHeight/2
+    } else {
+      newCurve.points.x1 = windowWidth / 2;
+      newCurve.points.y1 = windowHeight / 2;
 
-		}
-		else {
-			newCurve.points.x1 = windowWidth/2
-			newCurve.points.y1 = windowHeight/2
+      newCurve.points.x2 = allCurves[0].points.x2;
+      newCurve.points.y2 = allCurves[0].points.y2;
 
-			newCurve.points.x2 = allCurves[0].points.x2
-			newCurve.points.y2 = allCurves[0].points.y2
+      newCurve.points.x3 = allCurves[0].points.x3;
+      newCurve.points.y3 = allCurves[0].points.y3;
 
-			newCurve.points.x3 = allCurves[0].points.x3
-			newCurve.points.y3 = allCurves[0].points.y3
+      newCurve.points.x4 = windowWidth / 2;
+      newCurve.points.y4 = windowHeight / 2;
+    }
 
-			newCurve.points.x4 = windowWidth/2
-			newCurve.points.y4 = windowHeight/2
-		}
+    allCurves.push( newCurve );
+  }
 
-		allCurves.push(newCurve)
-	}
+  const num_circles = 1;
+  for ( let i = 0; i < num_circles; i++ ) {
+    circleOfDots();
+  }
 
-	let num_circles = 1
-	for (let i = 0; i < num_circles; i++) {
-		circleOfDots()
-	}
-
-	background("#FCC8CD")
+  background( '#FCC8CD' );
 }
 
 
-function draw () {
+function draw() {
 
-	background("black")
+  background( 'black' );
 
-	allCurves.forEach((curve) => {
+  allCurves.forEach( ( curve ) => {
 
-		curve.make()
-		// curve.makeDots()
+    curve.make();
+    // curve.makeDots()
 
-		if(mouseIsPressed) {
-			curve.findDot()
-			// mySound.setVolume(1);
-			// mySound.play()
-		}
+    if( mouseIsPressed ) {
+      curve.findDot();
+      // mySound.setVolume(1);
+      // mySound.play()
+    }
 
-		if(curve.dotsFound.x1) {
-			curve.change(random(50, 300))
-			curve.goDot()
-		}
-	})
+    if( curve.dotsFound.x1 ) {
+      curve.change( random( 50, 300 ) );
+      curve.goDot();
+    }
+  } );
 
 
-	circles.forEach((points) => {
-		points.forEach((point) => {
-			push()
-			stroke(random(10, 300), random(10, 300), random(10, 300))
-			fill(random(10, 300), random(10, 300), random(10, 300))
-			ellipse(point.x, point.y, 1, 1)
-			pop()
-		})
-	})
+  circles.forEach( ( points ) => {
+    points.forEach( ( point ) => {
+      push();
+      stroke( random( 10, 300 ), random( 10, 300 ), random( 10, 300 ) );
+      fill( random( 10, 300 ), random( 10, 300 ), random( 10, 300 ) );
+      ellipse( point.x, point.y, 1, 1 );
+      pop();
+    } );
+  } );
 
 }
 
 
-function kurve () {
+function kurve() {
 
-	this.points = {}
+  this.points = {};
 
-	this.dotsFound = {}
+  this.dotsFound = {};
 
-	this.speed = 3
+  this.speed = 3;
 
-	this.make = () => {
+  this.make = () => {
 
-		noFill()
-		// "#556487"
-		stroke("white");
-		curve(
-			this.points.x1,
-			this.points.y1,
-			this.points.x2,
-			this.points.y2,
-			this.points.x3,
-			this.points.y3,
-			this.points.x4,
-			this.points.y4
-		)
-	}
+    noFill();
+    // "#556487"
+    stroke( 'white' );
+    curve(
+      this.points.x1,
+      this.points.y1,
+      this.points.x2,
+      this.points.y2,
+      this.points.x3,
+      this.points.y3,
+      this.points.x4,
+      this.points.y4
+    );
+  };
 
-	this.makeDots = () => {
+  this.makeDots = () => {
 
-		fill("red")
-		//the curve
-		// ellipse(
-		// 	this.points.x1,
-		// 	this.points.y1,
-		// 	10,
-		// 	10
-		// )
-		// ellipse(
-		// 	this.points.x4,
-		// 	this.points.y4,
-		// 	10,
-		// 	10
-		// )
-		//the ends
-		ellipse(
-			this.points.x2,
-			this.points.y2,
-			10,
-			10
-		)
-		ellipse(
-			this.points.x3,
-			this.points.y3,
-			10,
-			10
-		)
-	}
+    fill( 'red' );
+    // the curve
+    // ellipse(
+    // 	this.points.x1,
+    // 	this.points.y1,
+    // 	10,
+    // 	10
+    // )
+    // ellipse(
+    // 	this.points.x4,
+    // 	this.points.y4,
+    // 	10,
+    // 	10
+    // )
+    // the ends
+    ellipse(
+      this.points.x2,
+      this.points.y2,
+      10,
+      10
+    );
+    ellipse(
+      this.points.x3,
+      this.points.y3,
+      10,
+      10
+    );
+  };
 
-	this.change = (num) => {
+  this.change = ( num ) => {
 
-		this.points.x1 += random(-num, num)
-		this.points.y1 += random(-num, num)
+    this.points.x1 += random( -num, num );
+    this.points.y1 += random( -num, num );
 
-		// this.points.x2 += random(-num, num)
-		// this.points.y2 += random(-num, num)
-		//
-		// this.points.x3 += random(-num, num)
-		// this.points.y3 += random(-num, num)
+    // this.points.x2 += random(-num, num)
+    // this.points.y2 += random(-num, num)
+    //
+    // this.points.x3 += random(-num, num)
+    // this.points.y3 += random(-num, num)
 
-		this.points.x4 += random(-num, num)
-		this.points.y4 += random(-num, num)
-	}
+    this.points.x4 += random( -num, num );
+    this.points.y4 += random( -num, num );
+  };
 
-	this.findDot = () => {
+  this.findDot = () => {
 
-		circles.forEach((points, i) => {
+    circles.forEach( ( points, i ) => {
 
-			if(i === 0) {
-				let dot1 = points[fixedNum(random(0,points.length - 1))],
-						dot2 = points[fixedNum(random(0,points.length - 1))]
-				this.dotsFound.x1 = dot1.x
-				this.dotsFound.y1 = dot1.y
+      if( i === 0 ) {
+        const dot1 = points[fixedNum( random( 0,points.length - 1 ) )],
+          dot2 = points[fixedNum( random( 0,points.length - 1 ) )];
+        this.dotsFound.x1 = dot1.x;
+        this.dotsFound.y1 = dot1.y;
 
-				this.dotsFound.x2 = dot2.x
-				this.dotsFound.y2 = dot2.y
-			}
-		})
-	}
+        this.dotsFound.x2 = dot2.x;
+        this.dotsFound.y2 = dot2.y;
+      }
+    } );
+  };
 
-	this.goDot = () => {
+  this.goDot = () => {
 
-		let direction1 = moveThere(
-			this.points.x2,
-			this.points.y2,
-			this.dotsFound.x1,
-			this.dotsFound.y1,
-			this.speed
-		),
-		direction2 = moveThere(
-			this.points.x3,
-			this.points.y3,
-			this.dotsFound.x2,
-			this.dotsFound.y2,
-			this.speed
-		)
+    const direction1 = moveThere(
+        this.points.x2,
+        this.points.y2,
+        this.dotsFound.x1,
+        this.dotsFound.y1,
+        this.speed
+      ),
+      direction2 = moveThere(
+        this.points.x3,
+        this.points.y3,
+        this.dotsFound.x2,
+        this.dotsFound.y2,
+        this.speed
+      );
 
-		this.points.x2 = direction1.x
+    this.points.x2 = direction1.x;
 
-		this.points.y2 = direction1.y
+    this.points.y2 = direction1.y;
 
-		this.points.x3 = direction2.x
+    this.points.x3 = direction2.x;
 
-		this.points.y3 = direction2.y
-	}
+    this.points.y3 = direction2.y;
+  };
 }
 
 const circleOfDots = () => {
 
-	// I got this from http://bl.ocks.org/bycoffe/3404776
-	 let radius = random(50, 300),
-			 num_points = 360,
-			 angle,
-			 x,
-			 y,
-			 points = []
+  // I got this from http://bl.ocks.org/bycoffe/3404776
+  let radius = random( 50, 300 ),
+    num_points = 360,
+    angle,
+    x,
+    y,
+    points = [];
 
-	 for (let c = 0; c < num_points; c++) {
+  for ( let c = 0; c < num_points; c++ ) {
 
-			angle = (c / (num_points / 2)) * Math.PI; // Calculate the angle at which the element will be placed.
-																						// For a semicircle, we would use (i / num_points) * Math.PI.
-			x = (radius * Math.cos(angle)) + (windowWidth/2); // Calculate the x position of the element.
-			y = (radius * Math.sin(angle)) + (windowHeight/2); // Calculate the y position of the element.
+    angle = ( c / ( num_points / 2 ) ) * Math.PI; // Calculate the angle at which the element will be placed.
+    // For a semicircle, we would use (i / num_points) * Math.PI.
+    x = ( radius * Math.cos( angle ) ) + ( windowWidth / 2 ); // Calculate the x position of the element.
+    y = ( radius * Math.sin( angle ) ) + ( windowHeight / 2 ); // Calculate the y position of the element.
 
-			points.push({
-				x: Number(x.toFixed(0)),
-				y: Number(y.toFixed(0)),
-			})
+    points.push( {x: Number( x.toFixed( 0 ) ),
+      y: Number( y.toFixed( 0 ) )} );
 
-			if(c === num_points - 1) {
-				circles.push([...points])
-			}
-	 }
-}
+    if( c === num_points - 1 ) {
+      circles.push( [ ...points ] );
+    }
+  }
+};
 
-const moveThere = (x, y, x1, y1, speed) => {
+const moveThere = ( x, y, x1, y1, speed ) => {
 
-	let xx, yy, distance
+  let xx, yy, distance;
 
-	xx =  x1 - x
-	yy = y1 - y
+  xx =  x1 - x;
+  yy = y1 - y;
 
-	distance = Math.sqrt(xx*xx + yy*yy)
-	xx /= distance
-	yy /= distance
+  distance = Math.sqrt( xx * xx + yy * yy );
+  xx /= distance;
+  yy /= distance;
 
-	x += xx * speed
-	y +=	yy * speed
+  x += xx * speed;
+  y +=	yy * speed;
 
-	if( distance < 10) {
-		x = x1
-		y = y1
-	}
+  if( distance < 10 ) {
+    x = x1;
+    y = y1;
+  }
 
-	return {x, y}
-}
+  return {x, y};
+};
 
-const fixedNum = (num) => {
-	return Number(num.toFixed(0))
-}
+const fixedNum = ( num ) => {
+  return Number( num.toFixed( 0 ) );
+};
 
 
 

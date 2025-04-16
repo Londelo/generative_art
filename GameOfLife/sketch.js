@@ -1,8 +1,7 @@
 
-
 const gameState = {
   cells: [],
-  livingLife: false,
+  livingLife: true,
   cellSize: 8,
   gridSize: 150,
   lifeSpeed: 100,

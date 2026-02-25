@@ -11,8 +11,8 @@ let lastSpawnTime = 0;
 
 const ANIMATION_DURATION = 1500; // 1.5 seconds
 const RAMP_UP_TIME = 100; // First 100ms slow spawn
-const PHASE1_SPAWN_INTERVAL = 3; // 3ms per particle
-const PHASE2_SPAWN_INTERVAL = 0.3; // 0.3ms per particle
+const PHASE1_SPAWN_INTERVAL = 1; // 1ms per particle
+const PHASE2_SPAWN_INTERVAL = 0.1; // 0.1ms per particle
 
 function setup() {
   const canvas = createCanvas(windowWidth, windowHeight);
@@ -136,7 +136,7 @@ class Particle {
     this.x = x;
     this.y = y;
     this.alpha = 255;
-    this.flickerTime = 1000; // Flicker for 1 second
+    this.flickerTime = 100; // Flicker for 100ms
     this.createdTime = millis();
     this.size = random(3, 6);
   }

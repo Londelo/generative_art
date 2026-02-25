@@ -9,16 +9,10 @@ let animationStartTime;
 let moveSpeed;
 let lastSpawnTime = 0;
 let totalParticlesSpawned = 0;
-let userInteracted = false;
 
-// Audio context for humming sound
+// Audio
 let audioContext;
-let leftOscillator;
-let rightOscillator;
-let leftGain;
-let rightGain;
-let leftPanner;
-let rightPanner;
+let audioInitialized = false;
 
 const ANIMATION_DURATION = 1500; // 1.5 seconds
 const RAMP_UP_TIME = 100; // First 100ms slow spawn
@@ -27,7 +21,6 @@ const PHASE2_SPAWN_INTERVAL = 0.5; // 0.5ms per particle
 const ZONE1_HEIGHT = 100; // 100px zone - 50% chance
 const ZONE2_HEIGHT = 300; // 300px zone - 30% chance
 const ZONE3_HEIGHT = 500; // 500px zone - 15% chance
-// Beyond zone 3: 5% chance
 
 function setup() {
   const canvas = createCanvas( windowWidth, windowHeight );
@@ -41,7 +34,6 @@ function setup() {
   canvas.style( 'pointer-events', 'none' );
 
   // Calculate speed to complete in 1.5 seconds
-  // Need to move half screen width in 1.5 seconds at 60fps
   moveSpeed = ( width / 2 ) / ( ANIMATION_DURATION / 1000 * 60 );
 
   // Initialize squares covering each half
@@ -61,19 +53,21 @@ function setup() {
     active: true
   };
 
-  // Initialize audio context (requires user interaction)
-  audioContext = new ( window.AudioContext || window.webkitAudioContext )();
-
-  // Add click listener to start animation
-  document.addEventListener( 'click', startAnimation, { once: true } );
+  // Setup click listener to start animation with audio
+  setTimeout( () => {
+    canvas.elt.style.pointerEvents = 'auto';
+    canvas.elt.addEventListener( 'click', startAnimation, { once: true } );
+  }, 100 );
 }
 
 function startAnimation() {
-  userInteracted = true;
+  // Reset canvas pointer events
+  document.getElementById( 'p5-overlay' ).style.pointerEvents = 'none';
 
-  // Resume audio context if suspended
-  if ( audioContext && audioContext.state === 'suspended' ) {
-    audioContext.resume();
+  // Initialize audio
+  if ( !audioInitialized ) {
+    audioContext = new ( window.AudioContext || window.webkitAudioContext )();
+    audioInitialized = true;
   }
 
   // Start animation after 500ms
@@ -86,60 +80,58 @@ function startAnimation() {
 }
 
 function startHummingSound() {
+  if ( !audioContext ) return;
+
   // Create two oscillators for stereo humming effect
-  leftOscillator = audioContext.createOscillator();
-  rightOscillator = audioContext.createOscillator();
+  const leftOsc = audioContext.createOscillator();
+  const rightOsc = audioContext.createOscillator();
 
   // Set oscillator type and frequency for deep hum
-  leftOscillator.type = 'sine';
-  rightOscillator.type = 'sine';
-  leftOscillator.frequency.setValueAtTime( 80, audioContext.currentTime ); // Deep hum
-  rightOscillator.frequency.setValueAtTime( 82, audioContext.currentTime ); // Slightly detuned for richness
+  leftOsc.type = 'sine';
+  rightOsc.type = 'sine';
+  leftOsc.frequency.setValueAtTime( 80, audioContext.currentTime );
+  rightOsc.frequency.setValueAtTime( 82, audioContext.currentTime );
 
   // Create gain nodes for volume control
-  leftGain = audioContext.createGain();
-  rightGain = audioContext.createGain();
+  const leftGain = audioContext.createGain();
+  const rightGain = audioContext.createGain();
 
   // Create stereo panners
-  leftPanner = audioContext.createStereoPanner();
-  rightPanner = audioContext.createStereoPanner();
+  const leftPanner = audioContext.createStereoPanner();
+  const rightPanner = audioContext.createStereoPanner();
 
-  // Set initial pan positions (center)
+  // Set initial pan positions
   leftPanner.pan.setValueAtTime( -0.3, audioContext.currentTime );
   rightPanner.pan.setValueAtTime( 0.3, audioContext.currentTime );
 
-  // Set initial volume (fade in)
+  // Volume envelope: fade in, hold, fade out
   leftGain.gain.setValueAtTime( 0, audioContext.currentTime );
   rightGain.gain.setValueAtTime( 0, audioContext.currentTime );
   leftGain.gain.linearRampToValueAtTime( 0.15, audioContext.currentTime + 0.2 );
   rightGain.gain.linearRampToValueAtTime( 0.15, audioContext.currentTime + 0.2 );
-
-  // Fade out near the end
   leftGain.gain.setValueAtTime( 0.15, audioContext.currentTime + 1.3 );
   rightGain.gain.setValueAtTime( 0.15, audioContext.currentTime + 1.3 );
   leftGain.gain.linearRampToValueAtTime( 0, audioContext.currentTime + 1.5 );
   rightGain.gain.linearRampToValueAtTime( 0, audioContext.currentTime + 1.5 );
 
-  // Pan from center to edges as squares move apart
+  // Pan from center to edges
   leftPanner.pan.linearRampToValueAtTime( -1, audioContext.currentTime + 1.5 );
   rightPanner.pan.linearRampToValueAtTime( 1, audioContext.currentTime + 1.5 );
 
-  // Connect nodes: oscillator -> gain -> panner -> destination
-  leftOscillator.connect( leftGain );
+  // Connect audio graph
+  leftOsc.connect( leftGain );
   leftGain.connect( leftPanner );
   leftPanner.connect( audioContext.destination );
 
-  rightOscillator.connect( rightGain );
+  rightOsc.connect( rightGain );
   rightGain.connect( rightPanner );
   rightPanner.connect( audioContext.destination );
 
-  // Start oscillators
-  leftOscillator.start();
-  rightOscillator.start();
-
-  // Stop oscillators after animation completes
-  leftOscillator.stop( audioContext.currentTime + 1.6 );
-  rightOscillator.stop( audioContext.currentTime + 1.6 );
+  // Start and stop
+  leftOsc.start();
+  rightOsc.start();
+  leftOsc.stop( audioContext.currentTime + 1.6 );
+  rightOsc.stop( audioContext.currentTime + 1.6 );
 }
 
 function draw() {
@@ -156,32 +148,30 @@ function draw() {
       spawnInterval = PHASE2_SPAWN_INTERVAL;
     }
 
-    // Calculate how many particles should spawn this frame
+    // Calculate particles to spawn this frame
     const timeSinceLastSpawn = elapsed - lastSpawnTime;
-    // Add slight randomness to spawn timing to break patterns
     const jitteredInterval = spawnInterval * random( 0.8, 1.2 );
     const particlesToSpawn = Math.floor( timeSinceLastSpawn / jitteredInterval );
 
     if ( particlesToSpawn > 0 ) {
       lastSpawnTime += particlesToSpawn * jitteredInterval;
 
-      // Spawn multiple particles per frame
+      // Spawn particles
       for ( let i = 0; i < particlesToSpawn; i++ ) {
         if ( leftSquare.active ) {
           const xOffset = random( -20, 20 );
           const yPos = random( height );
-
-          // Determine which zone the particle is in
           const distanceFromCenter = Math.abs( yPos - height / 2 );
+
           let extendedLife = 100;
-          let extendedChance = 0.05; // Default 5% for outside all zones
+          let extendedChance = 0.05;
 
           if ( distanceFromCenter < ZONE1_HEIGHT / 2 ) {
-            extendedChance = 0.5; // 50% in zone 1
+            extendedChance = 0.5;
           } else if ( distanceFromCenter < ZONE2_HEIGHT / 2 ) {
-            extendedChance = 0.3; // 30% in zone 2
+            extendedChance = 0.3;
           } else if ( distanceFromCenter < ZONE3_HEIGHT / 2 ) {
-            extendedChance = 0.15; // 15% in zone 3
+            extendedChance = 0.15;
           }
 
           if ( random() < extendedChance ) {
@@ -191,21 +181,21 @@ function draw() {
           particles.push( new Particle( leftSquare.x + leftSquare.w + xOffset, yPos, extendedLife ) );
           totalParticlesSpawned++;
         }
+
         if ( rightSquare.active ) {
           const xOffset = random( -20, 20 );
           const yPos = random( height );
-
-          // Determine which zone the particle is in
           const distanceFromCenter = Math.abs( yPos - height / 2 );
+
           let extendedLife = 100;
-          let extendedChance = 0.05; // Default 5% for outside all zones
+          let extendedChance = 0.05;
 
           if ( distanceFromCenter < ZONE1_HEIGHT / 2 ) {
-            extendedChance = 0.5; // 50% in zone 1
+            extendedChance = 0.5;
           } else if ( distanceFromCenter < ZONE2_HEIGHT / 2 ) {
-            extendedChance = 0.3; // 30% in zone 2
+            extendedChance = 0.3;
           } else if ( distanceFromCenter < ZONE3_HEIGHT / 2 ) {
-            extendedChance = 0.15; // 15% in zone 3
+            extendedChance = 0.15;
           }
 
           if ( random() < extendedChance ) {
@@ -221,8 +211,6 @@ function draw() {
     // Move squares apart
     if ( leftSquare.active ) {
       leftSquare.x -= moveSpeed;
-
-      // Check if innermost border reached left edge
       if ( leftSquare.x + leftSquare.w <= 0 ) {
         leftSquare.active = false;
         console.log( 'Left square complete. Total particles spawned:', totalParticlesSpawned );
@@ -231,40 +219,35 @@ function draw() {
 
     if ( rightSquare.active ) {
       rightSquare.x += moveSpeed;
-
-      // Check if innermost border reached right edge
       if ( rightSquare.x >= width ) {
         rightSquare.active = false;
         console.log( 'Right square complete. Total particles spawned:', totalParticlesSpawned );
       }
     }
 
-    // Log when animation is complete
     if ( !leftSquare.active && !rightSquare.active ) {
       console.log( 'Animation complete! Final total particles spawned:', totalParticlesSpawned );
       console.log( 'Particles currently alive:', particles.length );
     }
   }
 
-  // Draw squares with pale sky blue border on innermost edge (only after user clicks)
-  if ( userInteracted ) {
+  // Draw squares
+  noStroke();
+  fill( 27, 42, 65 );
+
+  if ( leftSquare.active ) {
+    rect( leftSquare.x, leftSquare.y, leftSquare.w, leftSquare.h );
+    stroke( 216, 237, 245 );
+    strokeWeight( 2 );
+    line( leftSquare.x + leftSquare.w, 0, leftSquare.x + leftSquare.w, height );
+  }
+
+  if ( rightSquare.active ) {
     noStroke();
-    fill( 27, 42, 65 ); // Deep navy background
-
-    if ( leftSquare.active ) {
-      rect( leftSquare.x, leftSquare.y, leftSquare.w, leftSquare.h );
-      stroke( 216, 237, 245 ); // Pale sky blue
-      strokeWeight( 2 );
-      line( leftSquare.x + leftSquare.w, 0, leftSquare.x + leftSquare.w, height );
-    }
-
-    if ( rightSquare.active ) {
-      noStroke();
-      rect( rightSquare.x, rightSquare.y, rightSquare.w, rightSquare.h );
-      stroke( 216, 237, 245 );
-      strokeWeight( 2 );
-      line( rightSquare.x, 0, rightSquare.x, height );
-    }
+    rect( rightSquare.x, rightSquare.y, rightSquare.w, rightSquare.h );
+    stroke( 216, 237, 245 );
+    strokeWeight( 2 );
+    line( rightSquare.x, 0, rightSquare.x, height );
   }
 
   // Update and draw particles
@@ -276,7 +259,6 @@ function draw() {
       particles.splice( i, 1 );
     }
   }
-
 }
 
 class Particle {
@@ -284,7 +266,7 @@ class Particle {
     this.x = x;
     this.y = y;
     this.alpha = 255;
-    this.flickerTime = flickerTime; // Variable lifespan
+    this.flickerTime = flickerTime;
     this.createdTime = millis();
     this.size = random( 2, 4 );
   }
@@ -293,10 +275,8 @@ class Particle {
     const elapsed = millis() - this.createdTime;
 
     if ( elapsed > this.flickerTime ) {
-      // Start fading after flicker period
       this.alpha -= 25;
     } else {
-      // Flicker effect
       this.alpha = random( 150, 255 );
     }
   }

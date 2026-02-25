@@ -69,18 +69,23 @@ function draw() {
       spawnInterval = PHASE2_SPAWN_INTERVAL; // 0.05 sec per particle
     }
 
-    // Check if it's time to spawn particles
-    if ( elapsed - lastSpawnTime >= spawnInterval ) {
-      lastSpawnTime = elapsed;
+    // Calculate how many particles should spawn this frame
+    const timeSinceLastSpawn = elapsed - lastSpawnTime;
+    const particlesToSpawn = Math.floor( timeSinceLastSpawn / spawnInterval );
 
-      // Spawn particles from both active squares
-      if ( leftSquare.active ) {
-        particles.push( new Particle( leftSquare.x + leftSquare.w, random( height ) ) );
-        totalParticlesSpawned++;
-      }
-      if ( rightSquare.active ) {
-        particles.push( new Particle( rightSquare.x, random( height ) ) );
-        totalParticlesSpawned++;
+    if ( particlesToSpawn > 0 ) {
+      lastSpawnTime += particlesToSpawn * spawnInterval;
+
+      // Spawn multiple particles per frame
+      for ( let i = 0; i < particlesToSpawn; i++ ) {
+        if ( leftSquare.active ) {
+          particles.push( new Particle( leftSquare.x + leftSquare.w, random( height ) ) );
+          totalParticlesSpawned++;
+        }
+        if ( rightSquare.active ) {
+          particles.push( new Particle( rightSquare.x, random( height ) ) );
+          totalParticlesSpawned++;
+        }
       }
     }
 

@@ -9,6 +9,7 @@ let animationStartTime;
 let moveSpeed;
 let lastSpawnTime = 0;
 let totalParticlesSpawned = 0;
+let userInteracted = false;
 
 // Audio context for humming sound
 let audioContext;
@@ -60,6 +61,21 @@ function setup() {
     active: true
   };
 
+  // Initialize audio context (requires user interaction)
+  audioContext = new ( window.AudioContext || window.webkitAudioContext )();
+
+  // Add click listener to start animation
+  document.addEventListener( 'click', startAnimation, { once: true } );
+}
+
+function startAnimation() {
+  userInteracted = true;
+
+  // Resume audio context if suspended
+  if ( audioContext && audioContext.state === 'suspended' ) {
+    audioContext.resume();
+  }
+
   // Start animation after 500ms
   setTimeout( () => {
     animationStarted = true;
@@ -70,9 +86,6 @@ function setup() {
 }
 
 function startHummingSound() {
-  // Create audio context
-  audioContext = new ( window.AudioContext || window.webkitAudioContext )();
-
   // Create two oscillators for stereo humming effect
   leftOscillator = audioContext.createOscillator();
   rightOscillator = audioContext.createOscillator();
@@ -233,23 +246,25 @@ function draw() {
     }
   }
 
-  // Draw squares with pale sky blue border on innermost edge
-  noStroke();
-  fill( 27, 42, 65 ); // Deep navy background
-
-  if ( leftSquare.active ) {
-    rect( leftSquare.x, leftSquare.y, leftSquare.w, leftSquare.h );
-    stroke( 216, 237, 245 ); // Pale sky blue
-    strokeWeight( 2 );
-    line( leftSquare.x + leftSquare.w, 0, leftSquare.x + leftSquare.w, height );
-  }
-
-  if ( rightSquare.active ) {
+  // Draw squares with pale sky blue border on innermost edge (only after user clicks)
+  if ( userInteracted ) {
     noStroke();
-    rect( rightSquare.x, rightSquare.y, rightSquare.w, rightSquare.h );
-    stroke( 216, 237, 245 );
-    strokeWeight( 2 );
-    line( rightSquare.x, 0, rightSquare.x, height );
+    fill( 27, 42, 65 ); // Deep navy background
+
+    if ( leftSquare.active ) {
+      rect( leftSquare.x, leftSquare.y, leftSquare.w, leftSquare.h );
+      stroke( 216, 237, 245 ); // Pale sky blue
+      strokeWeight( 2 );
+      line( leftSquare.x + leftSquare.w, 0, leftSquare.x + leftSquare.w, height );
+    }
+
+    if ( rightSquare.active ) {
+      noStroke();
+      rect( rightSquare.x, rightSquare.y, rightSquare.w, rightSquare.h );
+      stroke( 216, 237, 245 );
+      strokeWeight( 2 );
+      line( rightSquare.x, 0, rightSquare.x, height );
+    }
   }
 
   // Update and draw particles

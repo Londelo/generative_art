@@ -136,9 +136,9 @@ class Particle {
     this.x = x;
     this.y = y;
     this.alpha = 255;
-    this.flickerTime = 30; // Flicker for 30ms
+    this.flickerTime = 250; // Flicker for 250ms
     this.createdTime = millis();
-    this.size = random( 3, 6 );
+    this.size = random( 2, 4 );
   }
 
   update() {
@@ -154,9 +154,9 @@ class Particle {
   }
 
   display() {
-    noStroke();
-    fill( 216, 237, 245, this.alpha );
-    circle( this.x, this.y, this.size );
+    stroke( 216, 237, 245, this.alpha );
+    strokeWeight( this.size );
+    point( this.x, this.y );
   }
 
   isDead() {

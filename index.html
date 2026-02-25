@@ -72,9 +72,34 @@
       background: #254359;
     }
 
+    #reverse-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 60px;
+      height: 60px;
+      background: rgba(216, 237, 245, 0.1);
+      border: 2px solid #D8EEF5;
+      border-radius: 50%;
+      color: #D8EEF5;
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    #reverse-btn:hover {
+      background: rgba(216, 237, 245, 0.2);
+      transform: scale(1.1);
+    }
+
   </style>
 </head>
 <body>
+  <button id="reverse-btn" onclick="reverseAnimation()">↻</button>
   <header>
     <h1>Generative Art Gallery</h1>
   </header>

@@ -9,6 +9,8 @@ let animationStartTime;
 let moveSpeed;
 let lastSpawnTime = 0;
 let totalParticlesSpawned = 0;
+let isReversing = false;
+let reverseStartTime;
 
 // Audio
 let audioContext;
@@ -148,6 +150,80 @@ function startHummingSound() {
   rightOsc.stop( audioContext.currentTime + 1.6 );
 }
 
+function reverseAnimation() {
+  // Hide button
+  document.getElementById( 'reverse-btn' ).style.display = 'none';
+
+  // Reset squares to edges
+  leftSquare.x = -leftSquare.w;
+  leftSquare.active = true;
+  rightSquare.x = width;
+  rightSquare.active = true;
+
+  // Clear particles
+  particles.length = 0;
+
+  // Start reverse
+  isReversing = true;
+  reverseStartTime = millis();
+
+  // Play reverse sound
+  startReverseSound();
+}
+
+function startReverseSound() {
+  if ( !audioContext ) return;
+
+  const leftOsc = audioContext.createOscillator();
+  const rightOsc = audioContext.createOscillator();
+
+  leftOsc.type = 'sine';
+  rightOsc.type = 'sine';
+
+  // Reverse frequency sweep: high to bass
+  leftOsc.frequency.setValueAtTime( 280, audioContext.currentTime );
+  rightOsc.frequency.setValueAtTime( 282, audioContext.currentTime );
+  leftOsc.frequency.exponentialRampToValueAtTime( 80, audioContext.currentTime + 0.2 );
+  rightOsc.frequency.exponentialRampToValueAtTime( 82, audioContext.currentTime + 0.2 );
+  leftOsc.frequency.setValueAtTime( 80, audioContext.currentTime + 1.3 );
+  rightOsc.frequency.setValueAtTime( 82, audioContext.currentTime + 1.3 );
+  leftOsc.frequency.exponentialRampToValueAtTime( 250, audioContext.currentTime + 1.5 );
+  rightOsc.frequency.exponentialRampToValueAtTime( 252, audioContext.currentTime + 1.5 );
+
+  const leftGain = audioContext.createGain();
+  const rightGain = audioContext.createGain();
+  const leftPanner = audioContext.createStereoPanner();
+  const rightPanner = audioContext.createStereoPanner();
+
+  // Start panned out, move to center
+  leftPanner.pan.setValueAtTime( -1, audioContext.currentTime );
+  rightPanner.pan.setValueAtTime( 1, audioContext.currentTime );
+  leftPanner.pan.linearRampToValueAtTime( -0.3, audioContext.currentTime + 1.5 );
+  rightPanner.pan.linearRampToValueAtTime( 0.3, audioContext.currentTime + 1.5 );
+
+  // Volume fade in, hold, fade out
+  leftGain.gain.setValueAtTime( 0, audioContext.currentTime );
+  rightGain.gain.setValueAtTime( 0, audioContext.currentTime );
+  leftGain.gain.linearRampToValueAtTime( 0.15, audioContext.currentTime + 0.2 );
+  rightGain.gain.linearRampToValueAtTime( 0.15, audioContext.currentTime + 0.2 );
+  leftGain.gain.setValueAtTime( 0.15, audioContext.currentTime + 1.3 );
+  rightGain.gain.setValueAtTime( 0.15, audioContext.currentTime + 1.3 );
+  leftGain.gain.exponentialRampToValueAtTime( 0.001, audioContext.currentTime + 1.5 );
+  rightGain.gain.exponentialRampToValueAtTime( 0.001, audioContext.currentTime + 1.5 );
+
+  leftOsc.connect( leftGain );
+  leftGain.connect( leftPanner );
+  leftPanner.connect( audioContext.destination );
+  rightOsc.connect( rightGain );
+  rightGain.connect( rightPanner );
+  rightPanner.connect( audioContext.destination );
+
+  leftOsc.start();
+  rightOsc.start();
+  leftOsc.stop( audioContext.currentTime + 1.6 );
+  rightOsc.stop( audioContext.currentTime + 1.6 );
+}
+
 function draw() {
   clear();
 
@@ -162,12 +238,12 @@ function draw() {
       spawnInterval = PHASE2_SPAWN_INTERVAL;
     }
 
-    // Calculate particles to spawn this frame
+    // Calculate particles to spawn this frame (only during forward animation)
     const timeSinceLastSpawn = elapsed - lastSpawnTime;
     const jitteredInterval = spawnInterval * random( 0.8, 1.2 );
     const particlesToSpawn = Math.floor( timeSinceLastSpawn / jitteredInterval );
 
-    if ( particlesToSpawn > 0 ) {
+    if ( particlesToSpawn > 0 && !isReversing ) {
       lastSpawnTime += particlesToSpawn * jitteredInterval;
 
       // Spawn particles
@@ -242,6 +318,39 @@ function draw() {
     if ( !leftSquare.active && !rightSquare.active ) {
       console.log( 'Animation complete! Final total particles spawned:', totalParticlesSpawned );
       console.log( 'Particles currently alive:', particles.length );
+
+      // Show reverse button
+      document.getElementById( 'reverse-btn' ).style.display = 'flex';
+    }
+  }
+
+  // Handle reverse animation
+  if ( isReversing ) {
+    const elapsed = millis() - reverseStartTime;
+
+    // Move squares back together
+    if ( leftSquare.active ) {
+      leftSquare.x += moveSpeed;
+      if ( leftSquare.x >= 0 ) {
+        leftSquare.x = 0;
+        leftSquare.active = false;
+      }
+    }
+
+    if ( rightSquare.active ) {
+      rightSquare.x -= moveSpeed;
+      if ( rightSquare.x <= width / 2 ) {
+        rightSquare.x = width / 2;
+        rightSquare.active = false;
+      }
+    }
+
+    // Keep squares visible and active when animation completes
+    if ( !leftSquare.active && !rightSquare.active ) {
+      leftSquare.active = true;
+      rightSquare.active = true;
+      isReversing = false;
+      console.log( 'Reverse animation complete. Squares locked in place.' );
     }
   }
 

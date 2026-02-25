@@ -146,7 +146,7 @@ class Particle {
 
     if ( elapsed > this.flickerTime ) {
       // Start fading after flicker period
-      this.alpha -= 5;
+      this.alpha -= 25;
     } else {
       // Flicker effect
       this.alpha = random( 150, 255 );

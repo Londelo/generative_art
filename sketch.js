@@ -14,6 +14,7 @@ const ANIMATION_DURATION = 1500; // 1.5 seconds
 const RAMP_UP_TIME = 100; // First 100ms slow spawn
 const PHASE1_SPAWN_INTERVAL = 2; // 3ms per particle (~5 per frame per square)
 const PHASE2_SPAWN_INTERVAL = 0.5; // 1.5ms per particle (~10 per frame per square)
+const CENTER_ZONE_HEIGHT = 200; // 200px tall zone in center for special particles
 
 function setup() {
   const canvas = createCanvas( windowWidth, windowHeight );
@@ -83,13 +84,17 @@ function draw() {
         if ( leftSquare.active ) {
           const xOffset = random( -20, 20 );
           const yPos = random( height );
-          particles.push( new Particle( leftSquare.x + leftSquare.w + xOffset, yPos ) );
+          const inCenterZone = yPos > height / 2 - CENTER_ZONE_HEIGHT / 2 && yPos < height / 2 + CENTER_ZONE_HEIGHT / 2;
+          const hasDoubleLife = inCenterZone && random() < 0.3;
+          particles.push( new Particle( leftSquare.x + leftSquare.w + xOffset, yPos, hasDoubleLife ) );
           totalParticlesSpawned++;
         }
         if ( rightSquare.active ) {
           const xOffset = random( -20, 20 );
           const yPos = random( height );
-          particles.push( new Particle( rightSquare.x + xOffset, yPos ) );
+          const inCenterZone = yPos > height / 2 - CENTER_ZONE_HEIGHT / 2 && yPos < height / 2 + CENTER_ZONE_HEIGHT / 2;
+          const hasDoubleLife = inCenterZone && random() < 0.3;
+          particles.push( new Particle( rightSquare.x + xOffset, yPos, hasDoubleLife ) );
           totalParticlesSpawned++;
         }
       }
@@ -154,11 +159,11 @@ function draw() {
 }
 
 class Particle {
-  constructor( x, y ) {
+  constructor( x, y, hasDoubleLife = false ) {
     this.x = x;
     this.y = y;
     this.alpha = 255;
-    this.flickerTime = 100; // Flicker for 250ms
+    this.flickerTime = hasDoubleLife ? 200 : 100; // Double lifespan for center zone particles
     this.createdTime = millis();
     this.size = random( 2, 4 );
   }

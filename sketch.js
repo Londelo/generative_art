@@ -12,8 +12,8 @@ let totalParticlesSpawned = 0;
 
 const ANIMATION_DURATION = 1500; // 1.5 seconds
 const RAMP_UP_TIME = 100; // First 100ms slow spawn
-const PHASE1_SPAWN_INTERVAL = 2; // 3ms per particle (~5 per frame per square)
-const PHASE2_SPAWN_INTERVAL = 0.5; // 1.5ms per particle (~10 per frame per square)
+const PHASE1_SPAWN_INTERVAL = 2; // 2ms per particle
+const PHASE2_SPAWN_INTERVAL = 0.5; // 0.5ms per particle
 const ZONE1_HEIGHT = 100; // 100px zone - 50% chance
 const ZONE2_HEIGHT = 300; // 300px zone - 30% chance
 const ZONE3_HEIGHT = 500; // 500px zone - 15% chance
@@ -68,9 +68,9 @@ function draw() {
     // Determine spawn interval based on phase
     let spawnInterval;
     if ( elapsed < RAMP_UP_TIME ) {
-      spawnInterval = PHASE1_SPAWN_INTERVAL; // 0.1 sec per particle
+      spawnInterval = PHASE1_SPAWN_INTERVAL;
     } else {
-      spawnInterval = PHASE2_SPAWN_INTERVAL; // 0.05 sec per particle
+      spawnInterval = PHASE2_SPAWN_INTERVAL;
     }
 
     // Calculate how many particles should spawn this frame
@@ -111,7 +111,6 @@ function draw() {
         if ( rightSquare.active ) {
           const xOffset = random( -20, 20 );
           const yPos = random( height );
-          const inCenterZone = yPos > height / 2 - CENTER_ZONE_HEIGHT / 2 && yPos < height / 2 + CENTER_ZONE_HEIGHT / 2;
 
           // Determine which zone the particle is in
           const distanceFromCenter = Math.abs( yPos - height / 2 );
@@ -215,7 +214,7 @@ class Particle {
     this.x = x;
     this.y = y;
     this.alpha = 255;
-    this.flickerTime = flickerTime; // Variable lifespan, 100ms normal or 200-1000ms for center zone
+    this.flickerTime = flickerTime; // Variable lifespan
     this.createdTime = millis();
     this.size = random( 2, 4 );
   }

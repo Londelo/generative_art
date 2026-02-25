@@ -5,6 +5,12 @@ let leftSquare;
 let rightSquare;
 let particles = [];
 let animationStarted = false;
+let animationStartTime;
+let moveSpeed;
+
+const ANIMATION_DURATION = 1500; // 1.5 seconds
+const RAMP_UP_TIME = 300; // First 300ms slow spawn
+const TARGET_PARTICLES_PER_SQUARE = 500;
 
 function setup() {
   const canvas = createCanvas(windowWidth, windowHeight);
@@ -16,6 +22,10 @@ function setup() {
   canvas.style('left', '0');
   canvas.style('z-index', '5');
   canvas.style('pointer-events', 'none');
+
+  // Calculate speed to complete in 1.5 seconds
+  // Need to move half screen width in 1.5 seconds at 60fps
+  moveSpeed = (width / 2) / (ANIMATION_DURATION / 1000 * 60);
 
   // Initialize squares covering each half
   leftSquare = {
@@ -37,6 +47,7 @@ function setup() {
   // Start animation after 500ms
   setTimeout(() => {
     animationStarted = true;
+    animationStartTime = millis();
   }, 500);
 }
 
@@ -44,12 +55,25 @@ function draw() {
   clear();
 
   if (animationStarted) {
+    const elapsed = millis() - animationStartTime;
+
+    // Calculate spawn rate with ramp-up
+    let spawnRate;
+    if (elapsed < RAMP_UP_TIME) {
+      // Slow spawn for first 300ms
+      spawnRate = map(elapsed, 0, RAMP_UP_TIME, 0.1, 0.5);
+    } else {
+      // Ramp up aggressively after 300ms
+      const rampProgress = (elapsed - RAMP_UP_TIME) / (ANIMATION_DURATION - RAMP_UP_TIME);
+      spawnRate = map(rampProgress, 0, 1, 0.5, 0.95);
+    }
+
     // Move squares apart
     if (leftSquare.active) {
-      leftSquare.x -= 2;
+      leftSquare.x -= moveSpeed;
 
       // Spawn particles along right edge (innermost border)
-      if (random() < 0.3) {
+      if (random() < spawnRate) {
         particles.push(new Particle(leftSquare.x + leftSquare.w, random(height)));
       }
 
@@ -60,10 +84,10 @@ function draw() {
     }
 
     if (rightSquare.active) {
-      rightSquare.x += 2;
+      rightSquare.x += moveSpeed;
 
       // Spawn particles along left edge (innermost border)
-      if (random() < 0.3) {
+      if (random() < spawnRate) {
         particles.push(new Particle(rightSquare.x, random(height)));
       }
 

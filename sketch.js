@@ -12,8 +12,8 @@ let totalParticlesSpawned = 0;
 
 const ANIMATION_DURATION = 1500; // 1.5 seconds
 const RAMP_UP_TIME = 100; // First 100ms slow spawn
-const PHASE1_SPAWN_INTERVAL = 3; // 3ms per particle (~5 per frame per square)
-const PHASE2_SPAWN_INTERVAL = 1.5; // 1.5ms per particle (~10 per frame per square)
+const PHASE1_SPAWN_INTERVAL = 2; // 3ms per particle (~5 per frame per square)
+const PHASE2_SPAWN_INTERVAL = 0.5; // 1.5ms per particle (~10 per frame per square)
 
 function setup() {
   const canvas = createCanvas( windowWidth, windowHeight );
@@ -71,19 +71,25 @@ function draw() {
 
     // Calculate how many particles should spawn this frame
     const timeSinceLastSpawn = elapsed - lastSpawnTime;
-    const particlesToSpawn = Math.floor( timeSinceLastSpawn / spawnInterval );
+    // Add slight randomness to spawn timing to break patterns
+    const jitteredInterval = spawnInterval * random( 0.8, 1.2 );
+    const particlesToSpawn = Math.floor( timeSinceLastSpawn / jitteredInterval );
 
     if ( particlesToSpawn > 0 ) {
-      lastSpawnTime += particlesToSpawn * spawnInterval;
+      lastSpawnTime += particlesToSpawn * jitteredInterval;
 
       // Spawn multiple particles per frame
       for ( let i = 0; i < particlesToSpawn; i++ ) {
         if ( leftSquare.active ) {
-          particles.push( new Particle( leftSquare.x + leftSquare.w, random( height ) ) );
+          const xOffset = random( -20, 20 );
+          const yPos = random( height );
+          particles.push( new Particle( leftSquare.x + leftSquare.w + xOffset, yPos ) );
           totalParticlesSpawned++;
         }
         if ( rightSquare.active ) {
-          particles.push( new Particle( rightSquare.x, random( height ) ) );
+          const xOffset = random( -20, 20 );
+          const yPos = random( height );
+          particles.push( new Particle( rightSquare.x + xOffset, yPos ) );
           totalParticlesSpawned++;
         }
       }
@@ -152,7 +158,7 @@ class Particle {
     this.x = x;
     this.y = y;
     this.alpha = 255;
-    this.flickerTime = 250; // Flicker for 250ms
+    this.flickerTime = 100; // Flicker for 250ms
     this.createdTime = millis();
     this.size = random( 2, 4 );
   }

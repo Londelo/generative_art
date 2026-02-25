@@ -85,7 +85,14 @@ function draw() {
           const xOffset = random( -20, 20 );
           const yPos = random( height );
           const inCenterZone = yPos > height / 2 - CENTER_ZONE_HEIGHT / 2 && yPos < height / 2 + CENTER_ZONE_HEIGHT / 2;
-          const extendedLife = inCenterZone && random() < 0.5 ? random( 200, 1000 ) : 100;
+
+          let extendedLife = 100;
+          if ( inCenterZone && random() < 0.5 ) {
+            extendedLife = random( 200, 500 );
+          } else if ( !inCenterZone && random() < 0.3 ) {
+            extendedLife = random( 200, 500 );
+          }
+
           particles.push( new Particle( leftSquare.x + leftSquare.w + xOffset, yPos, extendedLife ) );
           totalParticlesSpawned++;
         }
@@ -93,7 +100,14 @@ function draw() {
           const xOffset = random( -20, 20 );
           const yPos = random( height );
           const inCenterZone = yPos > height / 2 - CENTER_ZONE_HEIGHT / 2 && yPos < height / 2 + CENTER_ZONE_HEIGHT / 2;
-          const extendedLife = inCenterZone && random() < 0.5 ? random( 200, 1000 ) : 100;
+
+          let extendedLife = 100;
+          if ( inCenterZone && random() < 0.5 ) {
+            extendedLife = random( 200, 500 );
+          } else if ( !inCenterZone && random() < 0.3 ) {
+            extendedLife = random( 200, 500 );
+          }
+
           particles.push( new Particle( rightSquare.x + xOffset, yPos, extendedLife ) );
           totalParticlesSpawned++;
         }

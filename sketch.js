@@ -89,7 +89,7 @@ function draw() {
           let extendedLife = 100;
           if ( inCenterZone && random() < 0.5 ) {
             extendedLife = random( 200, 500 );
-          } else if ( !inCenterZone && random() < 0.3 ) {
+          } else if ( !inCenterZone && random() < 0.1 ) {
             extendedLife = random( 200, 500 );
           }
 
@@ -104,7 +104,7 @@ function draw() {
           let extendedLife = 100;
           if ( inCenterZone && random() < 0.5 ) {
             extendedLife = random( 200, 500 );
-          } else if ( !inCenterZone && random() < 0.3 ) {
+          } else if ( !inCenterZone && random() < 0.1 ) {
             extendedLife = random( 200, 500 );
           }
 

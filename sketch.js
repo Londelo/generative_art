@@ -99,8 +99,8 @@ function startHummingSound() {
   rightOsc.frequency.exponentialRampToValueAtTime( 82, audioContext.currentTime + 0.3 );
 
   // Hold bass tone
-  leftOsc.frequency.setValueAtTime( 80, audioContext.currentTime + 1.0 );
-  rightOsc.frequency.setValueAtTime( 82, audioContext.currentTime + 1.0 );
+  leftOsc.frequency.setValueAtTime( 80, audioContext.currentTime + 1.3 );
+  rightOsc.frequency.setValueAtTime( 82, audioContext.currentTime + 1.3 );
 
   // Rise back to high tone during fade out
   leftOsc.frequency.exponentialRampToValueAtTime( 280, audioContext.currentTime + 1.5 );
@@ -123,8 +123,8 @@ function startHummingSound() {
   rightGain.gain.setValueAtTime( 0, audioContext.currentTime );
   leftGain.gain.linearRampToValueAtTime( 0.15, audioContext.currentTime + 0.3 );
   rightGain.gain.linearRampToValueAtTime( 0.15, audioContext.currentTime + 0.3 );
-  leftGain.gain.setValueAtTime( 0.15, audioContext.currentTime + 1.0 ); // Hold until fade out starts
-  rightGain.gain.setValueAtTime( 0.15, audioContext.currentTime + 1.0 );
+  leftGain.gain.setValueAtTime( 0.15, audioContext.currentTime + 1.3 ); // Hold until fade out starts
+  rightGain.gain.setValueAtTime( 0.15, audioContext.currentTime + 1.3 );
   leftGain.gain.exponentialRampToValueAtTime( 0.001, audioContext.currentTime + 1.5 ); // Fade out through end
   rightGain.gain.exponentialRampToValueAtTime( 0.001, audioContext.currentTime + 1.5 );
 

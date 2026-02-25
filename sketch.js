@@ -1,30 +1,142 @@
 // P5 overlay sketch for homepage effects
-// Transparent background with layered effects
+// Opening animation with splitting squares and particles
+
+let leftSquare;
+let rightSquare;
+let particles = [];
+let animationStarted = false;
 
 function setup() {
-  const canvas = createCanvas( windowWidth, windowHeight );
-  canvas.parent( document.body );
-  canvas.id( 'p5-overlay' );
+  const canvas = createCanvas(windowWidth, windowHeight);
+  canvas.parent(document.body);
+  canvas.id('p5-overlay');
 
-  // Position canvas as overlay
-  canvas.style( 'position', 'fixed' );
-  canvas.style( 'top', '0' );
-  canvas.style( 'left', '0' );
-  canvas.style( 'z-index', '5' );
-  canvas.style( 'pointer-events', 'none' );
+  canvas.style('position', 'fixed');
+  canvas.style('top', '0');
+  canvas.style('left', '0');
+  canvas.style('z-index', '5');
+  canvas.style('pointer-events', 'none');
+
+  // Initialize squares covering each half
+  leftSquare = {
+    x: 0,
+    y: 0,
+    w: width / 2,
+    h: height,
+    active: true
+  };
+
+  rightSquare = {
+    x: width / 2,
+    y: 0,
+    w: width / 2,
+    h: height,
+    active: true
+  };
+
+  // Start animation after 500ms
+  setTimeout(() => {
+    animationStarted = true;
+  }, 500);
 }
 
 function draw() {
-  // Clear with transparency - this is key for overlay effect
   clear();
 
-  // Example effect - you can replace this with anything
-  // Drawing a subtle moving circle as a placeholder
+  if (animationStarted) {
+    // Move squares apart
+    if (leftSquare.active) {
+      leftSquare.x -= 2;
+
+      // Spawn particles along right edge (innermost border)
+      if (random() < 0.3) {
+        particles.push(new Particle(leftSquare.x + leftSquare.w, random(height)));
+      }
+
+      // Check if innermost border reached left edge
+      if (leftSquare.x + leftSquare.w <= 0) {
+        leftSquare.active = false;
+      }
+    }
+
+    if (rightSquare.active) {
+      rightSquare.x += 2;
+
+      // Spawn particles along left edge (innermost border)
+      if (random() < 0.3) {
+        particles.push(new Particle(rightSquare.x, random(height)));
+      }
+
+      // Check if innermost border reached right edge
+      if (rightSquare.x >= width) {
+        rightSquare.active = false;
+      }
+    }
+  }
+
+  // Draw squares with pale sky blue border on innermost edge
   noStroke();
-  fill( 180, 161, 191, 30 ); // Light purple with transparency
-  circle( mouseX, mouseY, 50 );
+  fill(27, 42, 65); // Deep navy background
+
+  if (leftSquare.active) {
+    rect(leftSquare.x, leftSquare.y, leftSquare.w, leftSquare.h);
+    stroke(216, 237, 245); // Pale sky blue
+    strokeWeight(2);
+    line(leftSquare.x + leftSquare.w, 0, leftSquare.x + leftSquare.w, height);
+  }
+
+  if (rightSquare.active) {
+    noStroke();
+    rect(rightSquare.x, rightSquare.y, rightSquare.w, rightSquare.h);
+    stroke(216, 237, 245);
+    strokeWeight(2);
+    line(rightSquare.x, 0, rightSquare.x, height);
+  }
+
+  // Update and draw particles
+  for (let i = particles.length - 1; i >= 0; i--) {
+    particles[i].update();
+    particles[i].display();
+
+    if (particles[i].isDead()) {
+      particles.splice(i, 1);
+    }
+  }
+}
+
+class Particle {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.alpha = 255;
+    this.flickerTime = 1000; // Flicker for 1 second
+    this.createdTime = millis();
+    this.size = random(3, 6);
+  }
+
+  update() {
+    const elapsed = millis() - this.createdTime;
+
+    if (elapsed > this.flickerTime) {
+      // Start fading after flicker period
+      this.alpha -= 5;
+    } else {
+      // Flicker effect
+      this.alpha = random(150, 255);
+    }
+  }
+
+  display() {
+    noStroke();
+    fill(216, 237, 245, this.alpha);
+    circle(this.x, this.y, this.size);
+  }
+
+  isDead() {
+    return this.alpha <= 0;
+  }
 }
 
 function windowResized() {
-  resizeCanvas( windowWidth, windowHeight );
+  resizeCanvas(windowWidth, windowHeight);
 }

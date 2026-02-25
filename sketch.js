@@ -10,6 +10,15 @@ let moveSpeed;
 let lastSpawnTime = 0;
 let totalParticlesSpawned = 0;
 
+// Audio context for humming sound
+let audioContext;
+let leftOscillator;
+let rightOscillator;
+let leftGain;
+let rightGain;
+let leftPanner;
+let rightPanner;
+
 const ANIMATION_DURATION = 1500; // 1.5 seconds
 const RAMP_UP_TIME = 100; // First 100ms slow spawn
 const PHASE1_SPAWN_INTERVAL = 2; // 2ms per particle
@@ -56,7 +65,68 @@ function setup() {
     animationStarted = true;
     animationStartTime = millis();
     lastSpawnTime = 0;
+    startHummingSound();
   }, 500 );
+}
+
+function startHummingSound() {
+  // Create audio context
+  audioContext = new ( window.AudioContext || window.webkitAudioContext )();
+
+  // Create two oscillators for stereo humming effect
+  leftOscillator = audioContext.createOscillator();
+  rightOscillator = audioContext.createOscillator();
+
+  // Set oscillator type and frequency for deep hum
+  leftOscillator.type = 'sine';
+  rightOscillator.type = 'sine';
+  leftOscillator.frequency.setValueAtTime( 80, audioContext.currentTime ); // Deep hum
+  rightOscillator.frequency.setValueAtTime( 82, audioContext.currentTime ); // Slightly detuned for richness
+
+  // Create gain nodes for volume control
+  leftGain = audioContext.createGain();
+  rightGain = audioContext.createGain();
+
+  // Create stereo panners
+  leftPanner = audioContext.createStereoPanner();
+  rightPanner = audioContext.createStereoPanner();
+
+  // Set initial pan positions (center)
+  leftPanner.pan.setValueAtTime( -0.3, audioContext.currentTime );
+  rightPanner.pan.setValueAtTime( 0.3, audioContext.currentTime );
+
+  // Set initial volume (fade in)
+  leftGain.gain.setValueAtTime( 0, audioContext.currentTime );
+  rightGain.gain.setValueAtTime( 0, audioContext.currentTime );
+  leftGain.gain.linearRampToValueAtTime( 0.15, audioContext.currentTime + 0.2 );
+  rightGain.gain.linearRampToValueAtTime( 0.15, audioContext.currentTime + 0.2 );
+
+  // Fade out near the end
+  leftGain.gain.setValueAtTime( 0.15, audioContext.currentTime + 1.3 );
+  rightGain.gain.setValueAtTime( 0.15, audioContext.currentTime + 1.3 );
+  leftGain.gain.linearRampToValueAtTime( 0, audioContext.currentTime + 1.5 );
+  rightGain.gain.linearRampToValueAtTime( 0, audioContext.currentTime + 1.5 );
+
+  // Pan from center to edges as squares move apart
+  leftPanner.pan.linearRampToValueAtTime( -1, audioContext.currentTime + 1.5 );
+  rightPanner.pan.linearRampToValueAtTime( 1, audioContext.currentTime + 1.5 );
+
+  // Connect nodes: oscillator -> gain -> panner -> destination
+  leftOscillator.connect( leftGain );
+  leftGain.connect( leftPanner );
+  leftPanner.connect( audioContext.destination );
+
+  rightOscillator.connect( rightGain );
+  rightGain.connect( rightPanner );
+  rightPanner.connect( audioContext.destination );
+
+  // Start oscillators
+  leftOscillator.start();
+  rightOscillator.start();
+
+  // Stop oscillators after animation completes
+  leftOscillator.stop( audioContext.currentTime + 1.6 );
+  rightOscillator.stop( audioContext.currentTime + 1.6 );
 }
 
 function draw() {

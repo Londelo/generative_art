@@ -7,10 +7,12 @@ let particles = [];
 let animationStarted = false;
 let animationStartTime;
 let moveSpeed;
+let lastSpawnTime = 0;
 
 const ANIMATION_DURATION = 1500; // 1.5 seconds
 const RAMP_UP_TIME = 300; // First 300ms slow spawn
-const TARGET_PARTICLES_PER_SQUARE = 500;
+const PHASE1_SPAWN_INTERVAL = 100; // 0.1 sec per particle = 100ms
+const PHASE2_SPAWN_INTERVAL = 50; // 0.05 sec per particle = 50ms
 
 function setup() {
   const canvas = createCanvas(windowWidth, windowHeight);
@@ -48,6 +50,7 @@ function setup() {
   setTimeout(() => {
     animationStarted = true;
     animationStartTime = millis();
+    lastSpawnTime = 0;
   }, 500);
 }
 
@@ -57,25 +60,30 @@ function draw() {
   if (animationStarted) {
     const elapsed = millis() - animationStartTime;
 
-    // Calculate spawn rate with ramp-up
-    let spawnRate;
+    // Determine spawn interval based on phase
+    let spawnInterval;
     if (elapsed < RAMP_UP_TIME) {
-      // Slow spawn for first 300ms
-      spawnRate = map(elapsed, 0, RAMP_UP_TIME, 0.1, 0.5);
+      spawnInterval = PHASE1_SPAWN_INTERVAL; // 0.1 sec per particle
     } else {
-      // Ramp up aggressively after 300ms
-      const rampProgress = (elapsed - RAMP_UP_TIME) / (ANIMATION_DURATION - RAMP_UP_TIME);
-      spawnRate = map(rampProgress, 0, 1, 0.5, 0.95);
+      spawnInterval = PHASE2_SPAWN_INTERVAL; // 0.05 sec per particle
+    }
+
+    // Check if it's time to spawn particles
+    if (elapsed - lastSpawnTime >= spawnInterval) {
+      lastSpawnTime = elapsed;
+
+      // Spawn particles from both active squares
+      if (leftSquare.active) {
+        particles.push(new Particle(leftSquare.x + leftSquare.w, random(height)));
+      }
+      if (rightSquare.active) {
+        particles.push(new Particle(rightSquare.x, random(height)));
+      }
     }
 
     // Move squares apart
     if (leftSquare.active) {
       leftSquare.x -= moveSpeed;
-
-      // Spawn particles along right edge (innermost border)
-      if (random() < spawnRate) {
-        particles.push(new Particle(leftSquare.x + leftSquare.w, random(height)));
-      }
 
       // Check if innermost border reached left edge
       if (leftSquare.x + leftSquare.w <= 0) {
@@ -85,11 +93,6 @@ function draw() {
 
     if (rightSquare.active) {
       rightSquare.x += moveSpeed;
-
-      // Spawn particles along left edge (innermost border)
-      if (random() < spawnRate) {
-        particles.push(new Particle(rightSquare.x, random(height)));
-      }
 
       // Check if innermost border reached right edge
       if (rightSquare.x >= width) {

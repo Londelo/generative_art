@@ -8,6 +8,7 @@ let animationStarted = false;
 let animationStartTime;
 let moveSpeed;
 let lastSpawnTime = 0;
+let totalParticlesSpawned = 0;
 
 const ANIMATION_DURATION = 1500; // 1.5 seconds
 const RAMP_UP_TIME = 100; // First 100ms slow spawn
@@ -75,9 +76,11 @@ function draw() {
       // Spawn particles from both active squares
       if ( leftSquare.active ) {
         particles.push( new Particle( leftSquare.x + leftSquare.w, random( height ) ) );
+        totalParticlesSpawned++;
       }
       if ( rightSquare.active ) {
         particles.push( new Particle( rightSquare.x, random( height ) ) );
+        totalParticlesSpawned++;
       }
     }
 
@@ -88,6 +91,7 @@ function draw() {
       // Check if innermost border reached left edge
       if ( leftSquare.x + leftSquare.w <= 0 ) {
         leftSquare.active = false;
+        console.log( 'Left square complete. Total particles spawned:', totalParticlesSpawned );
       }
     }
 
@@ -97,7 +101,14 @@ function draw() {
       // Check if innermost border reached right edge
       if ( rightSquare.x >= width ) {
         rightSquare.active = false;
+        console.log( 'Right square complete. Total particles spawned:', totalParticlesSpawned );
       }
+    }
+
+    // Log when animation is complete
+    if ( !leftSquare.active && !rightSquare.active ) {
+      console.log( 'Animation complete! Final total particles spawned:', totalParticlesSpawned );
+      console.log( 'Particles currently alive:', particles.length );
     }
   }
 

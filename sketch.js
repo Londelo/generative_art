@@ -192,21 +192,6 @@ function draw() {
     }
   }
 
-  // Draw zone indicator lines
-  stroke( 216, 237, 245, 50 ); // Pale sky blue with low opacity
-  strokeWeight( 1 );
-
-  // Zone 1 (100px - 50% chance)
-  line( 0, height / 2 - ZONE1_HEIGHT / 2, width, height / 2 - ZONE1_HEIGHT / 2 );
-  line( 0, height / 2 + ZONE1_HEIGHT / 2, width, height / 2 + ZONE1_HEIGHT / 2 );
-
-  // Zone 2 (300px - 30% chance)
-  line( 0, height / 2 - ZONE2_HEIGHT / 2, width, height / 2 - ZONE2_HEIGHT / 2 );
-  line( 0, height / 2 + ZONE2_HEIGHT / 2, width, height / 2 + ZONE2_HEIGHT / 2 );
-
-  // Zone 3 (500px - 15% chance)
-  line( 0, height / 2 - ZONE3_HEIGHT / 2, width, height / 2 - ZONE3_HEIGHT / 2 );
-  line( 0, height / 2 + ZONE3_HEIGHT / 2, width, height / 2 + ZONE3_HEIGHT / 2 );
 }
 
 class Particle {

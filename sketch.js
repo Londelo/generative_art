@@ -155,10 +155,16 @@ window.reverseAnimation = function() {
   // Hide button
   document.getElementById( 'reverse-btn' ).style.display = 'none';
 
-  // Reset squares to edges
+  // Stop forward animation
+  animationStarted = false;
+
+  // Reset squares to edges (off screen)
   leftSquare.x = -leftSquare.w;
+  leftSquare.y = 0;
   leftSquare.active = true;
+
   rightSquare.x = width;
+  rightSquare.y = 0;
   rightSquare.active = true;
 
   // Clear particles
@@ -228,7 +234,7 @@ function startReverseSound() {
 function draw() {
   clear();
 
-  if ( animationStarted ) {
+  if ( animationStarted && !isReversing ) {
     const elapsed = millis() - animationStartTime;
 
     // Determine spawn interval based on phase

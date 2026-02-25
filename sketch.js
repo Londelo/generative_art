@@ -58,11 +58,19 @@ function setup() {
   // Setup click listener to start animation with audio
   setTimeout( () => {
     canvas.elt.style.pointerEvents = 'auto';
-    canvas.elt.addEventListener( 'click', startAnimation, { once: true } );
+    canvas.elt.addEventListener( 'click', startAnimation );
   }, 100 );
 }
 
+function canStartAnimation() {
+  // Can start if not currently animating
+  return !animationStarted && !isReversing;
+}
+
 function startAnimation() {
+  // Only start if not already animating
+  if ( !canStartAnimation() ) return;
+
   // Reset canvas pointer events
   document.getElementById( 'p5-overlay' ).style.pointerEvents = 'none';
 
@@ -71,6 +79,26 @@ function startAnimation() {
     audioContext = new ( window.AudioContext || window.webkitAudioContext )();
     audioInitialized = true;
   }
+
+  // Reset squares to starting position
+  leftSquare.x = 0;
+  leftSquare.y = 0;
+  leftSquare.w = width / 2;
+  leftSquare.h = height;
+  leftSquare.active = true;
+
+  rightSquare.x = width / 2;
+  rightSquare.y = 0;
+  rightSquare.w = width / 2;
+  rightSquare.h = height;
+  rightSquare.active = true;
+
+  // Clear particles
+  particles.length = 0;
+  totalParticlesSpawned = 0;
+
+  // Hide reverse button if visible
+  document.getElementById( 'reverse-btn' ).style.display = 'none';
 
   // Start animation after 500ms
   setTimeout( () => {
@@ -367,7 +395,10 @@ function draw() {
       document.querySelector( 'header' ).style.pointerEvents = 'none';
       document.querySelector( '.grid' ).style.pointerEvents = 'none';
 
-      console.log( 'Reverse animation complete. Squares locked in place.' );
+      // Enable canvas pointer events for clicking to restart
+      document.getElementById( 'p5-overlay' ).style.pointerEvents = 'auto';
+
+      console.log( 'Reverse animation complete. Click to restart.' );
     }
   }
 

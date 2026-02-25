@@ -104,15 +104,15 @@ function startHummingSound() {
   leftPanner.pan.setValueAtTime( -0.3, audioContext.currentTime );
   rightPanner.pan.setValueAtTime( 0.3, audioContext.currentTime );
 
-  // Volume envelope: fade in, hold, fade out
+  // Volume envelope: fade in, hold, quick fade out in last quarter
   leftGain.gain.setValueAtTime( 0, audioContext.currentTime );
   rightGain.gain.setValueAtTime( 0, audioContext.currentTime );
   leftGain.gain.linearRampToValueAtTime( 0.15, audioContext.currentTime + 0.2 );
   rightGain.gain.linearRampToValueAtTime( 0.15, audioContext.currentTime + 0.2 );
-  leftGain.gain.setValueAtTime( 0.15, audioContext.currentTime + 1.3 );
-  rightGain.gain.setValueAtTime( 0.15, audioContext.currentTime + 1.3 );
-  leftGain.gain.linearRampToValueAtTime( 0, audioContext.currentTime + 1.5 );
-  rightGain.gain.linearRampToValueAtTime( 0, audioContext.currentTime + 1.5 );
+  leftGain.gain.setValueAtTime( 0.15, audioContext.currentTime + 1.125 ); // Hold until last quarter
+  rightGain.gain.setValueAtTime( 0.15, audioContext.currentTime + 1.125 );
+  leftGain.gain.exponentialRampToValueAtTime( 0.001, audioContext.currentTime + 1.5 ); // Quick fade out
+  rightGain.gain.exponentialRampToValueAtTime( 0.001, audioContext.currentTime + 1.5 );
 
   // Pan from center to edges
   leftPanner.pan.linearRampToValueAtTime( -1, audioContext.currentTime + 1.5 );

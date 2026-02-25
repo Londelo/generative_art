@@ -150,7 +150,8 @@ function startHummingSound() {
   rightOsc.stop( audioContext.currentTime + 1.6 );
 }
 
-function reverseAnimation() {
+// Make function available globally for HTML onclick
+window.reverseAnimation = function() {
   // Hide button
   document.getElementById( 'reverse-btn' ).style.display = 'none';
 
@@ -169,7 +170,7 @@ function reverseAnimation() {
 
   // Play reverse sound
   startReverseSound();
-}
+};
 
 function startReverseSound() {
   if ( !audioContext ) return;

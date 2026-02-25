@@ -14,7 +14,10 @@ const ANIMATION_DURATION = 1500; // 1.5 seconds
 const RAMP_UP_TIME = 100; // First 100ms slow spawn
 const PHASE1_SPAWN_INTERVAL = 2; // 3ms per particle (~5 per frame per square)
 const PHASE2_SPAWN_INTERVAL = 0.5; // 1.5ms per particle (~10 per frame per square)
-const CENTER_ZONE_HEIGHT = 200; // 200px tall zone in center for special particles
+const ZONE1_HEIGHT = 100; // 100px zone - 50% chance
+const ZONE2_HEIGHT = 300; // 300px zone - 30% chance
+const ZONE3_HEIGHT = 500; // 500px zone - 15% chance
+// Beyond zone 3: 5% chance
 
 function setup() {
   const canvas = createCanvas( windowWidth, windowHeight );
@@ -84,12 +87,21 @@ function draw() {
         if ( leftSquare.active ) {
           const xOffset = random( -20, 20 );
           const yPos = random( height );
-          const inCenterZone = yPos > height / 2 - CENTER_ZONE_HEIGHT / 2 && yPos < height / 2 + CENTER_ZONE_HEIGHT / 2;
 
+          // Determine which zone the particle is in
+          const distanceFromCenter = Math.abs( yPos - height / 2 );
           let extendedLife = 100;
-          if ( inCenterZone && random() < 0.5 ) {
-            extendedLife = random( 200, 500 );
-          } else if ( !inCenterZone && random() < 0.1 ) {
+          let extendedChance = 0.05; // Default 5% for outside all zones
+
+          if ( distanceFromCenter < ZONE1_HEIGHT / 2 ) {
+            extendedChance = 0.5; // 50% in zone 1
+          } else if ( distanceFromCenter < ZONE2_HEIGHT / 2 ) {
+            extendedChance = 0.3; // 30% in zone 2
+          } else if ( distanceFromCenter < ZONE3_HEIGHT / 2 ) {
+            extendedChance = 0.15; // 15% in zone 3
+          }
+
+          if ( random() < extendedChance ) {
             extendedLife = random( 200, 500 );
           }
 
@@ -101,10 +113,20 @@ function draw() {
           const yPos = random( height );
           const inCenterZone = yPos > height / 2 - CENTER_ZONE_HEIGHT / 2 && yPos < height / 2 + CENTER_ZONE_HEIGHT / 2;
 
+          // Determine which zone the particle is in
+          const distanceFromCenter = Math.abs( yPos - height / 2 );
           let extendedLife = 100;
-          if ( inCenterZone && random() < 0.5 ) {
-            extendedLife = random( 200, 500 );
-          } else if ( !inCenterZone && random() < 0.1 ) {
+          let extendedChance = 0.05; // Default 5% for outside all zones
+
+          if ( distanceFromCenter < ZONE1_HEIGHT / 2 ) {
+            extendedChance = 0.5; // 50% in zone 1
+          } else if ( distanceFromCenter < ZONE2_HEIGHT / 2 ) {
+            extendedChance = 0.3; // 30% in zone 2
+          } else if ( distanceFromCenter < ZONE3_HEIGHT / 2 ) {
+            extendedChance = 0.15; // 15% in zone 3
+          }
+
+          if ( random() < extendedChance ) {
             extendedLife = random( 200, 500 );
           }
 
@@ -171,11 +193,21 @@ function draw() {
     }
   }
 
-  // Draw center zone indicator lines
+  // Draw zone indicator lines
   stroke( 216, 237, 245, 50 ); // Pale sky blue with low opacity
   strokeWeight( 1 );
-  line( 0, height / 2 - CENTER_ZONE_HEIGHT / 2, width, height / 2 - CENTER_ZONE_HEIGHT / 2 );
-  line( 0, height / 2 + CENTER_ZONE_HEIGHT / 2, width, height / 2 + CENTER_ZONE_HEIGHT / 2 );
+
+  // Zone 1 (100px - 50% chance)
+  line( 0, height / 2 - ZONE1_HEIGHT / 2, width, height / 2 - ZONE1_HEIGHT / 2 );
+  line( 0, height / 2 + ZONE1_HEIGHT / 2, width, height / 2 + ZONE1_HEIGHT / 2 );
+
+  // Zone 2 (300px - 30% chance)
+  line( 0, height / 2 - ZONE2_HEIGHT / 2, width, height / 2 - ZONE2_HEIGHT / 2 );
+  line( 0, height / 2 + ZONE2_HEIGHT / 2, width, height / 2 + ZONE2_HEIGHT / 2 );
+
+  // Zone 3 (500px - 15% chance)
+  line( 0, height / 2 - ZONE3_HEIGHT / 2, width, height / 2 - ZONE3_HEIGHT / 2 );
+  line( 0, height / 2 + ZONE3_HEIGHT / 2, width, height / 2 + ZONE3_HEIGHT / 2 );
 }
 
 class Particle {

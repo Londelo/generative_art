@@ -77,6 +77,11 @@ function startAnimation() {
     animationStarted = true;
     animationStartTime = millis();
     lastSpawnTime = 0;
+
+    // Enable pointer events on HTML content during forward animation
+    document.querySelector( 'header' ).style.pointerEvents = 'auto';
+    document.querySelector( '.grid' ).style.pointerEvents = 'auto';
+
     startHummingSound();
   }, 500 );
 }
@@ -336,48 +341,57 @@ function draw() {
     const elapsed = millis() - reverseStartTime;
 
     // Move squares back together
-    if ( leftSquare.active ) {
+    if ( leftSquare.x < 0 ) {
       leftSquare.x += moveSpeed;
       if ( leftSquare.x >= 0 ) {
         leftSquare.x = 0;
-        leftSquare.active = false;
       }
     }
 
-    if ( rightSquare.active ) {
+    if ( rightSquare.x > width / 2 ) {
       rightSquare.x -= moveSpeed;
       if ( rightSquare.x <= width / 2 ) {
         rightSquare.x = width / 2;
-        rightSquare.active = false;
       }
     }
 
-    // Keep squares visible and active when animation completes
-    if ( !leftSquare.active && !rightSquare.active ) {
+    // Complete reverse when both reach center
+    if ( leftSquare.x >= 0 && rightSquare.x <= width / 2 ) {
+      leftSquare.x = 0;
+      rightSquare.x = width / 2;
       leftSquare.active = true;
       rightSquare.active = true;
       isReversing = false;
+
+      // Disable pointer events on HTML content
+      document.querySelector( 'header' ).style.pointerEvents = 'none';
+      document.querySelector( '.grid' ).style.pointerEvents = 'none';
+
       console.log( 'Reverse animation complete. Squares locked in place.' );
     }
   }
 
-  // Draw squares
+  // Draw squares (always draw if active, during animation or when locked in place)
   noStroke();
   fill( 27, 42, 65 );
 
-  if ( leftSquare.active ) {
+  if ( leftSquare.active || isReversing || ( !animationStarted && leftSquare.x >= 0 ) ) {
     rect( leftSquare.x, leftSquare.y, leftSquare.w, leftSquare.h );
-    stroke( 216, 237, 245 );
-    strokeWeight( 2 );
-    line( leftSquare.x + leftSquare.w, 0, leftSquare.x + leftSquare.w, height );
+    if ( leftSquare.x + leftSquare.w > 0 && leftSquare.x + leftSquare.w < width ) {
+      stroke( 216, 237, 245 );
+      strokeWeight( 2 );
+      line( leftSquare.x + leftSquare.w, 0, leftSquare.x + leftSquare.w, height );
+    }
   }
 
-  if ( rightSquare.active ) {
+  if ( rightSquare.active || isReversing || ( !animationStarted && rightSquare.x <= width ) ) {
     noStroke();
     rect( rightSquare.x, rightSquare.y, rightSquare.w, rightSquare.h );
-    stroke( 216, 237, 245 );
-    strokeWeight( 2 );
-    line( rightSquare.x, 0, rightSquare.x, height );
+    if ( rightSquare.x > 0 && rightSquare.x < width ) {
+      stroke( 216, 237, 245 );
+      strokeWeight( 2 );
+      line( rightSquare.x, 0, rightSquare.x, height );
+    }
   }
 
   // Update and draw particles

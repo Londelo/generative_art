@@ -12,8 +12,8 @@ let totalParticlesSpawned = 0;
 
 const ANIMATION_DURATION = 1500; // 1.5 seconds
 const RAMP_UP_TIME = 100; // First 100ms slow spawn
-const PHASE1_SPAWN_INTERVAL = 0.1; // 0.1ms per particle
-const PHASE2_SPAWN_INTERVAL = 0.001; // 0.001ms per particle
+const PHASE1_SPAWN_INTERVAL = 3; // 3ms per particle (~5 per frame per square)
+const PHASE2_SPAWN_INTERVAL = 1.5; // 1.5ms per particle (~10 per frame per square)
 
 function setup() {
   const canvas = createCanvas( windowWidth, windowHeight );

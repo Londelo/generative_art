@@ -252,6 +252,33 @@ const InitialAnimation = (() => {
     }
   }
 
+  // Particle class
+  class Particle {
+    constructor( x, y, flickerTime = 100 ) {
+      this.x = x;
+      this.y = y;
+      this.alpha = 255;
+      this.flickerTime = flickerTime;
+      this.createdTime = millis();
+      this.size = random( 2, 4 );
+    }
+
+    update() {
+      const elapsed = millis() - this.createdTime;
+      this.alpha = elapsed > this.flickerTime ? this.alpha - 25 : random( 150, 255 );
+    }
+
+    display() {
+      stroke( 216, 237, 245, this.alpha );
+      strokeWeight( this.size );
+      point( this.x, this.y );
+    }
+
+    isDead() {
+      return this.alpha <= 0;
+    }
+  }
+
   function draw() {
     clear();
 
@@ -280,33 +307,6 @@ const InitialAnimation = (() => {
 
   return { setup, draw };
 })();
-
-// Particle class
-class Particle {
-  constructor( x, y, flickerTime = 100 ) {
-    this.x = x;
-    this.y = y;
-    this.alpha = 255;
-    this.flickerTime = flickerTime;
-    this.createdTime = millis();
-    this.size = random( 2, 4 );
-  }
-
-  update() {
-    const elapsed = millis() - this.createdTime;
-    this.alpha = elapsed > this.flickerTime ? this.alpha - 25 : random( 150, 255 );
-  }
-
-  display() {
-    stroke( 216, 237, 245, this.alpha );
-    strokeWeight( this.size );
-    point( this.x, this.y );
-  }
-
-  isDead() {
-    return this.alpha <= 0;
-  }
-}
 
 // P5.js lifecycle hooks
 function setup() {

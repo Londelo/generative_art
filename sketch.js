@@ -86,11 +86,25 @@ function startHummingSound() {
   const leftOsc = audioContext.createOscillator();
   const rightOsc = audioContext.createOscillator();
 
-  // Set oscillator type and frequency for deep hum
+  // Set oscillator type and frequency with pitch envelope
   leftOsc.type = 'sine';
   rightOsc.type = 'sine';
-  leftOsc.frequency.setValueAtTime( 80, audioContext.currentTime );
-  rightOsc.frequency.setValueAtTime( 82, audioContext.currentTime );
+
+  // Start high, drop to bass, rise back to high
+  leftOsc.frequency.setValueAtTime( 250, audioContext.currentTime );
+  rightOsc.frequency.setValueAtTime( 252, audioContext.currentTime );
+
+  // Drop to low bass during fade in
+  leftOsc.frequency.exponentialRampToValueAtTime( 80, audioContext.currentTime + 0.3 );
+  rightOsc.frequency.exponentialRampToValueAtTime( 82, audioContext.currentTime + 0.3 );
+
+  // Hold bass tone
+  leftOsc.frequency.setValueAtTime( 80, audioContext.currentTime + 1.0 );
+  rightOsc.frequency.setValueAtTime( 82, audioContext.currentTime + 1.0 );
+
+  // Rise back to high tone during fade out
+  leftOsc.frequency.exponentialRampToValueAtTime( 280, audioContext.currentTime + 1.5 );
+  rightOsc.frequency.exponentialRampToValueAtTime( 282, audioContext.currentTime + 1.5 );
 
   // Create gain nodes for volume control
   const leftGain = audioContext.createGain();
@@ -104,14 +118,14 @@ function startHummingSound() {
   leftPanner.pan.setValueAtTime( -0.3, audioContext.currentTime );
   rightPanner.pan.setValueAtTime( 0.3, audioContext.currentTime );
 
-  // Volume envelope: fade in, hold, quick fade out right at the end
+  // Volume envelope: fade in, hold, fade out through end of animation
   leftGain.gain.setValueAtTime( 0, audioContext.currentTime );
   rightGain.gain.setValueAtTime( 0, audioContext.currentTime );
-  leftGain.gain.linearRampToValueAtTime( 0.15, audioContext.currentTime + 0.2 );
-  rightGain.gain.linearRampToValueAtTime( 0.15, audioContext.currentTime + 0.2 );
-  leftGain.gain.setValueAtTime( 0.15, audioContext.currentTime + 1.35 ); // Hold until very end
-  rightGain.gain.setValueAtTime( 0.15, audioContext.currentTime + 1.35 );
-  leftGain.gain.exponentialRampToValueAtTime( 0.001, audioContext.currentTime + 1.5 ); // Quick fade out in last 150ms
+  leftGain.gain.linearRampToValueAtTime( 0.15, audioContext.currentTime + 0.3 );
+  rightGain.gain.linearRampToValueAtTime( 0.15, audioContext.currentTime + 0.3 );
+  leftGain.gain.setValueAtTime( 0.15, audioContext.currentTime + 1.0 ); // Hold until fade out starts
+  rightGain.gain.setValueAtTime( 0.15, audioContext.currentTime + 1.0 );
+  leftGain.gain.exponentialRampToValueAtTime( 0.001, audioContext.currentTime + 1.5 ); // Fade out through end
   rightGain.gain.exponentialRampToValueAtTime( 0.001, audioContext.currentTime + 1.5 );
 
   // Pan from center to edges

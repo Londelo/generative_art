@@ -85,16 +85,16 @@ function draw() {
           const xOffset = random( -20, 20 );
           const yPos = random( height );
           const inCenterZone = yPos > height / 2 - CENTER_ZONE_HEIGHT / 2 && yPos < height / 2 + CENTER_ZONE_HEIGHT / 2;
-          const hasDoubleLife = inCenterZone && random() < 0.3;
-          particles.push( new Particle( leftSquare.x + leftSquare.w + xOffset, yPos, hasDoubleLife ) );
+          const extendedLife = inCenterZone && random() < 0.5 ? random( 200, 1000 ) : 100;
+          particles.push( new Particle( leftSquare.x + leftSquare.w + xOffset, yPos, extendedLife ) );
           totalParticlesSpawned++;
         }
         if ( rightSquare.active ) {
           const xOffset = random( -20, 20 );
           const yPos = random( height );
           const inCenterZone = yPos > height / 2 - CENTER_ZONE_HEIGHT / 2 && yPos < height / 2 + CENTER_ZONE_HEIGHT / 2;
-          const hasDoubleLife = inCenterZone && random() < 0.3;
-          particles.push( new Particle( rightSquare.x + xOffset, yPos, hasDoubleLife ) );
+          const extendedLife = inCenterZone && random() < 0.5 ? random( 200, 1000 ) : 100;
+          particles.push( new Particle( rightSquare.x + xOffset, yPos, extendedLife ) );
           totalParticlesSpawned++;
         }
       }
@@ -156,14 +156,20 @@ function draw() {
       particles.splice( i, 1 );
     }
   }
+
+  // Draw center zone indicator lines
+  stroke( 216, 237, 245, 50 ); // Pale sky blue with low opacity
+  strokeWeight( 1 );
+  line( 0, height / 2 - CENTER_ZONE_HEIGHT / 2, width, height / 2 - CENTER_ZONE_HEIGHT / 2 );
+  line( 0, height / 2 + CENTER_ZONE_HEIGHT / 2, width, height / 2 + CENTER_ZONE_HEIGHT / 2 );
 }
 
 class Particle {
-  constructor( x, y, hasDoubleLife = false ) {
+  constructor( x, y, flickerTime = 100 ) {
     this.x = x;
     this.y = y;
     this.alpha = 255;
-    this.flickerTime = hasDoubleLife ? 200 : 100; // Double lifespan for center zone particles
+    this.flickerTime = flickerTime; // Variable lifespan, 100ms normal or 200-1000ms for center zone
     this.createdTime = millis();
     this.size = random( 2, 4 );
   }

@@ -30,6 +30,37 @@ const InitialAnimation = (() => {
   const ZONE1_HEIGHT = 100;  // 50% chance
   const ZONE2_HEIGHT = 300;  // 30% chance
   const ZONE3_HEIGHT = 500;  // 15% chance
+  const GATE_STATE_KEY = 'gatePosition';
+  const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+  function saveGateState( state ) {
+    const gateData = {
+      state: state,
+      timestamp: Date.now()
+    };
+    localStorage.setItem( GATE_STATE_KEY, JSON.stringify( gateData ) );
+  }
+
+  function loadGateState() {
+    const stored = localStorage.getItem( GATE_STATE_KEY );
+    if ( !stored ) return null;
+
+    try {
+      const gateData = JSON.parse( stored );
+      const age = Date.now() - gateData.timestamp;
+
+      // If record is older than 1 day, return null to force closed state
+      if ( age > ONE_DAY_MS ) {
+        localStorage.removeItem( GATE_STATE_KEY );
+        return null;
+      }
+
+      return gateData.state;
+    } catch ( e ) {
+      localStorage.removeItem( GATE_STATE_KEY );
+      return null;
+    }
+  }
 
   function setup() {
     const canvas = createCanvas( windowWidth, windowHeight );
@@ -44,6 +75,23 @@ const InitialAnimation = (() => {
     gateSpeed = ( width / 2 ) / ( ANIMATION_DURATION / 1000 * 60 );
 
     initializeGates();
+
+    // Check saved gate state
+    const savedState = loadGateState();
+    if ( savedState === 'open' ) {
+      // Restore open state
+      leftGate.x = -leftGate.w;
+      rightGate.x = width;
+      enableHTMLContent();
+      document.getElementById( 'close-gate-btn' ).style.display = 'flex';
+      document.getElementById( 'p5-overlay' ).style.pointerEvents = 'none';
+      console.log( 'Restored open gate state from storage' );
+    } else {
+      // Start closed (default or expired state)
+      disableHTMLContent();
+      console.log( 'Gates closed (default state)' );
+    }
+
     canvas.elt.addEventListener( 'click', openGates );
   }
 
@@ -198,6 +246,7 @@ const InitialAnimation = (() => {
     if ( leftGate.x + leftGate.w <= 0 && rightGate.x >= width ) {
       isOpening = false;
       enableHTMLContent();
+      saveGateState( 'open' );
       document.getElementById( 'close-gate-btn' ).style.display = 'flex';
       console.log( 'Gates opened. Particles spawned:', totalParticlesSpawned );
     }
@@ -217,6 +266,7 @@ const InitialAnimation = (() => {
     if ( leftGate.x >= 0 && rightGate.x <= width / 2 ) {
       isClosing = false;
       disableHTMLContent();
+      saveGateState( 'closed' );
       document.getElementById( 'p5-overlay' ).style.pointerEvents = 'auto';
       console.log( 'Gates closed. Click to reopen.' );
     }

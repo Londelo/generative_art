@@ -75,7 +75,7 @@ const InitialAnimation = (() => {
       isOpening = true;
       openingStartTime = millis();
       lastSpawnTime = 0;
-      enableHTMLContent();
+      disableHTMLContent();
       playGateSound( 'opening' );
     }, 500 );
   }
@@ -90,6 +90,7 @@ const InitialAnimation = (() => {
     rightGate.x = width;
     particles.length = 0;
 
+    disableHTMLContent();
     isClosing = true;
     closingStartTime = millis();
     playGateSound( 'closing' );
@@ -196,6 +197,7 @@ const InitialAnimation = (() => {
 
     if ( leftGate.x + leftGate.w <= 0 && rightGate.x >= width ) {
       isOpening = false;
+      enableHTMLContent();
       document.getElementById( 'close-gate-btn' ).style.display = 'flex';
       console.log( 'Gates opened. Particles spawned:', totalParticlesSpawned );
     }

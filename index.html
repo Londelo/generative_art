@@ -18,46 +18,38 @@
     body {
       margin: 0;
       padding: 0;
-      background: #1B2B41;
+      background: white;
       color: #D8EEF5;
-      font-family: "Helvetica Neue", sans-serif;
+      font-family: "Courier New", "Courier", monospace;
       position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
     }
 
-    header {
-      padding: 2rem 0;
-      text-align: center;
+    .container {
+      width: 60%;
+      height: 80vh;
       background: #1B2B41;
+      border: 2px solid #D8EEF5;
+      overflow-y: auto;
       position: relative;
       z-index: 0;
     }
 
-    h1 {
-      margin: 0;
-      font-size: 2.5rem;
-      letter-spacing: 1px;
+    .app-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      padding: 2rem;
     }
 
-    .grid {
-      border-top: 1px solid #D8EEF5;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 3rem;
-      padding: 10rem;
-      width: 50%;
-      margin: auto;
-      place-items: center;
-      position: relative;
-      z-index: 0;
-    }
-
-    .card {
-      width: 100px;
-      height: 100px;
-      padding: 30px;
+    .app-card {
+      width: 100%;
+      padding: 2rem;
       background: #1B2B41;
-      border: 1px solid #D8EEF5;
-      border-radius: 50%;
+      border: 2px solid #D8EEF5;
       color: #D8EEF5;
       display: flex;
       align-items: center;
@@ -65,11 +57,18 @@
       cursor: pointer;
       position: relative;
       z-index: 0;
+      font-size: 1.5rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      transition: all 0.2s ease;
+      margin-bottom: 1rem;
     }
 
-    .card:hover {
-      border: 2px dotted #D8EEF5;
+    .app-card:hover {
       background: #254359;
+      border: 2px solid #D8EEF5;
+      transform: translateX(10px);
     }
 
     #close-gate-btn {
@@ -100,57 +99,45 @@
 </head>
 <body>
   <button id="close-gate-btn" onclick="closeGates()">↻</button>
-  <header>
-    <h1>Generative Art Gallery</h1>
-  </header>
-  <section class="grid">
-    <div class="card" onclick="location.href='GameOfLife/index.html'">
-      Game of Life
+  <div class="container">
+    <div class="app-list">
+      <div class="app-card" onclick="location.href='GameOfLife/index.html'">
+        Game of Life
+      </div>
+      <div class="app-card" onclick="location.href='SimpleWorld/index.html'">
+        Simple World
+      </div>
+      <div class="app-card" onclick="location.href='CurvesBaby/index.html'">
+        Curves
+      </div>
+      <div class="app-card" onclick="location.href='FireFlies/index.html'">
+        Fire Flies
+      </div>
+      <div class="app-card" onclick="location.href='PlanetsBaby/index.html'">
+        Planets Baby
+      </div>
+      <div class="app-card" onclick="location.href='StrangeCircles/index.html'">
+        Circles
+      </div>
+      <div class="app-card" onclick="location.href='ArkadsGame/index.html'">
+        Arkad's Game
+      </div>
+      <div class="app-card" onclick="location.href='CrazySquare/index.html'">
+        Crazy Square
+      </div>
+      <div class="app-card" onclick="location.href='ExpansiveDots/index.html'">
+        Expansive Dots
+      </div>
+      <div class="app-card" onclick="location.href='NeedyCircles/index.html'">
+        Needy Circles
+      </div>
+      <div class="app-card" onclick="location.href='PrettyDotsAndLine/index.html'">
+        Pretty Dots and Line
+      </div>
+      <div class="app-card" onclick="location.href='FillTheGaps/index.html'">
+        Fill the Gaps
+      </div>
     </div>
-
-    <div class="card" onclick="location.href='SimpleWorld/index.html'">
-      Simple World
-    </div>
-
-    <div class="card" onclick="location.href='CurvesBaby/index.html'">
-      Curves
-    </div>
-
-    <div class="card" onclick="location.href='FireFlies/index.html'">
-      Fire Flies
-    </div>
-
-    <div class="card" onclick="location.href='PlanetsBaby/index.html'">
-      Planets Baby
-    </div>
-
-    <div class="card" onclick="location.href='StrangeCircles/index.html'">
-      Circles
-    </div>
-
-    <div class="card" onclick="location.href='ArkadsGame/index.html'">
-      Arkad's Game
-    </div>
-
-    <div class="card" onclick="location.href='CrazySquare/index.html'">
-      Crazy Square
-    </div>
-
-    <div class="card" onclick="location.href='ExpansiveDots/index.html'">
-      Expansive Dots
-    </div>
-
-    <div class="card" onclick="location.href='NeedyCircles/index.html'">
-      Needy Circles
-    </div>
-
-    <div class="card" onclick="location.href='PrettyDotsAndLine/index.html'">
-      Pretty Dots and Line
-    </div>
-
-    <div class="card" onclick="location.href='FillTheGaps/index.html'">
-      Fill the Gaps
-    </div>
-  </section>
+  </div>
 </body>
 </html>

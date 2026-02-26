@@ -284,13 +284,11 @@ const InitialAnimation = (() => {
   }
 
   function enableHTMLContent() {
-    document.querySelector( 'header' ).style.pointerEvents = 'auto';
-    document.querySelector( '.grid' ).style.pointerEvents = 'auto';
+    document.querySelector( '.container' ).style.pointerEvents = 'auto';
   }
 
   function disableHTMLContent() {
-    document.querySelector( 'header' ).style.pointerEvents = 'none';
-    document.querySelector( '.grid' ).style.pointerEvents = 'none';
+    document.querySelector( '.container' ).style.pointerEvents = 'none';
   }
 
   function drawGates() {

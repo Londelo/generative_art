@@ -294,24 +294,34 @@ const InitialAnimation = (() => {
   }
 
   function drawGates() {
+    // Only draw gates if they're visible on screen
+    const leftGateVisible = leftGate.x + leftGate.w > 0;
+    const rightGateVisible = rightGate.x < width;
+
+    if ( !leftGateVisible && !rightGateVisible ) return;
+
     noStroke();
     fill( 27, 42, 65 );
 
-    // Draw left gate
-    rect( leftGate.x, leftGate.y, leftGate.w, leftGate.h );
-    if ( leftGate.x + leftGate.w > 0 && leftGate.x + leftGate.w < width ) {
-      stroke( 216, 237, 245 );
-      strokeWeight( 2 );
-      line( leftGate.x + leftGate.w, 0, leftGate.x + leftGate.w, height );
+    // Draw left gate (only if visible)
+    if ( leftGateVisible ) {
+      rect( leftGate.x, leftGate.y, leftGate.w, leftGate.h );
+      if ( leftGate.x + leftGate.w < width ) {
+        stroke( 216, 237, 245 );
+        strokeWeight( 2 );
+        line( leftGate.x + leftGate.w, 0, leftGate.x + leftGate.w, height );
+      }
     }
 
-    // Draw right gate
-    noStroke();
-    rect( rightGate.x, rightGate.y, rightGate.w, rightGate.h );
-    if ( rightGate.x > 0 && rightGate.x < width ) {
-      stroke( 216, 237, 245 );
-      strokeWeight( 2 );
-      line( rightGate.x, 0, rightGate.x, height );
+    // Draw right gate (only if visible)
+    if ( rightGateVisible ) {
+      noStroke();
+      rect( rightGate.x, rightGate.y, rightGate.w, rightGate.h );
+      if ( rightGate.x > 0 ) {
+        stroke( 216, 237, 245 );
+        strokeWeight( 2 );
+        line( rightGate.x, 0, rightGate.x, height );
+      }
     }
   }
 
@@ -357,8 +367,10 @@ const InitialAnimation = (() => {
       updateGatesClosing();
     }
 
-    // Draw gates
-    drawGates();
+    // Draw gates (only when animating or visible)
+    if ( isOpening || isClosing || leftGate.x + leftGate.w > 0 || rightGate.x < width ) {
+      drawGates();
+    }
 
     // Update and draw particles
     for ( let i = particles.length - 1; i >= 0; i-- ) {

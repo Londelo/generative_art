@@ -23,14 +23,16 @@
       font-family: "Courier New", "Courier", monospace;
       position: relative;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
-      min-height: 100vh;
+      height: 100vh;
+      overflow: hidden;
+      padding-top: 10vh;
     }
 
     .container {
       width: 60%;
-      height: 80vh;
+      height: calc(100vh - 10vh);
       background: #1B2B41;
       border: 2px solid #D8EEF5;
       border-radius: 16px;

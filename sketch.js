@@ -131,6 +131,12 @@ const InitialAnimation = (() => {
   window.closeGates = function() {
     if ( !canAnimate() ) return;
 
+    // Initialize audio if not already done (handles restored gate state)
+    if ( !audioInitialized ) {
+      audioContext = new ( window.AudioContext || window.webkitAudioContext )();
+      audioInitialized = true;
+    }
+
     document.getElementById( 'close-gate-btn' ).style.display = 'none';
     isOpening = false;
 
@@ -146,6 +152,11 @@ const InitialAnimation = (() => {
 
   function playGateSound( direction ) {
     if ( !audioContext ) return;
+
+    // Resume audio context if suspended (browser behavior)
+    if ( audioContext.state === 'suspended' ) {
+      audioContext.resume();
+    }
 
     const isOpening = direction === 'opening';
     const [ leftOsc, rightOsc, leftGain, rightGain, leftPanner, rightPanner ] = createAudioNodes();

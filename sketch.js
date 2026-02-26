@@ -102,7 +102,7 @@ const InitialAnimation = (() => {
     canvas.style( 'position', 'fixed' );
     canvas.style( 'top', '0' );
     canvas.style( 'left', '0' );
-    canvas.style( 'z-index', '5' );
+    canvas.style( 'z-index', '1' );
     canvas.style( 'pointer-events', 'auto' );
 
     gateSpeed = ( width / 2 ) / ( ANIMATION_DURATION / 1000 * 60 );

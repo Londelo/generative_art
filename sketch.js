@@ -1,3 +1,36 @@
+// Background Display - Static dot grid
+const BackgroundDisplay = (() => {
+  const dots = [];
+  const DOT_SIZE = 2;
+  const DOT_SPACING = 30;
+  const DOT_COLOR = [200, 200, 200]; // Light gray
+
+  function setup() {
+    generateDots();
+  }
+
+  function generateDots() {
+    dots.length = 0;
+
+    for ( let x = DOT_SPACING; x < width; x += DOT_SPACING ) {
+      for ( let y = DOT_SPACING; y < height; y += DOT_SPACING ) {
+        dots.push( { x: x, y: y } );
+      }
+    }
+  }
+
+  function draw() {
+    noStroke();
+    fill( DOT_COLOR[0], DOT_COLOR[1], DOT_COLOR[2] );
+
+    for ( let dot of dots ) {
+      circle( dot.x, dot.y, DOT_SIZE );
+    }
+  }
+
+  return { setup, draw, generateDots };
+})();
+
 // Initial Animation - Gate Opening/Closing System
 // Gates split apart with particle effects and spatial audio
 
@@ -383,13 +416,16 @@ const InitialAnimation = (() => {
 
 // P5.js lifecycle hooks
 function setup() {
+  BackgroundDisplay.setup();
   InitialAnimation.setup();
 }
 
 function draw() {
+  BackgroundDisplay.draw();
   InitialAnimation.draw();
 }
 
 function windowResized() {
   resizeCanvas( windowWidth, windowHeight );
+  BackgroundDisplay.generateDots();
 }

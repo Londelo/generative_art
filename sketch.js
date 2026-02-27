@@ -458,6 +458,11 @@ const InitialAnimation = (() => {
   let audioContext;
   let audioInitialized = false;
 
+  // Voice recognition
+  let recognition;
+  let isListening = false;
+  let hintTimeout;
+
   // Constants
   const ANIMATION_DURATION = 1500;
   const RAMP_UP_TIME = 100;
@@ -498,12 +503,138 @@ const InitialAnimation = (() => {
     }
   }
 
+  function initVoiceRecognition() {
+    // Check for browser support
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if ( !SpeechRecognition ) {
+      console.log( 'Voice recognition not supported in this browser' );
+      return;
+    }
+
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    recognition.onresult = ( event ) => {
+      const last = event.results.length - 1;
+      const transcript = event.results[last][0].transcript.toLowerCase().trim();
+
+      console.log( 'Heard:', transcript );
+
+      // Check for trigger phrases
+      if ( transcript.includes( 'open sesame' ) ||
+           transcript.includes( 'opensesame' ) ||
+           transcript.includes( 'open says me' ) ) {
+        console.log( 'Magic words detected! Opening gates...' );
+        openGates();
+      }
+    };
+
+    recognition.onerror = ( event ) => {
+      console.log( 'Speech recognition error:', event.error );
+      if ( event.error === 'no-speech' || event.error === 'audio-capture' ) {
+        // Restart listening if it stops
+        if ( isListening && !isOpening && !isClosing ) {
+          setTimeout( () => {
+            if ( isListening ) startListening();
+          }, 1000 );
+        }
+      }
+    };
+
+    recognition.onend = () => {
+      // Restart listening if gates are still closed
+      if ( isListening && !isOpening && !isClosing ) {
+        setTimeout( () => {
+          if ( isListening ) startListening();
+        }, 100 );
+      }
+    };
+  }
+
+  function startListening() {
+    if ( !recognition || isListening ) return;
+
+    try {
+      recognition.start();
+      isListening = true;
+      console.log( 'Voice recognition active. Say "open sesame" to open gates.' );
+    } catch ( e ) {
+      console.log( 'Could not start recognition:', e.message );
+    }
+  }
+
+  function stopListening() {
+    if ( !recognition || !isListening ) return;
+
+    try {
+      recognition.stop();
+      isListening = false;
+      console.log( 'Voice recognition stopped.' );
+    } catch ( e ) {
+      console.log( 'Could not stop recognition:', e.message );
+    }
+  }
+
+  function showVoiceHint() {
+    // Clear any existing timeout
+    if ( hintTimeout ) clearTimeout( hintTimeout );
+
+    // Show hint after 30 seconds of gates being closed
+    hintTimeout = setTimeout( () => {
+      let hintElement = document.getElementById( 'voice-hint' );
+
+      if ( !hintElement ) {
+        // Create hint element
+        hintElement = document.createElement( 'div' );
+        hintElement.id = 'voice-hint';
+        hintElement.textContent = 'psst... say "open sesame"';
+        hintElement.style.position = 'fixed';
+        hintElement.style.bottom = '20px';
+        hintElement.style.right = '20px';
+        hintElement.style.color = '#D8EEF5';
+        hintElement.style.fontFamily = '"Courier New", monospace';
+        hintElement.style.fontSize = '18px';
+        hintElement.style.zIndex = '100';
+        hintElement.style.opacity = '0';
+        hintElement.style.transition = 'opacity 1s ease-in';
+        hintElement.style.pointerEvents = 'none';
+        document.body.appendChild( hintElement );
+      }
+
+      // Reset text in case it changed
+      hintElement.textContent = 'psst... say "open sesame"';
+
+      // Trigger fade-in
+      setTimeout( () => {
+        hintElement.style.opacity = '1';
+      }, 10 );
+    }, 30000 );
+  }
+
+  function hideVoiceHint() {
+    // Clear timeout
+    if ( hintTimeout ) {
+      clearTimeout( hintTimeout );
+      hintTimeout = null;
+    }
+
+    // Hide hint element
+    const hintElement = document.getElementById( 'voice-hint' );
+    if ( hintElement ) {
+      hintElement.style.opacity = '0';
+    }
+  }
+
   function setup( p5Instance ) {
     p = p5Instance;
 
     gateSpeed = ( p.width / 2 ) / ( ANIMATION_DURATION / 1000 * 60 );
 
     initializeGates();
+    initVoiceRecognition();
 
     // Check saved gate state
     const savedState = loadGateState();
@@ -519,6 +650,10 @@ const InitialAnimation = (() => {
       // Start closed (default or expired state)
       disableHTMLContent();
       console.log( 'Gates closed (default state)' );
+      // Start listening for voice commands
+      startListening();
+      // Show hint after 30 seconds
+      showVoiceHint();
     }
 
     document.getElementById( 'gate-canvas' ).addEventListener( 'click', openGates );
@@ -536,6 +671,9 @@ const InitialAnimation = (() => {
   function openGates() {
     if ( !canAnimate() ) return;
 
+    // Stop listening for voice commands when gates open
+    stopListening();
+
     document.getElementById( 'gate-canvas' ).style.pointerEvents = 'none';
 
     if ( !audioInitialized ) {
@@ -548,13 +686,14 @@ const InitialAnimation = (() => {
     totalParticlesSpawned = 0;
     document.getElementById( 'close-gate-btn' ).style.display = 'none';
 
-    setTimeout( () => {
-      isOpening = true;
-      openingStartTime = p.millis();
-      lastSpawnTime = 0;
-      disableHTMLContent();
-      playGateSound( 'opening' );
-    }, 500 );
+    // Hide voice hint when opening
+    hideVoiceHint();
+
+    isOpening = true;
+    openingStartTime = p.millis();
+    lastSpawnTime = 0;
+    disableHTMLContent();
+    playGateSound( 'opening' );
   }
 
   window.closeGates = function() {
@@ -708,7 +847,11 @@ const InitialAnimation = (() => {
       disableHTMLContent();
       saveGateState( 'closed' );
       document.getElementById( 'gate-canvas' ).style.pointerEvents = 'auto';
-      console.log( 'Gates closed. Click to reopen.' );
+      console.log( 'Gates closed. Click to reopen or say "open sesame".' );
+      // Start listening for voice commands when gates are closed
+      startListening();
+      // Show hint after 30 seconds
+      showVoiceHint();
     }
   }
 

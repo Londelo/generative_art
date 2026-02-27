@@ -1,40 +1,376 @@
-// Background Display - Static dot grid
+// Background Display - Interactive dot grid with cursor repulsion and physics squares
 const BackgroundDisplay = (() => {
   const dots = [];
+  const squares = [];
   const DOT_SIZE = 2;
-  const DOT_SPACING = 30;
+  const DOT_SPACING = 15;
   const DOT_COLOR = [200, 200, 200]; // Light gray
+  const CURSOR_RADIUS = 25; // Radius of cursor circle
+  const BUFFER_ZONE = 15; // Extra space around circle where dots shouldn't enter
+  const REPEL_RADIUS = 90; // Distance at which dots start repelling
+  const REPEL_STRENGTH = 1.5; // How strongly dots repel
+  const SPRING_STRENGTH = 0.15; // How strongly dots return to home
+  const DAMPING = 0.85; // Velocity damping for smooth motion
 
-  function setup() {
-    generateDots();
+  // Shelf and physics constants
+  const SQUARE_SIZE = 20;
+  const GRAVITY = 0.5;
+  const BOUNCE = 0.3;
+  const FRICTION = 0.98;
+  const RESET_DELAY = 10000; // 10 seconds in milliseconds
+  const RETURN_SPEED = 0.1; // How fast squares return home
+  let shelfY = 0;
+  let shelfLeft = 0;
+  let shelfRight = 0;
+
+  let p;
+  let mouseX = 0;
+  let mouseY = 0;
+  let prevMouseX = 0;
+  let prevMouseY = 0;
+  let mouseVX = 0;
+  let mouseVY = 0;
+
+  // Square class for physics objects
+  class Square {
+    constructor( x, y ) {
+      this.homeX = x;
+      this.homeY = y;
+      this.x = x;
+      this.y = y;
+      this.vx = 0;
+      this.vy = 0;
+      this.size = SQUARE_SIZE;
+      this.activated = false;
+      this.returningHome = false;
+      this.lastTouchTime = 0;
+    }
+
+    checkCollision( mx, my, mvx, mvy ) {
+      // Check collision between cursor circle and square
+      const dx = this.x - mx;
+      const dy = this.y - my;
+      const dist = Math.sqrt( dx * dx + dy * dy );
+
+      // Collision radius: cursor radius + half square size
+      const collisionRadius = CURSOR_RADIUS + this.size / 2;
+
+      if ( dist < collisionRadius && dist > 0 ) {
+        // Enable physics for THIS square when touched
+        if ( !this.activated ) {
+          this.activated = true;
+        }
+        this.lastTouchTime = p.millis();
+        this.returningHome = false;
+
+        // Calculate cursor speed and apply momentum transfer
+        const cursorSpeed = Math.sqrt( mvx * mvx + mvy * mvy );
+        const momentumMultiplier = 0.3; // Reduced from 0.8 - makes blocks heavier
+
+        // Apply cursor velocity to square with momentum transfer
+        this.vx += mvx * momentumMultiplier;
+        this.vy += mvy * momentumMultiplier;
+
+        // Push square out of collision overlap
+        const overlap = collisionRadius - dist;
+        if ( overlap > 0 ) {
+          const pushX = ( dx / dist ) * overlap;
+          const pushY = ( dy / dist ) * overlap;
+          this.x += pushX;
+          this.y += pushY;
+
+          // Add small impulse based on collision normal
+          const impulseStrength = Math.max( cursorSpeed * 0.15, 1.0 ); // Reduced from 0.3 and 2.0
+          this.vx += ( dx / dist ) * impulseStrength;
+          this.vy += ( dy / dist ) * impulseStrength;
+        }
+      }
+    }
+
+    update() {
+      // Check if THIS square should return home (only if it was activated)
+      if ( this.activated && !this.returningHome && p.millis() - this.lastTouchTime > RESET_DELAY ) {
+        this.returningHome = true;
+        // Clear velocity when starting return journey
+        this.vx = 0;
+        this.vy = 0;
+      }
+
+      if ( this.returningHome ) {
+        // Smoothly return to home position
+        const dx = this.homeX - this.x;
+        const dy = this.homeY - this.y;
+        const dist = Math.sqrt( dx * dx + dy * dy );
+
+        if ( dist < 1 ) {
+          // Snap to home position
+          this.x = this.homeX;
+          this.y = this.homeY;
+          this.vx = 0;
+          this.vy = 0;
+          this.activated = false;
+          this.returningHome = false;
+        } else {
+          // Move directly towards home (no physics, just interpolation)
+          const returnSpeed = 0.08;
+          this.x += dx * returnSpeed;
+          this.y += dy * returnSpeed;
+        }
+
+        return;
+      }
+
+      // Only apply physics if THIS square is activated
+      if ( !this.activated ) return;
+
+      // Apply gravity
+      this.vy += GRAVITY;
+
+      // Apply velocity
+      this.x += this.vx;
+      this.y += this.vy;
+
+      // Apply friction
+      this.vx *= FRICTION;
+
+      // Collision with shelf (only if within shelf boundaries)
+      const isOnShelf = this.x > shelfLeft && this.x < shelfRight;
+      if ( isOnShelf && this.y + this.size / 2 > shelfY ) {
+        this.y = shelfY - this.size / 2;
+        this.vy *= -BOUNCE;
+        if ( Math.abs( this.vy ) < 0.5 ) this.vy = 0;
+      }
+
+      // Keep on screen horizontally (side walls)
+      if ( this.x - this.size / 2 < 0 ) {
+        this.x = this.size / 2;
+        this.vx *= -BOUNCE;
+      }
+      if ( this.x + this.size / 2 > p.width ) {
+        this.x = p.width - this.size / 2;
+        this.vx *= -BOUNCE;
+      }
+
+      // Let squares fall off bottom if not on shelf
+      if ( this.y - this.size / 2 > p.height ) {
+        // Square fell off screen
+        this.y = p.height + this.size;
+      }
+    }
+
+    display( p5Instance ) {
+      p5Instance.fill( 0 );
+      p5Instance.noStroke();
+      p5Instance.rect( this.x - this.size / 2, this.y - this.size / 2, this.size, this.size );
+    }
   }
 
-  function generateDots() {
-    dots.length = 0;
+  function setup( p5Instance ) {
+    p = p5Instance;
 
-    for ( let x = DOT_SPACING; x < width; x += DOT_SPACING ) {
-      for ( let y = DOT_SPACING; y < height; y += DOT_SPACING ) {
-        dots.push( { x: x, y: y } );
+    // Initialize mouse tracking
+    mouseX = p.mouseX;
+    mouseY = p.mouseY;
+    prevMouseX = mouseX;
+    prevMouseY = mouseY;
+    mouseVX = 0;
+    mouseVY = 0;
+
+    // Calculate shelf position (20% from top, aligned with container top)
+    shelfY = p.height * 0.2;
+
+    // Calculate shelf boundaries (60% width, centered - same as app container)
+    const containerWidth = p.width * 0.6;
+    shelfLeft = ( p.width - containerWidth ) / 2;
+    shelfRight = shelfLeft + containerWidth;
+
+    generateDots();
+    generateArtSquares();
+  }
+
+  function generateArtSquares() {
+    squares.length = 0;
+
+    // Pixel patterns for letters (1 = square, 0 = empty)
+    const letterA = [
+      [0, 1, 1, 1, 0],
+      [1, 0, 0, 0, 1],
+      [1, 0, 0, 0, 1],
+      [1, 1, 1, 1, 1],
+      [1, 0, 0, 0, 1],
+      [1, 0, 0, 0, 1],
+      [1, 0, 0, 0, 1]
+    ];
+
+    const letterR = [
+      [1, 1, 1, 1, 0],
+      [1, 0, 0, 0, 1],
+      [1, 0, 0, 0, 1],
+      [1, 1, 1, 1, 0],
+      [1, 0, 1, 0, 0],
+      [1, 0, 0, 1, 0],
+      [1, 0, 0, 0, 1]
+    ];
+
+    const letterT = [
+      [1, 1, 1, 1, 1],
+      [0, 0, 1, 0, 0],
+      [0, 0, 1, 0, 0],
+      [0, 0, 1, 0, 0],
+      [0, 0, 1, 0, 0],
+      [0, 0, 1, 0, 0],
+      [0, 0, 1, 0, 0]
+    ];
+
+    // Center the word "ART" horizontally
+    const letterSpacing = SQUARE_SIZE * 1.5;
+    const totalWidth = ( 5 * SQUARE_SIZE * 3 ) + ( letterSpacing * 2 );
+    const startX = ( p.width - totalWidth ) / 2;
+
+    // Position letters on top of the shelf
+    const startY = shelfY - ( 7 * SQUARE_SIZE );
+
+    // Generate squares for each letter
+    generateLetterSquares( letterA, startX, startY );
+    generateLetterSquares( letterR, startX + ( 5 * SQUARE_SIZE ) + letterSpacing, startY );
+    generateLetterSquares( letterT, startX + ( 10 * SQUARE_SIZE ) + ( letterSpacing * 2 ), startY );
+  }
+
+  function generateLetterSquares( pattern, offsetX, offsetY ) {
+    for ( let row = 0; row < pattern.length; row++ ) {
+      for ( let col = 0; col < pattern[row].length; col++ ) {
+        if ( pattern[row][col] === 1 ) {
+          const x = offsetX + ( col * SQUARE_SIZE ) + SQUARE_SIZE / 2;
+          const y = offsetY + ( row * SQUARE_SIZE ) + SQUARE_SIZE / 2;
+          squares.push( new Square( x, y ) );
+        }
       }
     }
   }
 
-  function draw() {
-    noStroke();
-    fill( DOT_COLOR[0], DOT_COLOR[1], DOT_COLOR[2] );
+  function generateDots() {
+    if ( !p ) return;
 
-    for ( let dot of dots ) {
-      circle( dot.x, dot.y, DOT_SIZE );
+    dots.length = 0;
+
+    for ( let x = DOT_SPACING; x < p.width; x += DOT_SPACING ) {
+      for ( let y = DOT_SPACING; y < p.height; y += DOT_SPACING ) {
+        dots.push( {
+          homeX: x,
+          homeY: y,
+          x: x,
+          y: y,
+          vx: 0,
+          vy: 0
+        } );
+      }
     }
   }
 
-  return { setup, draw, generateDots };
+  function updateDots( p5Instance ) {
+    // Update mouse position and calculate velocity
+    prevMouseX = mouseX;
+    prevMouseY = mouseY;
+    mouseX = p5Instance.mouseX;
+    mouseY = p5Instance.mouseY;
+    mouseVX = mouseX - prevMouseX;
+    mouseVY = mouseY - prevMouseY;
+
+    for ( let dot of dots ) {
+      // Calculate distance from cursor
+      const dx = dot.x - mouseX;
+      const dy = dot.y - mouseY;
+      const dist = Math.sqrt( dx * dx + dy * dy );
+
+      // Apply repulsion force if within radius
+      if ( dist < REPEL_RADIUS && dist > 0 ) {
+        const exclusionZone = CURSOR_RADIUS + BUFFER_ZONE;
+
+        // Stronger force closer to the circle boundary
+        const force = ( REPEL_RADIUS - dist ) / REPEL_RADIUS;
+
+        // Extra strong force if dot is inside or near the buffer zone
+        const multiplier = dist < exclusionZone + 10 ? 4.0 : 1.0;
+
+        const fx = ( dx / dist ) * force * REPEL_STRENGTH * multiplier;
+        const fy = ( dy / dist ) * force * REPEL_STRENGTH * multiplier;
+        dot.vx += fx;
+        dot.vy += fy;
+
+        // Hard boundary: if dot is inside exclusion zone, push it out immediately
+        if ( dist < exclusionZone ) {
+          const pushDist = exclusionZone - dist;
+          dot.x += ( dx / dist ) * pushDist;
+          dot.y += ( dy / dist ) * pushDist;
+        }
+      }
+
+      // Apply spring force back to home position
+      const homeX = dot.homeX - dot.x;
+      const homeY = dot.homeY - dot.y;
+      dot.vx += homeX * SPRING_STRENGTH;
+      dot.vy += homeY * SPRING_STRENGTH;
+
+      // Apply damping
+      dot.vx *= DAMPING;
+      dot.vy *= DAMPING;
+
+      // Update position
+      dot.x += dot.vx;
+      dot.y += dot.vy;
+    }
+  }
+
+  function draw( p5Instance ) {
+    p5Instance.clear();
+
+    // Update dot positions
+    updateDots( p5Instance );
+
+    // Draw dots
+    p5Instance.noStroke();
+    p5Instance.fill( DOT_COLOR[0], DOT_COLOR[1], DOT_COLOR[2] );
+    for ( let dot of dots ) {
+      p5Instance.circle( dot.x, dot.y, DOT_SIZE );
+    }
+
+    // Check collisions with cursor and update squares
+    for ( let square of squares ) {
+      square.checkCollision( mouseX, mouseY, mouseVX, mouseVY );
+      square.update();
+      square.display( p5Instance );
+    }
+
+    // Draw cursor circle (light gray, transparent)
+    p5Instance.noFill();
+    p5Instance.stroke( 200, 200, 200, 100 );
+    p5Instance.strokeWeight( 2 );
+    p5Instance.circle( mouseX, mouseY, CURSOR_RADIUS * 2 );
+  }
+
+  function resize( p5Instance ) {
+    p = p5Instance;
+    shelfY = p.height * 0.2;
+
+    // Recalculate shelf boundaries
+    const containerWidth = p.width * 0.6;
+    shelfLeft = ( p.width - containerWidth ) / 2;
+    shelfRight = shelfLeft + containerWidth;
+
+    generateDots();
+    generateArtSquares();
+  }
+
+  return { setup, draw, resize };
 })();
 
 // Initial Animation - Gate Opening/Closing System
 // Gates split apart with particle effects and spatial audio
 
 const InitialAnimation = (() => {
+  // P5 instance
+  let p;
+
   // Gate state
   let leftGate;
   let rightGate;
@@ -95,17 +431,10 @@ const InitialAnimation = (() => {
     }
   }
 
-  function setup() {
-    const canvas = createCanvas( windowWidth, windowHeight );
-    canvas.parent( document.body );
-    canvas.id( 'p5-overlay' );
-    canvas.style( 'position', 'fixed' );
-    canvas.style( 'top', '0' );
-    canvas.style( 'left', '0' );
-    canvas.style( 'z-index', '1' );
-    canvas.style( 'pointer-events', 'auto' );
+  function setup( p5Instance ) {
+    p = p5Instance;
 
-    gateSpeed = ( width / 2 ) / ( ANIMATION_DURATION / 1000 * 60 );
+    gateSpeed = ( p.width / 2 ) / ( ANIMATION_DURATION / 1000 * 60 );
 
     initializeGates();
 
@@ -114,10 +443,10 @@ const InitialAnimation = (() => {
     if ( savedState === 'open' ) {
       // Restore open state
       leftGate.x = -leftGate.w;
-      rightGate.x = width;
+      rightGate.x = p.width;
       enableHTMLContent();
       document.getElementById( 'close-gate-btn' ).style.display = 'flex';
-      document.getElementById( 'p5-overlay' ).style.pointerEvents = 'none';
+      document.getElementById( 'gate-canvas' ).style.pointerEvents = 'none';
       console.log( 'Restored open gate state from storage' );
     } else {
       // Start closed (default or expired state)
@@ -125,12 +454,12 @@ const InitialAnimation = (() => {
       console.log( 'Gates closed (default state)' );
     }
 
-    canvas.elt.addEventListener( 'click', openGates );
+    document.getElementById( 'gate-canvas' ).addEventListener( 'click', openGates );
   }
 
   function initializeGates() {
-    leftGate = { x: 0, y: 0, w: width / 2, h: height };
-    rightGate = { x: width / 2, y: 0, w: width / 2, h: height };
+    leftGate = { x: 0, y: 0, w: p.width / 2, h: p.height };
+    rightGate = { x: p.width / 2, y: 0, w: p.width / 2, h: p.height };
   }
 
   function canAnimate() {
@@ -140,7 +469,7 @@ const InitialAnimation = (() => {
   function openGates() {
     if ( !canAnimate() ) return;
 
-    document.getElementById( 'p5-overlay' ).style.pointerEvents = 'none';
+    document.getElementById( 'gate-canvas' ).style.pointerEvents = 'none';
 
     if ( !audioInitialized ) {
       audioContext = new ( window.AudioContext || window.webkitAudioContext )();
@@ -154,7 +483,7 @@ const InitialAnimation = (() => {
 
     setTimeout( () => {
       isOpening = true;
-      openingStartTime = millis();
+      openingStartTime = p.millis();
       lastSpawnTime = 0;
       disableHTMLContent();
       playGateSound( 'opening' );
@@ -174,12 +503,12 @@ const InitialAnimation = (() => {
     isOpening = false;
 
     leftGate.x = -leftGate.w;
-    rightGate.x = width;
+    rightGate.x = p.width;
     particles.length = 0;
 
     disableHTMLContent();
     isClosing = true;
-    closingStartTime = millis();
+    closingStartTime = p.millis();
     playGateSound( 'closing' );
   };
 
@@ -255,7 +584,7 @@ const InitialAnimation = (() => {
 
   function spawnParticles( elapsed ) {
     const spawnInterval = elapsed < RAMP_UP_TIME ? PHASE1_SPAWN_INTERVAL : PHASE2_SPAWN_INTERVAL;
-    const jitteredInterval = spawnInterval * random( 0.8, 1.2 );
+    const jitteredInterval = spawnInterval * p.random( 0.8, 1.2 );
     const particlesToSpawn = Math.floor( ( elapsed - lastSpawnTime ) / jitteredInterval );
 
     if ( particlesToSpawn > 0 ) {
@@ -269,16 +598,16 @@ const InitialAnimation = (() => {
   }
 
   function createParticleAtGate( gate, xPos ) {
-    const xOffset = random( -20, 20 );
-    const yPos = random( height );
-    const distanceFromCenter = Math.abs( yPos - height / 2 );
+    const xOffset = p.random( -20, 20 );
+    const yPos = p.random( p.height );
+    const distanceFromCenter = Math.abs( yPos - p.height / 2 );
 
     let extendedChance = 0.05;
     if ( distanceFromCenter < ZONE1_HEIGHT / 2 ) extendedChance = 0.5;
     else if ( distanceFromCenter < ZONE2_HEIGHT / 2 ) extendedChance = 0.3;
     else if ( distanceFromCenter < ZONE3_HEIGHT / 2 ) extendedChance = 0.15;
 
-    const flickerTime = random() < extendedChance ? random( 200, 500 ) : 100;
+    const flickerTime = p.random() < extendedChance ? p.random( 200, 500 ) : 100;
     particles.push( new Particle( xPos + xOffset, yPos, flickerTime ) );
     totalParticlesSpawned++;
   }
@@ -287,7 +616,7 @@ const InitialAnimation = (() => {
     leftGate.x -= gateSpeed;
     rightGate.x += gateSpeed;
 
-    if ( leftGate.x + leftGate.w <= 0 && rightGate.x >= width ) {
+    if ( leftGate.x + leftGate.w <= 0 && rightGate.x >= p.width ) {
       isOpening = false;
       enableHTMLContent();
       saveGateState( 'open' );
@@ -302,16 +631,16 @@ const InitialAnimation = (() => {
       if ( leftGate.x >= 0 ) leftGate.x = 0;
     }
 
-    if ( rightGate.x > width / 2 ) {
+    if ( rightGate.x > p.width / 2 ) {
       rightGate.x -= gateSpeed;
-      if ( rightGate.x <= width / 2 ) rightGate.x = width / 2;
+      if ( rightGate.x <= p.width / 2 ) rightGate.x = p.width / 2;
     }
 
-    if ( leftGate.x >= 0 && rightGate.x <= width / 2 ) {
+    if ( leftGate.x >= 0 && rightGate.x <= p.width / 2 ) {
       isClosing = false;
       disableHTMLContent();
       saveGateState( 'closed' );
-      document.getElementById( 'p5-overlay' ).style.pointerEvents = 'auto';
+      document.getElementById( 'gate-canvas' ).style.pointerEvents = 'auto';
       console.log( 'Gates closed. Click to reopen.' );
     }
   }
@@ -324,34 +653,34 @@ const InitialAnimation = (() => {
     document.querySelector( '.container' ).style.pointerEvents = 'none';
   }
 
-  function drawGates() {
+  function drawGates( p5Instance ) {
     // Only draw gates if they're visible on screen
     const leftGateVisible = leftGate.x + leftGate.w > 0;
-    const rightGateVisible = rightGate.x < width;
+    const rightGateVisible = rightGate.x < p5Instance.width;
 
     if ( !leftGateVisible && !rightGateVisible ) return;
 
-    noStroke();
-    fill( 27, 42, 65 );
+    p5Instance.noStroke();
+    p5Instance.fill( 27, 42, 65 );
 
     // Draw left gate (only if visible)
     if ( leftGateVisible ) {
-      rect( leftGate.x, leftGate.y, leftGate.w, leftGate.h );
-      if ( leftGate.x + leftGate.w < width ) {
-        stroke( 216, 237, 245 );
-        strokeWeight( 2 );
-        line( leftGate.x + leftGate.w, 0, leftGate.x + leftGate.w, height );
+      p5Instance.rect( leftGate.x, leftGate.y, leftGate.w, leftGate.h );
+      if ( leftGate.x + leftGate.w < p5Instance.width ) {
+        p5Instance.stroke( 216, 237, 245 );
+        p5Instance.strokeWeight( 2 );
+        p5Instance.line( leftGate.x + leftGate.w, 0, leftGate.x + leftGate.w, p5Instance.height );
       }
     }
 
     // Draw right gate (only if visible)
     if ( rightGateVisible ) {
-      noStroke();
-      rect( rightGate.x, rightGate.y, rightGate.w, rightGate.h );
+      p5Instance.noStroke();
+      p5Instance.rect( rightGate.x, rightGate.y, rightGate.w, rightGate.h );
       if ( rightGate.x > 0 ) {
-        stroke( 216, 237, 245 );
-        strokeWeight( 2 );
-        line( rightGate.x, 0, rightGate.x, height );
+        p5Instance.stroke( 216, 237, 245 );
+        p5Instance.strokeWeight( 2 );
+        p5Instance.line( rightGate.x, 0, rightGate.x, p5Instance.height );
       }
     }
   }
@@ -363,19 +692,19 @@ const InitialAnimation = (() => {
       this.y = y;
       this.alpha = 255;
       this.flickerTime = flickerTime;
-      this.createdTime = millis();
-      this.size = random( 2, 4 );
+      this.createdTime = p.millis();
+      this.size = p.random( 2, 4 );
     }
 
     update() {
-      const elapsed = millis() - this.createdTime;
-      this.alpha = elapsed > this.flickerTime ? this.alpha - 25 : random( 150, 255 );
+      const elapsed = p.millis() - this.createdTime;
+      this.alpha = elapsed > this.flickerTime ? this.alpha - 25 : p.random( 150, 255 );
     }
 
-    display() {
-      stroke( 216, 237, 245, this.alpha );
-      strokeWeight( this.size );
-      point( this.x, this.y );
+    display( p5Instance ) {
+      p5Instance.stroke( 216, 237, 245, this.alpha );
+      p5Instance.strokeWeight( this.size );
+      p5Instance.point( this.x, this.y );
     }
 
     isDead() {
@@ -383,12 +712,12 @@ const InitialAnimation = (() => {
     }
   }
 
-  function draw() {
-    clear();
+  function draw( p5Instance ) {
+    p5Instance.clear();
 
     // Opening animation
     if ( isOpening ) {
-      const elapsed = millis() - openingStartTime;
+      const elapsed = p.millis() - openingStartTime;
       spawnParticles( elapsed );
       updateGatesOpening( elapsed );
     }
@@ -399,14 +728,14 @@ const InitialAnimation = (() => {
     }
 
     // Draw gates (only when animating or visible)
-    if ( isOpening || isClosing || leftGate.x + leftGate.w > 0 || rightGate.x < width ) {
-      drawGates();
+    if ( isOpening || isClosing || leftGate.x + leftGate.w > 0 || rightGate.x < p5Instance.width ) {
+      drawGates( p5Instance );
     }
 
     // Update and draw particles
     for ( let i = particles.length - 1; i >= 0; i-- ) {
       particles[i].update();
-      particles[i].display();
+      particles[i].display( p5Instance );
       if ( particles[i].isDead() ) particles.splice( i, 1 );
     }
   }
@@ -414,18 +743,51 @@ const InitialAnimation = (() => {
   return { setup, draw };
 })();
 
-// P5.js lifecycle hooks
-function setup() {
-  BackgroundDisplay.setup();
-  InitialAnimation.setup();
-}
+// P5.js instance for background (z-index 1)
+new p5(( p ) => {
+  p.setup = function() {
+    const canvas = p.createCanvas( p.windowWidth, p.windowHeight );
+    canvas.parent( document.body );
+    canvas.id( 'background-canvas' );
+    canvas.style( 'position', 'fixed' );
+    canvas.style( 'top', '0' );
+    canvas.style( 'left', '0' );
+    canvas.style( 'z-index', '1' );
+    canvas.style( 'pointer-events', 'none' );
 
-function draw() {
-  BackgroundDisplay.draw();
-  InitialAnimation.draw();
-}
+    BackgroundDisplay.setup( p );
+  };
 
-function windowResized() {
-  resizeCanvas( windowWidth, windowHeight );
-  BackgroundDisplay.generateDots();
-}
+  p.draw = function() {
+    BackgroundDisplay.draw( p );
+  };
+
+  p.windowResized = function() {
+    p.resizeCanvas( p.windowWidth, p.windowHeight );
+    BackgroundDisplay.resize( p );
+  };
+});
+
+// P5.js instance for gates/particles (z-index 10)
+new p5(( p ) => {
+  p.setup = function() {
+    const canvas = p.createCanvas( p.windowWidth, p.windowHeight );
+    canvas.parent( document.body );
+    canvas.id( 'gate-canvas' );
+    canvas.style( 'position', 'fixed' );
+    canvas.style( 'top', '0' );
+    canvas.style( 'left', '0' );
+    canvas.style( 'z-index', '10' );
+    canvas.style( 'pointer-events', 'auto' );
+
+    InitialAnimation.setup( p );
+  };
+
+  p.draw = function() {
+    InitialAnimation.draw( p );
+  };
+
+  p.windowResized = function() {
+    p.resizeCanvas( p.windowWidth, p.windowHeight );
+  };
+});

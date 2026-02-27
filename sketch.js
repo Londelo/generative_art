@@ -192,13 +192,33 @@ const BackgroundDisplay = (() => {
     squares.length = 0;
 
     // Pixel patterns for letters (1 = square, 0 = empty)
-    const letterA = [
+    const letterG = [
       [0, 1, 1, 1, 0],
       [1, 0, 0, 0, 1],
+      [1, 0, 0, 0, 0],
+      [1, 0, 1, 1, 1],
       [1, 0, 0, 0, 1],
+      [1, 0, 0, 0, 1],
+      [0, 1, 1, 1, 0]
+    ];
+
+    const letterE = [
       [1, 1, 1, 1, 1],
+      [1, 0, 0, 0, 0],
+      [1, 0, 0, 0, 0],
+      [1, 1, 1, 1, 0],
+      [1, 0, 0, 0, 0],
+      [1, 0, 0, 0, 0],
+      [1, 1, 1, 1, 1]
+    ];
+
+    const letterN = [
       [1, 0, 0, 0, 1],
-      [1, 0, 0, 0, 1],
+      [1, 1, 0, 0, 1],
+      [1, 1, 0, 0, 1],
+      [1, 0, 1, 0, 1],
+      [1, 0, 0, 1, 1],
+      [1, 0, 0, 1, 1],
       [1, 0, 0, 0, 1]
     ];
 
@@ -212,6 +232,16 @@ const BackgroundDisplay = (() => {
       [1, 0, 0, 0, 1]
     ];
 
+    const letterA = [
+      [0, 1, 1, 1, 0],
+      [1, 0, 0, 0, 1],
+      [1, 0, 0, 0, 1],
+      [1, 1, 1, 1, 1],
+      [1, 0, 0, 0, 1],
+      [1, 0, 0, 0, 1],
+      [1, 0, 0, 0, 1]
+    ];
+
     const letterT = [
       [1, 1, 1, 1, 1],
       [0, 0, 1, 0, 0],
@@ -222,18 +252,55 @@ const BackgroundDisplay = (() => {
       [0, 0, 1, 0, 0]
     ];
 
-    // Center the word "ART" horizontally
+    const letterI = [
+      [1, 1, 1, 1, 1],
+      [0, 0, 1, 0, 0],
+      [0, 0, 1, 0, 0],
+      [0, 0, 1, 0, 0],
+      [0, 0, 1, 0, 0],
+      [0, 0, 1, 0, 0],
+      [1, 1, 1, 1, 1]
+    ];
+
+    const letterV = [
+      [1, 0, 0, 0, 1],
+      [1, 0, 0, 0, 1],
+      [1, 0, 0, 0, 1],
+      [1, 0, 0, 0, 1],
+      [0, 1, 0, 1, 0],
+      [0, 1, 0, 1, 0],
+      [0, 0, 1, 0, 0]
+    ];
+
+    // Layout: "GENERATIVE ART"
+    const letters = [letterG, letterE, letterN, letterE, letterR, letterA, letterT, letterI, letterV, letterE, letterA, letterR, letterT];
     const letterSpacing = SQUARE_SIZE * 1.5;
-    const totalWidth = ( 5 * SQUARE_SIZE * 3 ) + ( letterSpacing * 2 );
+    const wordSpacing = SQUARE_SIZE * 6; // Extra space between words
+
+    // Calculate total width (10 letters + 9 letter spacings + 1 word spacing)
+    const generativeWidth = ( 5 * SQUARE_SIZE * 10 ) + ( letterSpacing * 9 );
+    const artWidth = ( 5 * SQUARE_SIZE * 3 ) + ( letterSpacing * 2 );
+    const totalWidth = generativeWidth + wordSpacing + artWidth;
     const startX = ( p.width - totalWidth ) / 2;
 
     // Position letters on top of the shelf
     const startY = shelfY - ( 7 * SQUARE_SIZE );
 
-    // Generate squares for each letter
-    generateLetterSquares( letterA, startX, startY );
-    generateLetterSquares( letterR, startX + ( 5 * SQUARE_SIZE ) + letterSpacing, startY );
-    generateLetterSquares( letterT, startX + ( 10 * SQUARE_SIZE ) + ( letterSpacing * 2 ), startY );
+    // Generate squares for "GENERATIVE"
+    let currentX = startX;
+    for ( let i = 0; i < 10; i++ ) {
+      generateLetterSquares( letters[i], currentX, startY );
+      currentX += ( 5 * SQUARE_SIZE ) + letterSpacing;
+    }
+
+    // Add word spacing
+    currentX += wordSpacing - letterSpacing;
+
+    // Generate squares for "ART"
+    for ( let i = 10; i < 13; i++ ) {
+      generateLetterSquares( letters[i], currentX, startY );
+      currentX += ( 5 * SQUARE_SIZE ) + letterSpacing;
+    }
   }
 
   function generateLetterSquares( pattern, offsetX, offsetY ) {

@@ -4,7 +4,7 @@ const BackgroundDisplay = (() => {
   const squares = [];
   const DOT_SIZE = 2;
   const DOT_SPACING = 15;
-  const DOT_COLOR = [200, 200, 200]; // Light gray
+  const DOT_COLOR = [191, 130, 117]; // Dusty rose #BF8275
   const CURSOR_RADIUS = 25; // Radius of cursor circle
   const BUFFER_ZONE = 15; // Extra space around circle where dots shouldn't enter
   const REPEL_RADIUS = 90; // Distance at which dots start repelling
@@ -159,7 +159,7 @@ const BackgroundDisplay = (() => {
     }
 
     display( p5Instance ) {
-      p5Instance.fill( 0 );
+      p5Instance.fill( 38, 38, 38 );
       p5Instance.noStroke();
       p5Instance.rect( this.x - this.size / 2, this.y - this.size / 2, this.size, this.size );
     }
@@ -283,8 +283,8 @@ const BackgroundDisplay = (() => {
     const totalWidth = generativeWidth + wordSpacing + artWidth;
     const startX = ( p.width - totalWidth ) / 2;
 
-    // Position letters on top of the shelf
-    const startY = shelfY - ( 7 * SQUARE_SIZE );
+    // Position letters on top of the shelf (2 squares higher than original)
+    const startY = shelfY - ( 9 * SQUARE_SIZE );
 
     // Generate squares for "GENERATIVE"
     let currentX = startX;
@@ -408,9 +408,9 @@ const BackgroundDisplay = (() => {
       square.display( p5Instance );
     }
 
-    // Draw cursor circle (light gray, transparent)
+    // Draw cursor circle (dark blue, transparent)
     p5Instance.noFill();
-    p5Instance.stroke( 200, 200, 200, 100 );
+    p5Instance.stroke( 88, 90, 115, 100 );
     p5Instance.strokeWeight( 2 );
     p5Instance.circle( mouseX, mouseY, CURSOR_RADIUS * 2 );
   }
@@ -728,13 +728,13 @@ const InitialAnimation = (() => {
     if ( !leftGateVisible && !rightGateVisible ) return;
 
     p5Instance.noStroke();
-    p5Instance.fill( 27, 42, 65 );
+    p5Instance.fill( 88, 89, 115 );
 
     // Draw left gate (only if visible)
     if ( leftGateVisible ) {
       p5Instance.rect( leftGate.x, leftGate.y, leftGate.w, leftGate.h );
       if ( leftGate.x + leftGate.w < p5Instance.width ) {
-        p5Instance.stroke( 216, 237, 245 );
+        p5Instance.stroke( 242, 171, 109 );
         p5Instance.strokeWeight( 2 );
         p5Instance.line( leftGate.x + leftGate.w, 0, leftGate.x + leftGate.w, p5Instance.height );
       }
@@ -745,7 +745,7 @@ const InitialAnimation = (() => {
       p5Instance.noStroke();
       p5Instance.rect( rightGate.x, rightGate.y, rightGate.w, rightGate.h );
       if ( rightGate.x > 0 ) {
-        p5Instance.stroke( 216, 237, 245 );
+        p5Instance.stroke( 242, 171, 109 );
         p5Instance.strokeWeight( 2 );
         p5Instance.line( rightGate.x, 0, rightGate.x, p5Instance.height );
       }
@@ -769,7 +769,7 @@ const InitialAnimation = (() => {
     }
 
     display( p5Instance ) {
-      p5Instance.stroke( 216, 237, 245, this.alpha );
+      p5Instance.stroke( 242, 171, 109, this.alpha );
       p5Instance.strokeWeight( this.size );
       p5Instance.point( this.x, this.y );
     }

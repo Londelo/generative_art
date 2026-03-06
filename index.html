@@ -1,91 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
+<!--
+  Color Scheme: Night Sky Stars
+  #B4A1BF - Light purple/lavender
+  #1B2B41 - Deep navy (darkest)
+  #6981A7 - Medium slate blue
+  #254359 - Dark blue
+  #D8EEF5 - Pale sky blue (lightest)
+-->
 <head>
   <meta charset="UTF-8" />
   <title>Generative Art Gallery</title>
+  <script src="lib/p5/p5.min.js"></script>
+  <script src="sketch.js"></script>
+
   <style>
     body {
       margin: 0;
       padding: 0;
-      background: #181818;
-      color: #A8A8A8;
-      font-family: "Helvetica Neue", sans-serif;
+      background: white;
+      color: #D8EEF5;
+      font-family: "Courier New", "Courier", monospace;
+      position: relative;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+      z-index: 0;
     }
 
-    header {
-      padding: 2rem 0;
-      text-align: center;
-      background: #181818;
+    .container {
+      width: 60%;
+      height: 80vh;
+      background: #1B2B41;
+      border: 2px solid #D8EEF5;
+      border-radius: 16px;
+      overflow-y: auto;
+      position: relative;
+      z-index: 2;
     }
 
-    h1 {
-      margin: 0;
-      font-size: 2.5rem;
-      letter-spacing: 1px;
+    .app-list {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      padding: 2rem;
     }
 
-    .grid {
-      border-top: 1px solid #4C4C4C;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 3rem;
-      padding: 10rem;
-      width: 50%;
-      margin: auto;
-      place-items: center;
-    }
-
-    .card {
-      width: 100px;
-      height: 100px;
-      padding: 30px;
-      background: #181818;
-      border: 1px solid #DBDBDB;
-      border-radius: 50%;
+    .app-card {
+      width: 40%;
+      padding: 2rem;
+      background: #1B2B41;
+      border: 2px solid #D8EEF5;
+      border-radius: 12px;
+      color: #D8EEF5;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      position: relative;
+      font-size: 1.5rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      transition: all 0.2s ease;
+      margin-bottom: 1rem;
     }
 
-    .card:hover {
-      border: 2px dotted #DBDBDB;
+    .app-card:hover {
+      background: #254359;
+      border: 2px solid #D8EEF5;
+      transform: translateX(10px);
+    }
+
+    #close-gate-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 60px;
+      height: 60px;
+      background: rgba(216, 237, 245, 0.1);
+      border: 2px solid #D8EEF5;
+      border-radius: 50%;
+      color: #D8EEF5;
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    #close-gate-btn:hover {
+      background: rgba(216, 237, 245, 0.2);
+      transform: scale(1.1);
     }
 
   </style>
 </head>
 <body>
-  <header>
-    <h1>Generative Art Gallery</h1>
-  </header>
-  <section class="grid">
-    <div class="card" onclick="location.href='GameOfLife/index.html'">
-      Game of Life
+  <button id="close-gate-btn" onclick="closeGates()">↻</button>
+  <div class="container">
+    <div class="app-list">
+      <div class="app-card" onclick="location.href='GameOfLife/index.html'">
+        Game of Life
+      </div>
+      <div class="app-card" onclick="location.href='SimpleWorld/index.html'">
+        Simple World
+      </div>
+      <div class="app-card" onclick="location.href='CurvesBaby/index.html'">
+        Curves
+      </div>
+      <div class="app-card" onclick="location.href='FireFlies/index.html'">
+        Fire Flies
+      </div>
+      <div class="app-card" onclick="location.href='PlanetsBaby/index.html'">
+        Planets Baby
+      </div>
+      <div class="app-card" onclick="location.href='StrangeCircles/index.html'">
+        Circles
+      </div>
+      <div class="app-card" onclick="location.href='ArkadsGame/index.html'">
+        Arkad's Game
+      </div>
+      <div class="app-card" onclick="location.href='CrazySquare/index.html'">
+        Crazy Square
+      </div>
+      <div class="app-card" onclick="location.href='ExpansiveDots/index.html'">
+        Expansive Dots
+      </div>
+      <div class="app-card" onclick="location.href='NeedyCircles/index.html'">
+        Needy Circles
+      </div>
+      <div class="app-card" onclick="location.href='PrettyDotsAndLine/index.html'">
+        Pretty Dots and Line
+      </div>
+      <div class="app-card" onclick="location.href='FillTheGaps/index.html'">
+        Fill the Gaps
+      </div>
     </div>
-
-    <div class="card" onclick="location.href='SimpleWorld/index.html'">
-      Simple World
-    </div>
-
-    <div class="card" onclick="location.href='CurvesBaby/index.html'">
-      Curves
-    </div>
-
-    <div class="card" onclick="location.href='FireFlies/index.html'">
-      Fire Flies
-    </div>
-
-    <div class="card" onclick="location.href='PlanetsBaby/index.html'">
-      Planets Baby
-    </div>
-
-    <div class="card" onclick="location.href='StrangeCircles/index.html'">
-      Circles
-    </div>
-
-    <div class="card" onclick="location.href='ArkadsGame/index.html'">
-      Arkad's Game
-    </div>
-  </section>
+  </div>
 </body>
 </html>

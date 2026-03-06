@@ -4,7 +4,7 @@ const BackgroundDisplay = (() => {
   const squares = [];
   const DOT_SIZE = 2;
   const DOT_SPACING = 15;
-  const DOT_COLOR = [200, 200, 200]; // Light gray
+  const DOT_COLOR = [191, 130, 117]; // Dusty rose #BF8275
   const CURSOR_RADIUS = 25; // Radius of cursor circle
   const BUFFER_ZONE = 15; // Extra space around circle where dots shouldn't enter
   const REPEL_RADIUS = 90; // Distance at which dots start repelling
@@ -159,7 +159,7 @@ const BackgroundDisplay = (() => {
     }
 
     display( p5Instance ) {
-      p5Instance.fill( 0 );
+      p5Instance.fill( 38, 38, 38 );
       p5Instance.noStroke();
       p5Instance.rect( this.x - this.size / 2, this.y - this.size / 2, this.size, this.size );
     }
@@ -283,8 +283,8 @@ const BackgroundDisplay = (() => {
     const totalWidth = generativeWidth + wordSpacing + artWidth;
     const startX = ( p.width - totalWidth ) / 2;
 
-    // Position letters on top of the shelf
-    const startY = shelfY - ( 7 * SQUARE_SIZE );
+    // Position letters on top of the shelf (2 squares higher than original)
+    const startY = shelfY - ( 9 * SQUARE_SIZE );
 
     // Generate squares for "GENERATIVE"
     let currentX = startX;
@@ -408,9 +408,9 @@ const BackgroundDisplay = (() => {
       square.display( p5Instance );
     }
 
-    // Draw cursor circle (light gray, transparent)
+    // Draw cursor circle (dark blue, transparent)
     p5Instance.noFill();
-    p5Instance.stroke( 200, 200, 200, 100 );
+    p5Instance.stroke( 88, 90, 115, 100 );
     p5Instance.strokeWeight( 2 );
     p5Instance.circle( mouseX, mouseY, CURSOR_RADIUS * 2 );
   }
@@ -458,11 +458,6 @@ const InitialAnimation = (() => {
   let audioContext;
   let audioInitialized = false;
 
-  // Voice recognition
-  let recognition;
-  let isListening = false;
-  let hintTimeout;
-
   // Constants
   const ANIMATION_DURATION = 1500;
   const RAMP_UP_TIME = 100;
@@ -503,138 +498,12 @@ const InitialAnimation = (() => {
     }
   }
 
-  function initVoiceRecognition() {
-    // Check for browser support
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-    if ( !SpeechRecognition ) {
-      console.log( 'Voice recognition not supported in this browser' );
-      return;
-    }
-
-    recognition = new SpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = false;
-    recognition.lang = 'en-US';
-
-    recognition.onresult = ( event ) => {
-      const last = event.results.length - 1;
-      const transcript = event.results[last][0].transcript.toLowerCase().trim();
-
-      console.log( 'Heard:', transcript );
-
-      // Check for trigger phrases
-      if ( transcript.includes( 'open sesame' ) ||
-           transcript.includes( 'opensesame' ) ||
-           transcript.includes( 'open says me' ) ) {
-        console.log( 'Magic words detected! Opening gates...' );
-        openGates();
-      }
-    };
-
-    recognition.onerror = ( event ) => {
-      console.log( 'Speech recognition error:', event.error );
-      if ( event.error === 'no-speech' || event.error === 'audio-capture' ) {
-        // Restart listening if it stops
-        if ( isListening && !isOpening && !isClosing ) {
-          setTimeout( () => {
-            if ( isListening ) startListening();
-          }, 1000 );
-        }
-      }
-    };
-
-    recognition.onend = () => {
-      // Restart listening if gates are still closed
-      if ( isListening && !isOpening && !isClosing ) {
-        setTimeout( () => {
-          if ( isListening ) startListening();
-        }, 100 );
-      }
-    };
-  }
-
-  function startListening() {
-    if ( !recognition || isListening ) return;
-
-    try {
-      recognition.start();
-      isListening = true;
-      console.log( 'Voice recognition active. Say "open sesame" to open gates.' );
-    } catch ( e ) {
-      console.log( 'Could not start recognition:', e.message );
-    }
-  }
-
-  function stopListening() {
-    if ( !recognition || !isListening ) return;
-
-    try {
-      recognition.stop();
-      isListening = false;
-      console.log( 'Voice recognition stopped.' );
-    } catch ( e ) {
-      console.log( 'Could not stop recognition:', e.message );
-    }
-  }
-
-  function showVoiceHint() {
-    // Clear any existing timeout
-    if ( hintTimeout ) clearTimeout( hintTimeout );
-
-    // Show hint after 30 seconds of gates being closed
-    hintTimeout = setTimeout( () => {
-      let hintElement = document.getElementById( 'voice-hint' );
-
-      if ( !hintElement ) {
-        // Create hint element
-        hintElement = document.createElement( 'div' );
-        hintElement.id = 'voice-hint';
-        hintElement.textContent = 'psst... say "open sesame"';
-        hintElement.style.position = 'fixed';
-        hintElement.style.bottom = '20px';
-        hintElement.style.right = '20px';
-        hintElement.style.color = '#D8EEF5';
-        hintElement.style.fontFamily = '"Courier New", monospace';
-        hintElement.style.fontSize = '18px';
-        hintElement.style.zIndex = '100';
-        hintElement.style.opacity = '0';
-        hintElement.style.transition = 'opacity 1s ease-in';
-        hintElement.style.pointerEvents = 'none';
-        document.body.appendChild( hintElement );
-      }
-
-      // Reset text in case it changed
-      hintElement.textContent = 'psst... say "open sesame"';
-
-      // Trigger fade-in
-      setTimeout( () => {
-        hintElement.style.opacity = '1';
-      }, 10 );
-    }, 30000 );
-  }
-
-  function hideVoiceHint() {
-    // Clear timeout
-    if ( hintTimeout ) {
-      clearTimeout( hintTimeout );
-      hintTimeout = null;
-    }
-
-    // Hide hint element
-    const hintElement = document.getElementById( 'voice-hint' );
-    if ( hintElement ) {
-      hintElement.style.opacity = '0';
-    }
-  }
-
   function setup( p5Instance ) {
     p = p5Instance;
 
     gateSpeed = ( p.width / 2 ) / ( ANIMATION_DURATION / 1000 * 60 );
 
     initializeGates();
-    initVoiceRecognition();
 
     // Check saved gate state
     const savedState = loadGateState();
@@ -650,10 +519,6 @@ const InitialAnimation = (() => {
       // Start closed (default or expired state)
       disableHTMLContent();
       console.log( 'Gates closed (default state)' );
-      // Start listening for voice commands
-      startListening();
-      // Show hint after 30 seconds
-      showVoiceHint();
     }
 
     document.getElementById( 'gate-canvas' ).addEventListener( 'click', openGates );
@@ -671,9 +536,6 @@ const InitialAnimation = (() => {
   function openGates() {
     if ( !canAnimate() ) return;
 
-    // Stop listening for voice commands when gates open
-    stopListening();
-
     document.getElementById( 'gate-canvas' ).style.pointerEvents = 'none';
 
     if ( !audioInitialized ) {
@@ -685,9 +547,6 @@ const InitialAnimation = (() => {
     particles.length = 0;
     totalParticlesSpawned = 0;
     document.getElementById( 'close-gate-btn' ).style.display = 'none';
-
-    // Hide voice hint when opening
-    hideVoiceHint();
 
     isOpening = true;
     openingStartTime = p.millis();
@@ -847,11 +706,7 @@ const InitialAnimation = (() => {
       disableHTMLContent();
       saveGateState( 'closed' );
       document.getElementById( 'gate-canvas' ).style.pointerEvents = 'auto';
-      console.log( 'Gates closed. Click to reopen or say "open sesame".' );
-      // Start listening for voice commands when gates are closed
-      startListening();
-      // Show hint after 30 seconds
-      showVoiceHint();
+      console.log( 'Gates closed. Click to reopen.' );
     }
   }
 
@@ -871,13 +726,13 @@ const InitialAnimation = (() => {
     if ( !leftGateVisible && !rightGateVisible ) return;
 
     p5Instance.noStroke();
-    p5Instance.fill( 27, 42, 65 );
+    p5Instance.fill( 88, 89, 115 );
 
     // Draw left gate (only if visible)
     if ( leftGateVisible ) {
       p5Instance.rect( leftGate.x, leftGate.y, leftGate.w, leftGate.h );
       if ( leftGate.x + leftGate.w < p5Instance.width ) {
-        p5Instance.stroke( 216, 237, 245 );
+        p5Instance.stroke( 242, 171, 109 );
         p5Instance.strokeWeight( 2 );
         p5Instance.line( leftGate.x + leftGate.w, 0, leftGate.x + leftGate.w, p5Instance.height );
       }
@@ -888,7 +743,7 @@ const InitialAnimation = (() => {
       p5Instance.noStroke();
       p5Instance.rect( rightGate.x, rightGate.y, rightGate.w, rightGate.h );
       if ( rightGate.x > 0 ) {
-        p5Instance.stroke( 216, 237, 245 );
+        p5Instance.stroke( 242, 171, 109 );
         p5Instance.strokeWeight( 2 );
         p5Instance.line( rightGate.x, 0, rightGate.x, p5Instance.height );
       }
@@ -912,7 +767,7 @@ const InitialAnimation = (() => {
     }
 
     display( p5Instance ) {
-      p5Instance.stroke( 216, 237, 245, this.alpha );
+      p5Instance.stroke( 242, 171, 109, this.alpha );
       p5Instance.strokeWeight( this.size );
       p5Instance.point( this.x, this.y );
     }
